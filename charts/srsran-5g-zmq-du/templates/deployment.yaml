@@ -72,14 +72,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.command }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- else }}
+          command: ["/bin/sh", "-c"]
           {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- else }}
           args:
-            - "gnb"
+            - exec /entrypoint.sh;
           {{- end }}
-          {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           env:
@@ -87,6 +88,8 @@ spec:
               value: {{ .Values.config.amf.hostname }}
             - name: AMF_BIND_INTERFACE
               value: {{ .Values.config.amf.bind_interface }}
+            - name: CUCP_ADDRESS
+              value: srsran-cu-f1ap
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
@@ -119,9 +122,9 @@ spec:
           resources: {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: srsran-5g-config
-              mountPath: /gnb-template.yml
-              subPath: gnb-template.yml
+            - name: srsran-du-config
+              mountPath: /du-template.yml
+              subPath: du-template.yml
             - name: entrypoint
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
