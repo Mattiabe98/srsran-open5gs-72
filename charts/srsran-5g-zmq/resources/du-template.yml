@@ -3,9 +3,12 @@
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
 
-amf:
-  addr: {{ .Values.config.amf.hostname }}                # The address or hostname of the AMF.
-  bind_addr: 0.0.0.0           # A local IP that the gNB binds to for traffic from the AMF.
+f1ap:
+  cu_cp_addr: 127.0.10.1
+  bind_addr: 127.0.10.2
+
+nru:
+  bind_addr: 127.0.10.2
 
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
@@ -30,14 +33,6 @@ cell_cfg:
       dci_format_0_1_and_1_1: false # Set correct DCI format (fallback)
   prach:
     prach_config_index: 1           # Sets PRACH config to match what is expected by srsUE      
-
-
-
-slicing:
-  {{- range .Values.config.slicing }}
-    - {{- toYaml . | nindent 6 }}
-    {{- end }}
-
 
 log:
   filename: stdout          # Path of the log file.
