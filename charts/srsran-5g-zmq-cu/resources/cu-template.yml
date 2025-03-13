@@ -10,9 +10,13 @@ cu_cp:
     supported_tracking_areas:                                    # Configure the TA associated with the CU-CP
       - tac: 1
         plmn_list:
-          - plmn: "99970"
+          -
+            plmn: "99970"
             tai_slice_support_list:
-              - sst: 1
+              -
+                sst: 1
+                sd: 0x111111
+              
   f1ap:
     bind_addr: ${AMF_BIND_ADDR}        
 
