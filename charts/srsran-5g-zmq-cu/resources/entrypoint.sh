@@ -18,4 +18,4 @@ fi
 
 # envsubst < /gnb-template.yml > gnb.yml
 
-/usr/local/bin/gnb -c /gnb-template.yml
+/usr/local/bin/srscu -c /cu-template.yml
