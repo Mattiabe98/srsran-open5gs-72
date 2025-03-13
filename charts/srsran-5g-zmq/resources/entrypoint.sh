@@ -2,11 +2,11 @@
 
 # set -ex
 
-# if [ $# -lt 1 ]
-# then
-#         echo "Usage : $0 [gnb]"
-#         exit
-# fi
+if [ $# -lt 1 ]
+then
+        echo "Usage : $0 [gnb]"
+        exit
+fi
 
 # if [[ ! -z "$AMF_HOSTNAME" ]] ; then 
 #     export AMF_ADDR="$(host -4 $AMF_HOSTNAME |awk '/has.*address/{print $NF; exit}')"
