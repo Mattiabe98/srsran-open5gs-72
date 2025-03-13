@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: grafana
+  namespace: srsran
+spec:
+  to:
+    kind: Service
+    name: grafana-srsran  # Use the service name from `oc get svc`
+  port:
+    targetPort: 80
+  tls:
+    termination: edge
+  wildcardPolicy: None
