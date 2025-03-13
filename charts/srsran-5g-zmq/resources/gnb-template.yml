@@ -4,8 +4,8 @@
 # is not defined and the default is used. 
 
 amf:
-  addr: ${AMF_ADDR}                  # The address or hostname of the AMF.
-  bind_addr: ${AMF_BIND_ADDR}             # A local IP that the gNB binds to for traffic from the AMF.
+  addr: {{ .Values.config.amf.hostname }}                # The address or hostname of the AMF.
+  bind_addr: 0.0.0.0           # A local IP that the gNB binds to for traffic from the AMF.
 
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
