@@ -29,6 +29,8 @@ smf:
 upf:
   enabled: true
 webui:
+  ingress:
+    hostname: open5gs.sno.home.lab
   enabled: true
 
 # 4G
