@@ -87,6 +87,10 @@ spec:
               value: {{ .Values.config.amf.hostname }}
             - name: AMF_BIND_INTERFACE
               value: {{ .Values.config.amf.bind_interface }}
+            - name: SRSRAN_CU_GTPU
+              value: srsran-cu-gtpu
+            - name: SRSRAN_CU_F1AP
+              value: srsran-cu-f1ap
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
