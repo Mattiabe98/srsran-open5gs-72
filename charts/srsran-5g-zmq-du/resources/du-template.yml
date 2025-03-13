@@ -5,11 +5,8 @@
 
 f1ap:
   cu_cp_addr: ${CU_ADDR}
-  bind_addr:  ${DU_BIND_ADDR} 
-
-nru:
   bind_addr: ${DU_BIND_ADDR}
-
+  
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
   device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
