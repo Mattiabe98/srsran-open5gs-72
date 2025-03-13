@@ -2,20 +2,20 @@
 
 # set -ex
 
-if [ $# -lt 1 ]
-then
-        echo "Usage : $0 [gnb]"
-        exit
+resolve_ip() {
+    python3 -c "import socket; print(socket.gethostbyname('$1'))" 2>/dev/null
+}
+
+
+if [[ -z "$DU_BIND_ADDR" ]] ; then
+    export DU_BIND_ADDR=$(hostname -I)
 fi
 
-# if [[ ! -z "$AMF_HOSTNAME" ]] ; then 
-#     export AMF_ADDR="$(host -4 $AMF_HOSTNAME |awk '/has.*address/{print $NF; exit}')"
-# fi
+export CUCP_ADDRESS="$(resolve_ip "$CUCP_ADDRESS")"
 
-# if [[ -z "${AMF_BIND_ADDR}" ]] ; then
-#     export AMF_BIND_ADDR=$(ip addr show $AMF_BIND_INTERFACE | grep -Po 'inet \K[\d.]+')
-# fi
+# Replace variables in the template
+sed -e "s/\${CUCP_ADDRESS}/$CUCP_ADDRESS/g" \
+    -e "s/\${DU_BIND_ADDR}/$DU_BIND_ADDR/g" \
+    < /cu-template.yml > cu.yml
 
-# envsubst < /gnb-template.yml > gnb.yml
-
-/usr/local/bin/gnb -c /gnb-template.yml
+/usr/local/bin/srscu -c /cu.yml
