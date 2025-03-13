@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.names.fullname" . }}-f1ap
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.services.f1ap.annotations .Values.commonAnnotations }}
+  annotations:
+    {{- if .Values.services.f1ap.annotations }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.services.f1ap.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  type: {{ .Values.services.f1ap.type }}
+  {{- if .Values.services.f1ap.sessionAffinity }}
+  sessionAffinity: {{ .Values.services.f1ap.sessionAffinity }}
+  {{- end }}
+  {{- if .Values.services.f1ap.sessionAffinityConfig }}
+  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.services.f1ap.sessionAffinityConfig "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.services.f1ap.clusterIP (eq .Values.services.f1ap.type "ClusterIP") }}
+  clusterIP: {{ .Values.services.f1ap.clusterIP }}
+  {{- end }}
+  {{- if (and (eq .Values.services.f1ap.type "LoadBalancer") (not (empty .Values.services.f1ap.loadBalancerIP))) }}
+  loadBalancerIP: {{ .Values.services.f1ap.loadBalancerIP }}
+  {{- end }}
+  {{- if and (eq .Values.services.f1ap.type "LoadBalancer") .Values.services.f1ap.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges: {{- toYaml .Values.services.f1ap.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- if or (eq .Values.services.f1ap.type "LoadBalancer") (eq .Values.services.f1ap.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.services.f1ap.externalTrafficPolicy | quote }}
+  {{- end }}
+  ports:
+    - name: f1ap
+      port: {{ .Values.services.f1ap.ports.f1ap }}
+      protocol: UDP
+      targetPort: f1ap
+      {{- if and (or (eq .Values.services.f1ap.type "NodePort") (eq .Values.services.f1ap.type "LoadBalancer")) (not (empty .Values.services.f1ap.nodePorts.f1ap)) }}
+      nodePort: {{ .Values.services.f1ap.nodePorts.f1ap }}
+      {{- else if eq .Values.services.f1ap.type "ClusterIP" }}
+      nodePort: null
+      {{- end }}
+    {{- if .Values.services.f1ap.extraPorts }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.services.f1ap.extraPorts "context" $) | nindent 4 }}
+    {{- end }}
+  publishNotReadyAddresses: true
+  selector: {{- include "common.labels.matchLabels" . | nindent 4 }}
