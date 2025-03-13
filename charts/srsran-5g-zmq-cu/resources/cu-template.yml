@@ -13,7 +13,7 @@ cu_cp:
           - plmn: "{{ .Values.config.cell_cfg.plmn }}"
             tai_slice_support_list:
                   {{- range .Values.config.slicing }}
-                    - {{- toYaml . | nindent 6 }}
+                    - {{- toYaml . }}
                     {{- end }}
   f1ap:
     bind_addr: ${SRSRAN-CU-F1AP}          
