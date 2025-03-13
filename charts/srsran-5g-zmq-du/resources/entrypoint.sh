@@ -11,10 +11,10 @@ if [[ -z "$DU_BIND_ADDR" ]] ; then
     export DU_BIND_ADDR=$(hostname -I)
 fi
 
-export CU_ADDRESS="$(resolve_ip "$CU_ADDRESS")"
+export CU_ADDR="$(resolve_ip "$CU_ADDRESS")"
 
 # Replace variables in the template
-sed -e "s/\${CU_ADDRESS}/$CU_ADDRESS/g" \
+sed -e "s/\${CU_ADDR}/$CU_ADDR/g" \
     -e "s/\${DU_BIND_ADDR}/$DU_BIND_ADDR/g" \
     < /du-template.yml > du.yml
 
