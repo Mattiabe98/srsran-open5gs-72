@@ -4,5 +4,5 @@ metadata:
   name: {{ include "common.names.fullname" . }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 data:
-  gnb-template.yml: |
-{{ tpl (.Files.Get "resources/gnb-template.yml") . | indent 4 }}
+  du-template.yml: |
+{{ tpl (.Files.Get "resources/du-template.yml") . | indent 4 }}
