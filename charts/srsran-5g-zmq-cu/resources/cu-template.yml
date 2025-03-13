@@ -5,8 +5,8 @@
 
 cu_cp:
   amf:
-    addr: {{ .Values.config.amf.hostname }}                # The address or hostname of the AMF.
-    bind_addr: srsran-cu-gtpu           # A local IP that the gNB binds to for traffic from the AMF.
+    addr: ${AMF_ADDR}               # The address or hostname of the AMF.
+    bind_addr: ${SRSRAN-CU-GTPU}           # A local IP that the gNB binds to for traffic from the AMF.
     supported_tracking_areas:            # Configure the TA associated with the CU-CP
       - tac: {{ .Values.config.cell_cfg.tac }}
         plmn_list:
@@ -17,7 +17,7 @@ cu_cp:
                   sst: {{ .sst }}
                 {{- end }}
   f1ap:
-    bind_addr: srsran-cu-f1ap         
+    bind_addr: ${SRSRAN-CU-F1AP}          
 
 slicing:
   {{- range .Values.config.slicing }}
