@@ -63,8 +63,8 @@ extraDeploy: []
 image:
   srsran:
     registry: docker.io
-    repository: softwareradiosystems/srsran-project
-    tag: "release_avx2-latest"
+    repository: boing7898/srsran-5g-zmq
+    tag: "latest"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
