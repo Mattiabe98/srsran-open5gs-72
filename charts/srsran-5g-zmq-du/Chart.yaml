@@ -8,7 +8,7 @@ sources:
 maintainers:
 - email: avrodriguez@gradiant.org
   name: avrodriguez
-name: srsran-5g-zmq
+name: srsran-5g-zmq-du
 version: 1.0.1
 dependencies:
   - name: common
