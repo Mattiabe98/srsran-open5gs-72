@@ -12,18 +12,16 @@ cu_cp:
         plmn_list:
           - plmn: "{{ .Values.config.cell_cfg.plmn }}"
             tai_slice_support_list:
-                {{- range .Values.config.slicing }}
-                - sd: {{ .sd }}
-                  sst: {{ .sst }}
-                {{- end }}
+                  {{- range .Values.config.slicing }}
+                    - {{- toYaml . | nindent 6 }}
+                    {{- end }}
   f1ap:
     bind_addr: ${SRSRAN-CU-F1AP}          
 
 slicing:
   {{- range .Values.config.slicing }}
-  - sd: {{ .sd }}
-    sst: {{ .sst }}
-  {{- end }}
+    - {{- toYaml . | nindent 6 }}
+    {{- end }}
 
 log:
   filename: stdout          # Path of the log file.
