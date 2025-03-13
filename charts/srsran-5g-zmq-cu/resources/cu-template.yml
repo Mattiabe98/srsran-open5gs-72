@@ -6,9 +6,9 @@
 cu_cp:
   amf:
     addr: ${AMF_ADDR}               # The address or hostname of the AMF.
-    bind_addr: ${SRSRAN-CU-GTPU}           # A local IP that the gNB binds to for traffic from the AMF.
+    bind_addr: 127.0.0.1          # A local IP that the gNB binds to for traffic from the AMF.
   f1ap:
-    bind_addr: ${SRSRAN-CU-F1AP}          
+    bind_addr: 127.0.0.1          
 
 log:
   filename: stdout          # Path of the log file.
