@@ -43,16 +43,6 @@ dependencies:
     repository: file://../open5gs-bsf
     condition: bsf.enabled
     alias: bsf
-  - name: open5gs-hss
-    version: ~2.2.5
-    repository: file://../open5gs-hss
-    condition: hss.enabled
-    alias: hss
-  - name: open5gs-mme
-    version: ~2.2.5
-    repository: file://../open5gs-mme
-    condition: mme.enabled
-    alias: mme
   - name: open5gs-nrf
     version: ~2.2.5
     repository: file://../open5gs-nrf
@@ -68,26 +58,11 @@ dependencies:
     repository: file://../open5gs-pcf
     condition: pcf.enabled
     alias: pcf
-  - name: open5gs-pcrf
-    version: ~2.2.5
-    repository: file://../open5gs-pcrf
-    condition: pcrf.enabled
-    alias: pcrf
   - name: open5gs-scp
     version: ~2.2.5
     repository: file://../open5gs-scp
     condition: scp.enabled
     alias: scp
-  - name: open5gs-sgwc
-    version: ~2.2.5
-    repository: file://../open5gs-sgwc
-    condition: sgwc.enabled
-    alias: sgwc
-  - name: open5gs-sgwu
-    version: ~2.2.5
-    repository: file://../open5gs-sgwu
-    condition: sgwu.enabled
-    alias: sgwu
   - name: open5gs-smf
     version: ~2.2.6
     repository: file://../open5gs-smf
