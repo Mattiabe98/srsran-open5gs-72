@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+spec:
+  clusterIP: None
+  selector:
+    app: grafana-srsran
+  ports:
+    - port: 80          # The port exposed by the service
+      targetPort: 3000  # The actual port inside the container
+      protocol: TCP
+    - port: 55555          # The port exposed by the service
+      targetPort: 55555  # The actual port inside the container
+      protocol: UDP
+  type: ClusterIP
