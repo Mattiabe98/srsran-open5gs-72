@@ -144,7 +144,7 @@ spec:
               mountPath: /etc/srsran/ue.conf
               subPath: "ue.conf"
       volumes:
-        - name: srsran-5g-config
+        - name: srsran-du-config
           configMap:
             name: {{ include "common.names.fullname" . }}
         - name: entrypoint
