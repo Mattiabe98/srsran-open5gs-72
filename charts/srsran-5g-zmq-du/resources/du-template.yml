@@ -4,7 +4,7 @@
 # is not defined and the default is used. 
 
 f1ap:
-  cu_cp_addr: ${CUCP_ADDR}
+  cu_cp_addr: ${CU_ADDR}
   bind_addr:  ${DU_BIND_ADDR} 
 
 nru:
