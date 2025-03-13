@@ -89,6 +89,8 @@ spec:
               value: {{ .Values.config.amf.bind_interface }}
             - name: CU_ADDRESS
               value: srsran-cu-f1ap
+            - name: METRICS_ADDR
+              value: metrics-server
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
