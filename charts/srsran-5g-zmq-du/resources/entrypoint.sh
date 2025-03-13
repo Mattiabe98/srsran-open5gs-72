@@ -18,4 +18,4 @@ sed -e "s/\${CU_ADDR}/$CU_ADDR/g" \
     -e "s/\${DU_BIND_ADDR}/$DU_BIND_ADDR/g" \
     < /du-template.yml > du.yml
 
-/usr/local/bin/srsdu -c /du.yml
+/opt/srsRAN_Project/target/bin/srsdu -c /du.yml
