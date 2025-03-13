@@ -32,13 +32,6 @@ tolerations: []
 affinity: {}
 
 grafana:
-  service:
-    type: ClusterIP  # Change to NodePort or LoadBalancer if needed
-    port: 80
-    targetPort: 3000
-  route:
-    enabled: true  # Enable OpenShift Route
-    host: grafana.srsran.apps.sno.home.lab  # Replace with your OKD domain
   image:
     repository: softwareradiosystems/grafana
     pullPolicy: IfNotPresent
