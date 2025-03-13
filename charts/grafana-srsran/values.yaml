@@ -32,6 +32,7 @@ tolerations: []
 affinity: {}
 
 grafana:
+  serviceAccountName: default
   image:
     repository: softwareradiosystems/grafana
     pullPolicy: IfNotPresent
@@ -56,6 +57,7 @@ grafana:
     GF_AUTH_ANONYMOUS_ENABLED: true
 
 influxdb:
+  serviceAccountName: default
   image:
     repository: influxdb
     tag: "2.7.4-alpine"
@@ -72,6 +74,10 @@ influxdb:
     size: 50Gi
     mountPath: /var/lib/influxdb2
     subPath: ""
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
 
 metrics-server:
   config:
