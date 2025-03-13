@@ -16,6 +16,6 @@ export CU_ADDRESS="$(resolve_ip "$CU_ADDRESS")"
 # Replace variables in the template
 sed -e "s/\${CU_ADDRESS}/$CU_ADDRESS/g" \
     -e "s/\${DU_BIND_ADDR}/$DU_BIND_ADDR/g" \
-    < /cu-template.yml > cu.yml
+    < /du-template.yml > du.yml
 
-/usr/local/bin/srscu -c /cu.yml
+/usr/local/bin/srsdu -c /du.yml
