@@ -48,9 +48,9 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
     DEBIAN_FRONTEND=noninteractive apt-get install --yes libzmq3-dev
 # Install srsRAN build dependencies
-RUN /src/docker/scripts/install_dependencies.sh build && \
-    /src/docker/scripts/install_uhd_dependencies.sh build && \
-    /src/docker/scripts/install_dpdk_dependencies.sh build && \
+RUN /src/scripts/install_dependencies.sh build && \
+    /src/scripts/install_uhd_dependencies.sh build && \
+    /src/scripts/install_dpdk_dependencies.sh build && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git clang
 
 ARG UHD_VERSION
@@ -59,8 +59,8 @@ ARG MARCH
 ARG NUM_JOBS
 
 # Compile UHD/DPDK
-RUN /src/docker/scripts/build_uhd.sh "${UHD_VERSION}" ${MARCH} ${NUM_JOBS} && \
-    /src/docker/scripts/build_dpdk.sh "${DPDK_VERSION}" ${MARCH} ${NUM_JOBS}
+RUN /src/scripts/build_uhd.sh "${UHD_VERSION}" ${MARCH} ${NUM_JOBS} && \
+    /src/scripts/build_dpdk.sh "${DPDK_VERSION}" ${MARCH} ${NUM_JOBS}
 
 # Compile srsRAN Project and install it in the OS
 ARG COMPILER=gcc
@@ -69,7 +69,7 @@ ENV UHD_DIR=/opt/uhd/${UHD_VERSION}
 ENV DPDK_DIR=/opt/dpdk/${DPDK_VERSION}
 RUN if [ -z "$NUM_JOBS" ]; then NUM_JOBS=$(nproc); fi \
     && \
-    /src/docker/scripts/builder.sh -c ${COMPILER} -m "-j${NUM_JOBS} srscu srsdu srsdu_split_8 srsdu_split_7_2 gnb gnb_split_8 gnb_split_7_2 ru_emulator" \
+    /src/scripts/builder.sh -c ${COMPILER} -m "-j${NUM_JOBS} srscu srsdu srsdu_split_8 srsdu_split_7_2 gnb gnb_split_8 gnb_split_7_2 ru_emulator" \
     -DBUILD_TESTS=False -DENABLE_UHD=On -DENABLE_DPDK=On -DMARCH=${MARCH} -DCMAKE_INSTALL_PREFIX=/opt/srs \
     ${EXTRA_CMAKE_ARGS} /src \
     && \
@@ -99,9 +99,9 @@ COPY --from=builder /opt/dpdk/${DPDK_VERSION} /opt/dpdk/${DPDK_VERSION}
 COPY --from=builder /opt/srs                  /usr/local
 
 # Copy the install dependencies scripts
-ADD docker/scripts/install_uhd_dependencies.sh  /usr/local/etc/install_uhd_dependencies.sh
-ADD docker/scripts/install_dpdk_dependencies.sh /usr/local/etc/install_dpdk_dependencies.sh
-ADD docker/scripts/install_dependencies.sh      /usr/local/etc/install_srsran_dependencies.sh
+ADD scripts/install_uhd_dependencies.sh  /usr/local/etc/install_uhd_dependencies.sh
+ADD scripts/install_dpdk_dependencies.sh /usr/local/etc/install_dpdk_dependencies.sh
+ADD scripts/install_dependencies.sh      /usr/local/etc/install_srsran_dependencies.sh
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/uhd/${UHD_VERSION}/lib/:/opt/uhd/${UHD_VERSION}/lib/x86_64-linux-gnu/:/opt/uhd/${UHD_VERSION}/lib/aarch64-linux-gnu/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/dpdk/${DPDK_VERSION}/lib/:/opt/dpdk/${DPDK_VERSION}/lib/x86_64-linux-gnu/:/opt/dpdk/${DPDK_VERSION}/lib/aarch64-linux-gnu/
 ENV PATH=$PATH:/opt/uhd/${UHD_VERSION}/bin/:/opt/dpdk/${DPDK_VERSION}/bin/
