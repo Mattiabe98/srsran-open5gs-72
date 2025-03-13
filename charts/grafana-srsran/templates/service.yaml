@@ -10,7 +10,9 @@ spec:
     - port: 80          # The port exposed by the service
       targetPort: 3000  # The actual port inside the container
       protocol: TCP
+      name: http
     - port: 55555          # The port exposed by the service
       targetPort: 55555  # The actual port inside the container
       protocol: UDP
+      name: data
   type: ClusterIP
