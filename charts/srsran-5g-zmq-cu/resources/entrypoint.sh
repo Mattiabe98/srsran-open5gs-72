@@ -24,3 +24,5 @@ sed -e "s/\${SRSRAN-CU-GTPU}/$SRSRAN_CU_GTPU_IP/g" \
     -e "s/\${SRSRAN-CU-F1AP}/$SRSRAN_CU_F1AP_IP/g" \
     -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
     < /cu-template.yml > cu.yml
+
+/usr/local/bin/srscu -c /cu.yml
