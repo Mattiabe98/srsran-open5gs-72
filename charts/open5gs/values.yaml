@@ -15,7 +15,7 @@ populate:
 # Common
 mongodb:
   enabled: true
-  persistance:
+  persistence:
     enabled: false
   auth:
     enabled: false
