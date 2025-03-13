@@ -2,7 +2,6 @@
 
 # set -ex
 
-
 resolve_ip() {
     python3 -c "import socket; print(socket.gethostbyname('$1'))" 2>/dev/null
 }
@@ -26,7 +25,7 @@ fi
 # Replace variables in the template
 sed -e "s/\${SRSRAN-CU-GTPU}/$SRSRAN_CU_GTPU_IP/g" \
     -e "s/\${SRSRAN-CU-F1AP}/$SRSRAN_CU_F1AP_IP/g" \
-    -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \    
+    -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
     < /cu-template.yml > cu.yml
 
