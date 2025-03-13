@@ -7,15 +7,15 @@ cu_cp:
   amf:
     addr: ${AMF_ADDR}               # The address or hostname of the AMF.
     bind_addr: ${AMF_BIND_ADDR}         # A local IP that the gNB binds to for traffic from the AMF.
-  f1ap:
-    bind_addr: ${AMF_BIND_ADDR}        
     supported_tracking_areas:                                    # Configure the TA associated with the CU-CP
       - tac: 1
         plmn_list:
           - plmn: "99970"
             tai_slice_support_list:
               - sst: 1
-              
+  f1ap:
+    bind_addr: ${AMF_BIND_ADDR}        
+
 log:
   filename: stdout          # Path of the log file.
   all_level: info                   # Logging level applied to all layers.
