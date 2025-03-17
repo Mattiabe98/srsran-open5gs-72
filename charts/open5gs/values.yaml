@@ -30,7 +30,7 @@ upf:
   enabled: true
 webui:
   ingress:
-    hostname: open5gs.sno.home.lab
+    hostname: open5gs.sno.oran.lab
   enabled: true
 
 # 4G
