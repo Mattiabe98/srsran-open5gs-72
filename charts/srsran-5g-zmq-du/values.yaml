@@ -105,7 +105,6 @@ config:
 
   slicing:
   - sst: 1
-    sd: 0x111111
 
 ue:
   image:
