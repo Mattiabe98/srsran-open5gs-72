@@ -15,7 +15,6 @@ cu_cp:
             tai_slice_support_list:
               -
                 sst: 1
-                sd: 0x111111
               
   f1ap:
     bind_addr: ${AMF_BIND_ADDR}        
