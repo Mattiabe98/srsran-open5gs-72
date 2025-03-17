@@ -69,7 +69,6 @@ amf:
           mnc: "70"
         s_nssai:
           - sst: 1
-            sd: "0x111111"
 ausf:
   enabled: true
 bsf:
