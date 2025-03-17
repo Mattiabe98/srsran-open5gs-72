@@ -49,6 +49,9 @@ sgwu:
 
 # 5G
 amf:
+  services:
+    sbi:
+      clusterIP: None
   enabled: true
   config:
     guamiList:
