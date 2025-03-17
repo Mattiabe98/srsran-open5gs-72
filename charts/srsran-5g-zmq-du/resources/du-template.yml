@@ -21,11 +21,23 @@ cell_cfg:
   common_scs: {{ .Values.config.cell_cfg.common_scs }}                    # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
+  pdcch:
+    common:
+      ss0_index: 0                  # Set search space zero index to match srsUE capabilities
+      coreset0_index: 12            # Set search CORESET Zero index to match srsUE capabilities
+    dedicated:
+      ss2_type: common              # Search Space type, has to be set to common
+      dci_format_0_1_and_1_1: false # Set correct DCI format (fallback)
+  prach:
+    prach_config_index: 1           # Sets PRACH config to match what is expected by srsUE      
+
+
 
 slicing:
   {{- range .Values.config.slicing }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
+
 
 log:
   filename: stdout          # Path of the log file.
