@@ -34,9 +34,9 @@ cell_cfg:
 
   
   slicing:
-    {{- range .Values.config.slicing }}
-      - {{- toYaml . | nindent 6 }}
-      {{- end }}
+  {{- range .Values.config.slicing }}
+    - {{- toYaml . | nindent 6 }}
+    {{- end }}
 
 
 log:
