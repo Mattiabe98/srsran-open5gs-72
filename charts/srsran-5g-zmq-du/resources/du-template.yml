@@ -6,7 +6,11 @@
 f1ap:
   cu_cp_addr: ${CU_ADDR}
   bind_addr: ${DU_BIND_ADDR}
-  
+
+f1u:
+  socket:
+    -
+      bind_addr: ${DU_BIND_ADDR}
 # f1u:
 #   socket:
 #     -
