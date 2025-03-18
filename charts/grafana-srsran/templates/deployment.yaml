@@ -1,48 +1,33 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment  # Or Pod, depending on your setup
 metadata:
-  name: {{ .Release.Name }}-influxdb
-  labels:
-    app: influxdb
+  name: influxdb
 spec:
-  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: influxdb
+  replicas: 1
   template:
     metadata:
       labels:
         app: influxdb
     spec:
-      serviceAccountName: {{ .Values.influxdb.serviceAccountName }}
-      securityContext: {{ toYaml .Values.podSecurityContext | nindent 6 }}
       volumes:
-        - name: influxdb-data
-          emptyDir: {}  # Non-persistent storage
-        - name: influxdb-config
-          emptyDir: {}  # Non-persistent storage
+      - name: influxdb-data
+        emptyDir: {}  # This creates the temporary volume
+      - name: influxdb-config
+        emptyDir: {}
       containers:
-        - name: influxdb
-          image: "{{ .Values.influxdb.image.repository }}:{{ .Values.influxdb.image.tag }}"
-          ports:
-            - containerPort: 8086
-              name: http
-          env:
-            - name: INFLUXDB_ADMIN_USER
-              value: "{{ .Values.influxdb.adminUser.user }}"
-            - name: INFLUXDB_ADMIN_PASSWORD
-              value: "{{ .Values.influxdb.adminUser.password }}"
-            - name: INFLUXDB_ADMIN_ORG
-              value: "{{ .Values.influxdb.adminUser.organization }}"
-            - name: INFLUXDB_ADMIN_BUCKET
-              value: "{{ .Values.influxdb.adminUser.bucket }}"
-            - name: INFLUXDB_ADMIN_TOKEN
-              value: "{{ .Values.influxdb.adminUser.token }}"
-            - name: INFLUXDB_RETENTION_POLICY
-              value: "{{ .Values.influxdb.adminUser.retention_policy }}"
-          volumeMounts:
-            - name: influxdb-data
-              mountPath: /var/lib/influxdb2
-            - name: influxdb-config
-              mountPath: /etc/influxdb2
-          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+      - name: influxdb
+        image: "{{ .Values.influxdb.image.repository }}:{{ .Values.influxdb.image.tag }}"
+        ports:
+        - containerPort: 9999
+          name: http
+        volumeMounts:
+        - name: influxdb-data
+          mountPath: /var/lib/influxdb2
+        - name: influxdb-config
+          mountPath: /etc/influxdb2
+        securityContext:
+          runAsUser: 0 # added security context to run as root
+          #runAsGroup: 0
