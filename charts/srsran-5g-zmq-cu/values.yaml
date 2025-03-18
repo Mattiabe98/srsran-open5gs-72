@@ -379,7 +379,7 @@ services:
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP: None
+    clusterIP: ""
     ## @param service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
     ##
     extraPorts: []
