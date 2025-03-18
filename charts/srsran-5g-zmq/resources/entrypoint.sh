@@ -14,8 +14,8 @@ if [[ -z "${AMF_BIND_ADDR}" ]] ; then
     export AMF_BIND_ADDR=$(hostname -I)
 fi
 
-sed -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
-    -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
-    > gnb.yml
+sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
+    -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
+    < /gnb-template.yml > /gnb.yml
 
-/usr/local/bin/gnb -c gnb.yml
+/usr/local/bin/gnb -c /gnb.yml
