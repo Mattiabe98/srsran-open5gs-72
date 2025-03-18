@@ -39,7 +39,7 @@ spec:
   ports:
     - name: f1ap
       port: {{ .Values.services.f1ap.ports.f1ap }}
-      protocol: UDP
+      protocol: SCTP
       targetPort: f1ap
       {{- if and (or (eq .Values.services.f1ap.type "NodePort") (eq .Values.services.f1ap.type "LoadBalancer")) (not (empty .Values.services.f1ap.nodePorts.f1ap)) }}
       nodePort: {{ .Values.services.f1ap.nodePorts.f1ap }}
