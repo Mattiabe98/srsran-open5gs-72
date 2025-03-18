@@ -228,6 +228,9 @@ resources:
 podSecurityContext:
   enabled: true
   fsGroup: 1001
+  sysctls:
+    - name: net.ipv4.ip_forward
+      value: "1"  
 ## Configure Container Security Context (only main container)
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @param containerSecurityContext.enabled Enable open5gs-upf containers' Security Context
@@ -240,6 +243,9 @@ containerSecurityContext:
   privileged: true
   capabilities:
     add: ["NET_ADMIN"]
+  sysctls:
+    - name: net.ipv4.ip_forward
+      value: "1"
 #######################################
 ## Only Custom Probes available for UPF
 #######################################
