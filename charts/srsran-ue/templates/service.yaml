@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: srsran-ue
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: rx
+      port: 2000
+      targetPort: 2000
+      protocol: TCP
+    - name: tx
+      port: 2001
+      targetPort: 2001
+      protocol: TCP
+  selector: {{- include "common.labels.matchLabels" . | nindent 4 }}
