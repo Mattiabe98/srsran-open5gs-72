@@ -7,9 +7,10 @@ f1ap:
   cu_cp_addr: ${CU_ADDR}
   bind_addr: ${DU_BIND_ADDR}
   
-f1u: 
+f1u:
   socket:
-    bind_addr: ${DU_BIND_ADDR}
+    -
+      bind_addr: ${DU_BIND_ADDR}
 
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
