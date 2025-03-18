@@ -18,4 +18,3 @@ spec:
       port: 2001
       targetPort: 2001
       protocol: TCP
-  selector: {{- include "common.labels.matchLabels" . | nindent 4 }}
