@@ -21,11 +21,11 @@ cu_cp:
   f1ap:
     bind_addr: ${AMF_BIND_ADDR}    
 
-# cu_up: 
-#   f1u:
-#       socket:
-#         -
-#           bind_addr: ${SRSRAN-CU-GTPU}
+cu_up: 
+  f1u:
+      socket:
+        -
+          bind_addr: ${AMF_BIND_ADDR}
 
 log:
   filename: stdout          # Path of the log file.
