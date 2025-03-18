@@ -74,17 +74,6 @@ influxdb:
     size: 50Gi
     mountPath: /var/lib/influxdb2
     subPath: ""
-  volumes:
-    influxdb-data:
-      emptyDir: {}
-    influxdb-config:
-      emptyDir: {}
-  #Modify Volume Mounts to use emptyDir
-  volumeMounts:
-    - name: influxdb-data
-      mountPath: /var/lib/influxdb2
-    - name: influxdb-config
-      mountPath: /etc/influxdb2
 securityContext:
   runAsUser: 1000
   runAsGroup: 1000
