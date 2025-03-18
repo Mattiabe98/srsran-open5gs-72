@@ -119,19 +119,19 @@ auth:
     username: admin
     ## @param auth.admin.password InfluxDB&trade; admin user's password
     ##
-    password: ""
+    password: "admin1234"
     ## @param auth.admin.token InfluxDB&trade; admin user's token. Only valid with InfluxDB&trade; v2
     ##
-    token: ""
+    token: "605bc59413b7d5457d181ccf20f9fda15693f81b068d70396cc183081b264f3b"
     ## @param auth.admin.org InfluxDB&trade; admin user's org. Only valid with InfluxDB&trade; v2
     ##
-    org: primary
+    org: "srs"
     ## @param auth.admin.bucket InfluxDB&trade; admin user's bucket. Only valid with InfluxDB&trade; v2
     ##
-    bucket: primary
+    bucket: "srsran"
     ## @param auth.admin.retention InfluxDB&trade; admin user's bucket retention. Only valid with InfluxDB&trade; v2
     ##
-    retention: ""
+    retention: "4d"
   ## @param auth.createUserToken Whether to create tokens for the different users. Take into account these tokens are going to be created by CLI randomly and they will not be accessible from a secret. See more influxdb 2.0 [auth ref](https://docs.influxdata.com/influxdb/v2.0/security/tokens/)
   ## You should take into account these tokens are going to be created by CLI
   ## so it is not possible to get them by k8s secrets nor to provide them though
