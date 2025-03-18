@@ -62,21 +62,6 @@ spec:
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hostAliases "context" $) | nindent 8 }}
       # yamllint enable rule:indentation
       {{- end }}
-      initContainers:
-        - name: init
-          image: docker.io/oaisoftwarealliance/oai-tcpdump-init:alpine-3.20
-          imagePullPolicy: IfNotPresent
-          command:
-            - /bin/sh
-            - -c
-            - until ncat -zv srsran-du 2000 ; do echo waiting for DU to start; sleep 1; done
-          resources:
-            requests:
-              memory: 50Mi
-              cpu: 1m
-            limits:
-              memory: 50Mi
-              cpu: 1m
       containers:
         - name: srsran-ue
           image: {{ .Values.ue.image.registry }}/{{ .Values.ue.image.repository }}:{{ .Values.ue.image.tag }}
