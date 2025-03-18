@@ -2,12 +2,16 @@
 
 set -ex
 
-if [[ ! -z "$AMF_HOSTNAME" ]] ; then 
-    export AMF_ADDR="$(host -4 $AMF_HOSTNAME |awk '/has.*address/{print $NF; exit}')"
+resolve_ip() {
+    python3 -c "import socket; print(socket.gethostbyname('$1'))" 2>/dev/null
+}
+
+if [[ -n "$AMF_HOSTNAME" ]]; then 
+    export AMF_ADDR="$(resolve_ip "$AMF_HOSTNAME")"
 fi
 
 if [[ -z "${AMF_BIND_ADDR}" ]] ; then
-    export AMF_BIND_ADDR=$(ip addr show $AMF_BIND_INTERFACE | grep -Po 'inet \K[\d.]+')
+    export AMF_BIND_ADDR=$(hostname -I)
 fi
 
 sed -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
