@@ -4,6 +4,7 @@
 # is not defined and the default is used. 
 
 cu_cp:
+  inactivity_timer: 7200
   amf:
     addr: ${AMF_ADDR}               # The address or hostname of the AMF.
     bind_addr: ${AMF_BIND_ADDR}         # A local IP that the gNB binds to for traffic from the AMF.
