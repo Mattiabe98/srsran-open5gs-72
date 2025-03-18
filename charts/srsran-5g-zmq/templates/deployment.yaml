@@ -82,7 +82,6 @@ spec:
             - exec /entrypoint.sh;
           {{- end }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
           env:
             - name: AMF_HOSTNAME
               value: {{ .Values.config.amf.hostname }}
