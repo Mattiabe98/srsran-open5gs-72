@@ -404,7 +404,7 @@ services:
     ## @param service.ports.gtpu Service HTTP port
     ##
     ports:
-      f1ap: 2152
+      f1ap: 38472
     ## @param service.loadBalancerSourceRanges Restricts access for LoadBalancer (only with `service.type: LoadBalancer`)
     ## e.g:
     ## loadBalancerSourceRanges:
