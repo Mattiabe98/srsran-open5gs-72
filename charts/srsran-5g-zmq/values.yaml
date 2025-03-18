@@ -90,7 +90,7 @@ config:
 
   ru_sdr:
     device_driver: zmq
-    device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001,id=gnb,base_srate=23.04e6
+    device_args: tx_port=tcp://0.0.0.0:2000,rx_port=tcp://srsran-ue:2001,id=gnb,base_srate=23.04e6
     srate: 23.04
     tx_gain: 75
     rx_gain: 75
@@ -107,29 +107,6 @@ config:
   - sst: 1
     sd: 0x111111
 
-ue:
-  image:
-    registry: docker.io
-    repository: gradiant/srsran-4g
-    tag: "23_11"
-    digest: ""
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    ##
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ##
-    # pullSecrets:
-    #  - regcred
-  config:
-    opc: 'E8ED289DEBA952E4283B54E88E6183CA'
-    k: '465B5CE8B199B49FAA5F0A2EE238A6BC'
-    imsi: '999700000000001'
-    imei: '353490069873319'
-    resources: {}
 
 ## @param replicaCount Number of srsran Pods to run (requires ReadWriteMany PVC support)
 ##
@@ -380,7 +357,7 @@ services:
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP: ""
+    clusterIP: None
     ## @param service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
     ##
     extraPorts: []
