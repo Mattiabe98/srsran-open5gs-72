@@ -1,13 +1,19 @@
+{{- if .Values.route.enabled -}}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: grafana-route
+  {{- end }}
 spec:
-  to:
-    kind: Service
-    name: grafana-srsran  # Use the service name from `oc get svc`
+  host: srsran-grafana.sno.oran.lab
   port:
-    targetPort: 80
+    targetPort: http  # This must match the port name in your Grafana service
   tls:
     termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  to:
+    kind: Service
+    name: metrics-server
+    weight: 100
   wildcardPolicy: None
+{{- end }}
