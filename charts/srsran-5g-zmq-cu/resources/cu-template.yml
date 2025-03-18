@@ -19,7 +19,7 @@ cu_cp:
                 sd: 0x111111
               
   f1ap:
-    bind_addr: ${SRSRAN-CU-F1AP}     
+    bind_addr: ${AMF_BIND_ADDR}    
 
 # cu_up: 
 #   f1u:
