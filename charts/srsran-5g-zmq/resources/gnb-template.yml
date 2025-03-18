@@ -2,10 +2,21 @@
 # transmitting in band 78, with 20 MHz bandwidth and 30 kHz sub-carrier-spacing. A USRP B200 is configured 
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
+
 cu_cp:
+  inactivity_timer: 7200
   amf:
-    addr: ${AMF_ADDR}                  # The address or hostname of the AMF.
-    bind_addr: ${AMF_BIND_ADDR}             # A local IP that the gNB binds to for traffic from the AMF.
+    addr: ${AMF_ADDR}               # The address or hostname of the AMF.
+    bind_addr: ${AMF_BIND_ADDR}         # A local IP that the gNB binds to for traffic from the AMF.
+    supported_tracking_areas:                                    # Configure the TA associated with the CU-CP
+      - tac: 1
+        plmn_list:
+          -
+            plmn: "99970"
+            tai_slice_support_list:
+              -
+                sst: 1
+                sd: 0x111111
 
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
