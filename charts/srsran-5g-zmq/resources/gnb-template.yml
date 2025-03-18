@@ -41,7 +41,10 @@ cell_cfg:
       dci_format_0_1_and_1_1: false # Set correct DCI format (fallback)
   prach:
     prach_config_index: 1           # Sets PRACH config to match what is expected by srsUE      
-
+  pdsch:
+    mcs_table: qam64                # Sets PDSCH MCS to 64 QAM
+  pusch:
+    mcs_table: qam64                # Sets PUSCH MCS to 64 QAM
 # e2:
 #   enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
 #   e2sm_kpm_enabled: true            # Enable KPM service module
