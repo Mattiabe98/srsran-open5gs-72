@@ -12,4 +12,4 @@ fi
 
 envsubst < /gnb-template.yml > gnb.yml
 
-/opt/srsRAN_Project/target/bin/gnb -c gnb.yml
+/usr/local/bin/gnb -c gnb.yml
