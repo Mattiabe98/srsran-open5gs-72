@@ -74,11 +74,22 @@ influxdb:
     size: 50Gi
     mountPath: /var/lib/influxdb2
     subPath: ""
-securityContext:
-  runAsUser: 0
-  runAsGroup: 0
-  fsGroup: 0
-  privileged: true
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    fsGroup: 0
+    privileged: true
+  volumes:
+    - name: influxdb-data
+      emptyDir: {}  # Non-persistent storage
+    - name: influxdb-config
+      emptyDir: {}  # Non-persistent storage
+  mountPoints:
+    - name: influxdb-data
+      mountPath: /var/lib/influxdb2
+    - name: influxdb-config
+      mountPath: /etc/influxdb2
+
 
 metrics-server:
   config:
