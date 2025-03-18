@@ -1,18 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: metrics-server
+  name: grafana-service # Renamed for clarity
+  labels: #Ensure that labels are linked to the grafana pods instead of srsran pods
+    app: grafana-srsran #Example only, please change according to your configuration
 spec:
-  clusterIP: None
   selector:
-    app: grafana-srsran
+    app: grafana-srsran # Select the correct Grafana pods
   ports:
-    - port: 80          # The port exposed by the service
+    - port: 3000          # The port exposed by the service
       targetPort: 3000  # The actual port inside the container
       protocol: TCP
       name: http
-    - port: 55555          # The port exposed by the service
-      targetPort: 55555  # The actual port inside the container
-      protocol: UDP
-      name: data
-  type: ClusterIP
+  type: ClusterIP # Ensure a ClusterIP service is requested
