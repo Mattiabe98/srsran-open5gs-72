@@ -25,7 +25,7 @@ cu_up:
   f1u:
       socket:
         -
-          bind_addr: ${AMF_BIND_ADDR}
+          bind_addr: ${CU_F1U}
 
 log:
   filename: stdout          # Path of the log file.
