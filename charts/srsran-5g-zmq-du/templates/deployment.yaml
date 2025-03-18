@@ -88,7 +88,7 @@ spec:
             - name: AMF_BIND_INTERFACE
               value: {{ .Values.config.amf.bind_interface }}
             - name: CU_ADDRESS
-              value: srsran-cu-f1ap
+              value: srsran-cu-gtpu
             - name: METRICS_ADDR
               value: metrics-server
             {{- if .Values.extraEnvVars }}
