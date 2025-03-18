@@ -10,6 +10,8 @@ if [[ -z "${AMF_BIND_ADDR}" ]] ; then
     export AMF_BIND_ADDR=$(ip addr show $AMF_BIND_INTERFACE | grep -Po 'inet \K[\d.]+')
 fi
 
-envsubst < /gnb-template.yml > gnb.yml
+sed -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
+    -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
+    > gnb.yml
 
 /usr/local/bin/gnb -c gnb.yml
