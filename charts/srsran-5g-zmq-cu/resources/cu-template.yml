@@ -21,6 +21,10 @@ cu_cp:
   f1ap:
     bind_addr: ${AMF_BIND_ADDR}        
 
+cu_up:
+  nru:
+    bind_addr: ${AMF_BIND_ADDR}
+
 log:
   filename: stdout          # Path of the log file.
   all_level: info                   # Logging level applied to all layers.
