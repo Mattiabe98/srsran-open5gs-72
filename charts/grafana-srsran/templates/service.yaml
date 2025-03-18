@@ -1,15 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: grafana-service # Renamed for clarity
-  labels: #Ensure that labels are linked to the grafana pods instead of srsran pods
-    app: grafana-srsran #Example only, please change according to your configuration
+  name: grafana-service  # Fixed name, no template logic
+  namespace: srs5g           # Your actual namespace
+  labels: # These should match the Grafana Pod labels
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: srsran-grafana
 spec:
   selector:
-    app: grafana-srsran # Select the correct Grafana pods
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: srsran-grafana
   ports:
     - port: 3000          # The port exposed by the service
       targetPort: 3000  # The actual port inside the container
       protocol: TCP
       name: http
-  type: ClusterIP # Ensure a ClusterIP service is requested
+  type: ClusterIP
+  clusterIP: None #Removes the clusterIP
