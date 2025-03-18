@@ -41,7 +41,7 @@ cell_cfg:
 # metrics:
 #   rlc_report_period: 1000           # Set reporting period to 1s
 
-slicing:
+  slicing:
   {{- range .Values.config.slicing }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
