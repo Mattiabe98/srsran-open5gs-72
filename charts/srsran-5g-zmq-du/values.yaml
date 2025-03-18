@@ -90,7 +90,7 @@ config:
 
   ru_sdr:
     device_driver: zmq
-    device_args: tx_port=tcp://srsran-ue:2000,rx_port=tcp://srsran-ue:2001,id=gnb,base_srate=23.04e6
+    device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001,id=gnb,base_srate=23.04e6
     srate: 23.04
     tx_gain: 75
     rx_gain: 75
