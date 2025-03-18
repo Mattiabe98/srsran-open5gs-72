@@ -10,8 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: grafana-srsran
-        app.kubernetes.io/name: influxdb
+        app: influxdb
     spec:
       volumes:
       - name: influxdb-data
