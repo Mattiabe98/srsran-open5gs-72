@@ -831,7 +831,7 @@ networkPolicy:
 persistence:
   ## @param persistence.enabled Enable data persistence
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.existingClaim Use a existing PVC which must be created manually before bound
   ## If defined, PVC must be created manually before volume will be bound
   ## The value is evaluated as a template
