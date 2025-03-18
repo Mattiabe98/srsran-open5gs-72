@@ -927,7 +927,7 @@ volumePermissions:
   ##
   securityContext:
     seLinuxOptions: {}
-    runAsUser: 0
+    runAsUser: auto
 ## @section InfluxDB&trade; backup parameters
 backup:
   ## @param backup.enabled Enable InfluxDB&trade; backup
