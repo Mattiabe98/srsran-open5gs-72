@@ -135,9 +135,9 @@ volumes:
   - name: influxdb-config
     emptyDir: {}
 mountPoints:
-  - name: influxdb-storage
-    mountPath: /var/lib/influxdb2
-    readOnly: false
+  # - name: influxdb-storage
+  #   mountPath: /var/lib/influxdb2
+  #   readOnly: false
   - name: influxdb-config
     mountPath: /etc/influxdb2
     readOnly: false
