@@ -52,8 +52,11 @@ cell_cfg:
 #   addr: e2term-service                  # RIC IP address
 #   port: 36421                       # RIC port
 
-# metrics:
-#   rlc_report_period: 1000           # Set reporting period to 1s
+metrics:
+  rlc_report_period: 1000           # Set reporting period to 1s
+  enable_json_metrics: true       # Enable reporting metrics in JSON format
+  addr: grafana-srsran-metrics-server              # Metrics-server IP
+  port: 55555                     # Metrics-server Port  
 
   slicing:
   {{- range .Values.config.slicing }}
