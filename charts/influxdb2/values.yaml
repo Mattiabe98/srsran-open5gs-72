@@ -94,14 +94,12 @@ env: {}
 ## Defaults indicated below
 ##
 adminUser:
-  organization: "influxdata"
-  bucket: "default"
+  organization: "srs"
+  bucket: "srsran"
   user: "admin"
-  retention_policy: "0s"
-  ## Leave empty to generate a random password and token.
-  ## Or fill any of these values to use fixed values.
-  password: ""
-  token: ""
+  retention_policy: "4d"
+  password: "admin1234"
+  token: "605bc59413b7d5457d181ccf20f9fda15693f81b068d70396cc183081b264f3b"
 
   ## The password and token are obtained from an existing secret. The expected
   ## keys are `admin-password` and `admin-token`.
@@ -111,7 +109,7 @@ adminUser:
 ## Persist data to a persistent volume
 ##
 persistence:
-  enabled: true
+  enabled: false
   ## If true will use an existing PVC instead of creating one
   # useExisting: false
   ## Name of existing PVC to be used in the influx deployment
@@ -131,15 +129,18 @@ persistence:
 
 ## Add custom volume and volumeMounts
 ##
-# volumes:
-#   - name: influxdb2-templates
-#     hostPath:
-#       path: /data/influxdb2-templates
-#       type: Directory
-# mountPoints:
-#   - name: influxdb2-templates
-#     mountPath: /influxdb2-templates
-#     readOnly: true
+volumes:
+  - name: influxdb-storage
+    emptyDir: {}
+  - name: influxdb-config
+    emptyDir: {}
+mountPoints:
+  - name: influxdb-storage
+    mountPath: /var/lib/influxdb2
+    readOnly: false
+  - name: influxdb-config
+    mountPath: /etc/influxdb2
+    readOnly: false
 
 ## Allow executing custom init scripts
 ## If the container finds any files with the .sh extension inside of the
@@ -163,10 +164,11 @@ service:
   annotations: {}
   labels: {}
   portName: http
+  clusterIP: None
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
-  create: true
+  create: false
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
