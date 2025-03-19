@@ -14,12 +14,14 @@ if [[ -z "${AMF_BIND_ADDR}" ]] ; then
     export AMF_BIND_ADDR=$(hostname -I)
 fi
 
-export E2_ADDR=$(resolve_ip "$E2_HOSTNAME")
+# Trim trailing spaces from AMF_BIND_ADDR
+AMF_BIND_ADDR=$(echo "$AMF_BIND_ADDR" | xargs)
 
+export E2_ADDR=$(resolve_ip "$E2_HOSTNAME")
 
 sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     -e "s/\${AMF_ADDR}/$AMF_ADDR/g" \
-    -e "s/\${E2_ADDR}/$E2_ADDR/g" \    
+    -e "s/\${E2_ADDR}/$E2_ADDR/g" \
     < /gnb-template.yml > /gnb.yml
 
 /usr/local/bin/gnb -c /gnb.yml
