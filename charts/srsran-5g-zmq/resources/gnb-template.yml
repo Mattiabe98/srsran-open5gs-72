@@ -3,6 +3,8 @@
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
 
+gnb_du_id: 1
+
 cu_cp:
   inactivity_timer: 7200
   amf:
