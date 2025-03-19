@@ -45,12 +45,12 @@ cell_cfg:
     mcs_table: qam64                # Sets PDSCH MCS to 64 QAM
   pusch:
     mcs_table: qam64                # Sets PUSCH MCS to 64 QAM
-# e2:
-#   enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
-#   e2sm_kpm_enabled: true            # Enable KPM service module
-#   e2sm_rc_enabled: true             # Enable RC service module
-#   addr: e2term-service                  # RIC IP address
-#   port: 36421                       # RIC port
+e2:
+  enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
+  e2sm_kpm_enabled: true            # Enable KPM service module
+  e2sm_rc_enabled: true             # Enable RC service module
+  addr: e2term-service                  # RIC IP address
+  port: 36421                       # RIC port
 
   slicing:
   {{- range .Values.config.slicing }}
