@@ -85,6 +85,8 @@ spec:
           env:
             - name: AMF_HOSTNAME
               value: {{ .Values.config.amf.hostname }}
+            - name: E2_HOSTNAME
+              value: e2term-service          
             - name: AMF_BIND_INTERFACE
               value: {{ .Values.config.amf.bind_interface }}
             - name: METRICS_ADDR
