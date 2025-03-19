@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment  # Or Pod, depending on your setup
+metadata:
+  name: influxdb2
+spec:
+  selector:
+    matchLabels:
+      app: influxdb2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: influxdb2
+    spec:
+      volumes:
+      - name: influxdb-data
+        emptyDir: {}  # This creates the temporary volume
+      - name: influxdb-config
+        emptyDir: {}
+      containers:
+      - name: influxdb
+        image: influxdb:2.7.4-alpine # Or your desired InfluxDB image
+        ports:
+        - containerPort: 9999
+          name: http
+        volumeMounts:
+        - name: influxdb-data
+          mountPath: /var/lib/influxdb2
+        - name: influxdb-config
+          mountPath: /etc/influxdb2
+        securityContext:
+          runAsUser: 0 # added security context to run as root
+          #runAsGroup: 0
