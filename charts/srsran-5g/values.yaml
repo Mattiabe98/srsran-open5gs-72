@@ -168,10 +168,7 @@ sidecars: []
 ## @param tolerations Tolerations for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 ##
-tolerations:
-  - key: ettus.com/usrp
-    operator: Equal
-    effect: NoSchedule
+tolerations: []
 serviceAccount:
   ## @param serviceAccount.create Specifies whether a service account should be created
   ##
