@@ -17,8 +17,7 @@ data:
     # Default Data Set
     #
     twoStepFlag             {{ .Values.config.twoStepFlag | default 1 }}
-    slaveOnly               1
-    clientOnly              {{ .Values.config.clientOnly | default 0 }}
+    clientOnly              {{ .Values.config.clientOnly | default 1 }}
     socket_priority         {{ .Values.config.socket_priority | default 0 }}
     priority1               {{ .Values.config.priority1 | default 128 }}
     priority2               {{ .Values.config.priority2 | default 128 }}
