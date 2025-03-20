@@ -99,8 +99,8 @@ data:
     # Transport options
     #
     transportSpecific       {{ .Values.config.transportSpecific | default 0x0 }}
-    ptp_dst_mac             {{ .Values.config.ptp_dst_mac | default "01:1B:19:00:00:00" }}
-    p2p_dst_mac             {{ .Values.config.p2p_dst_mac | default "01:80:C2:00:00:0E" }}
+    #ptp_dst_mac             {{ .Values.config.ptp_dst_mac | default "01:1B:19:00:00:00" }}
+    #p2p_dst_mac             {{ .Values.config.p2p_dst_mac | default "01:80:C2:00:00:0E" }}
     udp_ttl                 {{ .Values.config.udp_ttl | default 1 }}
     udp6_scope              {{ .Values.config.udp6_scope | default 0x0E }}
     uds_address             {{ .Values.config.uds_address | default "/var/run/ptp4l" }}
