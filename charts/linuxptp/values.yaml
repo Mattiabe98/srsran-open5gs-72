@@ -30,7 +30,7 @@ podSecurityContext: {}
 
 securityContext:
   capabilities:
-    add: ["SYS_NICE", "NET_ADMIN"]
+    add: ["SYS_NICE", "NET_ADMIN", "SYS_TIME"]
   privileged: true
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
