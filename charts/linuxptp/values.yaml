@@ -22,7 +22,7 @@ fullnameOverride: "linuxptp-chart"
 serviceAccount:
   create: false
   annotations: {}
-  name: "srsadmin-gnb"
+  name: "default"
 
 podAnnotations: {}
 
