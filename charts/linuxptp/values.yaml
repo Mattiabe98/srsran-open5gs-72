@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "eth0"
+interfaceName: "ens18"
 
 startupProbe:
   enabled: true
