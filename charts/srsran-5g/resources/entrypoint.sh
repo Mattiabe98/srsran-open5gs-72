@@ -15,14 +15,12 @@ if [[ -z "${AMF_BIND_ADDR}" ]] ; then
 fi
 
 if [[ ! -z "$GNB_HOSTNAME" ]] ; then 
-    export GNB_ADDRESS="$(host -4 $GNB_HOSTNAME | awk '/has.*address/{print $NF; exit}')"
-else
-    export GNB_ADDRESS="$(host -4 localhost | awk '/has.*address/{print $NF; exit}')"
+    export GNB_ADDRESS="$(resolve_ip "$GNB_HOSTNAME")"
 fi
 
 
 if [[ ! -z "$UE_HOSTNAME" ]] ; then 
-    export UE_ADDRESS="$(host -4 $UE_HOSTNAME |awk '/has.*address/{print $NF; exit}')"
+    export UE_ADDRESS="$(resolve_ip "$UE_HOSTNAME")"
 fi
 
 
