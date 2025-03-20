@@ -61,10 +61,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          command: ["/bin/sh", "-c"]
-          args: ["sleep 100000"]
-          #command: [ "ptp4l" ]
-          #args: [ "-i", "{{ .Values.interfaceName }}", "-f", "/etc/config/linuxptp.cfg", "-m" ]
+          #command: ["/bin/sh", "-c"]
+          #args: ["sleep 100000"]
+          command: [ "ptp4l" ]
+          args: [ "-i", "{{ .Values.interfaceName }}", "-f", "/etc/config/linuxptp.cfg", "-m" ]
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
