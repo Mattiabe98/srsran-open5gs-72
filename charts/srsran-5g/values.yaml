@@ -84,30 +84,31 @@ image:
     debug: false
 
 
+
 config:
   amf:
     hostname: open5gs-amf-ngap
     bind_interface: eth0
 
   ru_sdr:
-    device_driver: uhd
-    device_args: type=b200,num_recv_frames=64,num_send_frames=64    # Optionally pass arguments to the selected RF driver.
+    device_driver: zmq
+    device_args: tx_port=tcp://0.0.0.0:2000,rx_port=tcp://srsran-ue:2001,id=gnb,base_srate=23.04e6
     srate: 23.04
-    tx_gain: 50
-    rx_gain: 60
-    otw_format: sc12
-
+    tx_gain: 75
+    rx_gain: 75
 
   cell_cfg:
-    dl_arfcn: 632628
-    band: 78
+    dl_arfcn: 368500
+    band: 3
     channel_bandwidth_MHz: 20
-    common_scs: 30
+    common_scs: 15
     plmn: "99970"
     tac: 1
 
   slicing:
   - sst: 1
+    sd: 0x111111
+
 
 ## @param replicaCount Number of srsran Pods to run (requires ReadWriteMany PVC support)
 ##
