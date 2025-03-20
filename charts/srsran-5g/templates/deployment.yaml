@@ -67,21 +67,21 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
         {{- end }}
       containers:
-        - name: {{ include "common.names.fullname" . }}
+        - name: {{ include "common.names.fullname" . }}-gnb
           image: {{ template "srsran.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.command }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
+          {{- else }}
+          command: ["/bin/sh", "-c"]
           {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- else }}
           args:
-            - "gnb"
+            - exec /entrypoint.sh;
           {{- end }}
-          {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
           env:
             - name: AMF_HOSTNAME
               value: {{ .Values.config.amf.hostname }}
