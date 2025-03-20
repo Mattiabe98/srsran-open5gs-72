@@ -3,17 +3,29 @@
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
 
-amf:
-  addr: ${AMF_ADDR}                  # The address or hostname of the AMF.
-  bind_addr: ${AMF_BIND_ADDR}             # A local IP that the gNB binds to for traffic from the AMF.
+gnb_du_id: 1
+
+cu_cp:
+  inactivity_timer: 7200
+  amf:
+    addr: ${AMF_ADDR}               # The address or hostname of the AMF.
+    bind_addr: ${AMF_BIND_ADDR}         # A local IP that the gNB binds to for traffic from the AMF.
+    supported_tracking_areas:                                    # Configure the TA associated with the CU-CP
+      - tac: 1
+        plmn_list:
+          -
+            plmn: "99970"
+            tai_slice_support_list:
+              -
+                sst: 1
+                sd: 0x111111
 
 ru_sdr:
   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
   device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
-  srate: {{ .Values.config.ru_sdr.srate }}                      # RF sample rate might need to be adjusted according to selected bandwidth.
+  srate: {{ .Values.config.ru_sdr.srate }}
   tx_gain: {{ .Values.config.ru_sdr.tx_gain }}                     # Transmit gain of the RF might need to adjusted to the given situation.
   rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
-  otw_format: {{ .Values.config.ru_sdr.otw_format}}  
 
 cell_cfg:
   dl_arfcn: {{ .Values.config.cell_cfg.dl_arfcn }}                  # ARFCN of the downlink carrier (center frequency).
@@ -22,18 +34,43 @@ cell_cfg:
   common_scs: {{ .Values.config.cell_cfg.common_scs }}                    # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
-  pci: 1
+  pdcch:
+    common:
+      ss0_index: 0                  # Set search space zero index to match srsUE capabilities
+      coreset0_index: 12            # Set search CORESET Zero index to match srsUE capabilities
+    dedicated:
+      ss2_type: common              # Search Space type, has to be set to common
+      dci_format_0_1_and_1_1: false # Set correct DCI format (fallback)
+  prach:
+    prach_config_index: 1           # Sets PRACH config to match what is expected by srsUE      
+  pdsch:
+    mcs_table: qam64                # Sets PDSCH MCS to 64 QAM
+  pusch:
+    mcs_table: qam64                # Sets PUSCH MCS to 64 QAM
 
-slicing:
+  slicing:
   {{- range .Values.config.slicing }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
 
+e2:
+  enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
+  e2sm_kpm_enabled: true            # Enable KPM service module
+  e2sm_rc_enabled: false             # Enable RC service module
+  addr: ${E2_ADDR}                 # RIC IP address
+  bind_addr: ${AMF_BIND_ADDR}
+  port: 36421                       # RIC port
 
-log:  
-  filename: ./gnb.log            # Path of the log file.
+metrics:
+  rlc_report_period: 1000           # Set reporting period to 1s
+  enable_json_metrics: true       # Enable reporting metrics in JSON format
+  addr: grafana-srsran-metrics-server              # Metrics-server IP
+  port: 55555                     # Metrics-server Port  
+
+
+log:
+  filename: stdout         # Path of the log file.
   all_level: info                   # Logging level applied to all layers.
-  hex_max_size: 0
 
 pcap:
   mac_enable: false                 # Set to true to enable MAC-layer PCAPs.
