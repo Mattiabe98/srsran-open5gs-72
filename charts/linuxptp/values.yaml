@@ -86,6 +86,7 @@ config:
   ptp_dst_mac: "01:80:C2:00:00:0E"
   network_transport: "L2"
   domainNumber: "24"
+  tx_timestamp_timeout: "50"
   ts2phc:
     enabled: false
     use_syslog: 0
