@@ -115,11 +115,6 @@ spec:
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
-          resources:
-            requests:
-              ettus.com/usrp: 1
-            limits:
-              ettus.com/usrp: 1
           volumeMounts:
             - name: srsran-5g-config
               mountPath: /gnb-template.yml
