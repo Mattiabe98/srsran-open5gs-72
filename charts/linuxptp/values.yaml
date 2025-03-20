@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "ens16f0"
+interfaceName: "ens16np0"
 
 startupProbe:
   enabled: true
