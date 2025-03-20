@@ -20,7 +20,7 @@ nameOverride: "linuxptp-chart"
 fullnameOverride: "linuxptp-chart"
 
 serviceAccount:
-  create: true
+  create: false
   annotations: {}
   name: "srsadmin-gnb"
 
@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "ens3f1np1"
+interfaceName: "eth0"
 
 startupProbe:
   enabled: true
