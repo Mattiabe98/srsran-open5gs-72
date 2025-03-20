@@ -34,10 +34,10 @@ data:
     #
     # Port Data Set
     #
-    logAnnounceInterval     {{ .Values.config.logAnnounceInterval | default 1 }}
-    logSyncInterval         {{ .Values.config.logSyncInterval | default 0 }}
+    logAnnounceInterval     {{ .Values.config.logAnnounceInterval | default -3 }}
+    logSyncInterval         {{ .Values.config.logSyncInterval | default -4 }}
     operLogSyncInterval     {{ .Values.config.operLogSyncInterval | default 0 }}
-    logMinDelayReqInterval  {{ .Values.config.logMinDelayReqInterval | default 0 }}
+    logMinDelayReqInterval  {{ .Values.config.logMinDelayReqInterval | default -4 }}
     logMinPdelayReqInterval {{ .Values.config.logMinPdelayReqInterval | default 0 }}
     operLogPdelayReqInterval {{ .Values.config.operLogPdelayReqInterval | default 0 }}
     announceReceiptTimeout  {{ .Values.config.announceReceiptTimeout | default 3 }}
