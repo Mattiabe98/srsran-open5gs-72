@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "ens16np0"
+interfaceName: "/dev/ptp0"
 
 startupProbe:
   enabled: true
