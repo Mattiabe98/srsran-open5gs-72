@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "x"
+interfaceName: "/dev/ptp0"
 
 startupProbe:
   enabled: true
