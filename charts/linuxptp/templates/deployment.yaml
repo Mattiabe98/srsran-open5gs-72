@@ -54,48 +54,6 @@ spec:
           hostPath:
             path: "/dev/ptp0"
       containers:
-        # - name: {{ .Chart.Name }}-ptp4l
-        #   securityContext:
-        #     {{- toYaml .Values.securityContext | nindent 12 }}
-        #   image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        #   imagePullPolicy: {{ .Values.image.pullPolicy }}
-        #   resources:
-        #     {{- toYaml .Values.resources | nindent 12 }}
-        #   command: [ "ptp4l" ]
-        #   args: [ "-i", "{{ .Values.interfaceName }}", "-f", "/etc/config/linuxptp.cfg", "-m" ]
-        #   volumeMounts:
-        #     - name: config-volume
-        #       mountPath: /etc/config
-        #     - name: ptp4l-run-volume
-        #       mountPath: "/var/run"
-        #       readOnly: false
-        #   {{- if and (.Values.livenessProbe.enabled) (eq "1" (default .Values.config.serverOnly "0")) }}
-        #   livenessProbe:
-        #     exec:
-        #       command:
-        #       - /usr/local/bin/liveness-ptp4l.sh 
-        #       - "25"  # max rms 25ns
-        #     initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-        #     periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-        #   {{- end }}
-        #   {{- if and (.Values.startupProbe.enabled) (eq "1" (default .Values.config.serverOnly "0")) }}
-        #   startupProbe:
-        #     exec:
-        #       command:
-        #       - /usr/local/bin/liveness-ptp4l.sh
-        #       - "25"  # max rms 25ns
-        #     failureThreshold: {{ .Values.startupProbe.failureThreshold }}
-        #     periodSeconds: {{ .Values.startupProbe.periodSeconds }}
-        #   {{- end }}
-        #   {{- if and (.Values.readinessProbe.enabled) (eq "1" (default .Values.config.serverOnly "0")) }}
-        #   readinessProbe:
-        #     exec:
-        #       command:
-        #       - /usr/local/bin/liveness-ptp4l.sh 
-        #       - "25"  # max rms 25ns
-        #     failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
-        #     periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-        #   {{- end }}
         - name: {{ .Chart.Name }}-phc2sys
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
