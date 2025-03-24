@@ -8,7 +8,7 @@
 #
 
 INTERFACE=$1
-phc2sys -s ${INTERFACE} -w -m -f /etc/config/linuxptp.cfg  &
+phc2sys -s ${INTERFACE} -c CLOCK_REALTIME -O 0 -m -q  &
 phc2sys_pid=$!
 cat "/proc/${phc2sys_pid}/fd/1" > /tmp/phc2sys.stdout &
 liveness-phc2sys.sh /tmp/phc2sys.stdout
