@@ -254,7 +254,7 @@ containerSecurityContext:
   # runAsNonRoot: false
   privileged: true
   capabilities:
-    add: ["NET_ADMIN"]
+    add: ["NET_ADMIN", "NET_RAW"]
 # ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
 # ## @param startupProbe.enabled Enable startupProbe
 # ## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
