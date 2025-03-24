@@ -20,12 +20,12 @@ cu_cp:
                 sst: 1
                 sd: 0x111111
 
-ru_sdr:
-  device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
-  device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
-  srate: {{ .Values.config.ru_sdr.srate }}
-  tx_gain: {{ .Values.config.ru_sdr.tx_gain }}                     # Transmit gain of the RF might need to adjusted to the given situation.
-  rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
+# ru_sdr:
+#   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
+#   device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
+#   srate: {{ .Values.config.ru_sdr.srate }}
+#   tx_gain: {{ .Values.config.ru_sdr.tx_gain }}                     # Transmit gain of the RF might need to adjusted to the given situation.
+#   rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
 
 cell_cfg:
   dl_arfcn: {{ .Values.config.cell_cfg.dl_arfcn }}                  # ARFCN of the downlink carrier (center frequency).
@@ -53,6 +53,37 @@ cell_cfg:
     - {{- toYaml . | nindent 6 }}
     {{- end }}
 
+
+ru_ofh:
+  t1a_max_cp_dl: 470
+  t1a_min_cp_dl: 419
+  t1a_max_cp_ul: 336
+  t1a_min_cp_ul: 285
+  t1a_max_up: 345
+  t1a_min_up: 294
+  ta4_max: 200
+  ta4_min: 0
+  is_prach_cp_enabled: false           # Configures if Control-Plane messages should be used to receive PRACH messages.
+  compr_method_ul: bfp                 # Uplink compression method.
+  compr_bitwidth_ul: 9                 # Uplink IQ samples bitwidth after compression.
+  compr_method_dl: bfp                 # Downlink compression method.
+  compr_bitwidth_dl: 9                 # Downlink IQ samples bitwidth after compression.
+  compr_method_prach: bfp              # PRACH compression method.
+  compr_bitwidth_prach: 9              # PRACH IQ samples bitwidth after compression.
+  enable_ul_static_compr_hdr: true     # Configures if the compression header is present for uplink User-Plane messages (false) or not present (true).
+  enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
+  iq_scaling: 10                       # IQ samples scaling factor applied before compression, should be a positive value smaller than 10.
+  cells:
+    - network_interface: 0000:00:10.0     # Ethernet interface name used to communicate with the RU.
+      ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
+      du_mac_addr: 72:0E:9B:5F:81:DF   # DU MAC address.
+      vlan_tag_cp: 10                   # VLAN tag value for CP.
+      vlan_tag_up: 10                   # VLAN tag value for UP.
+      prach_port_id: [8]            # PRACH eAxC port value.
+      dl_port_id: [0, 1, 2, 3]         # Downlink eAxC port values.
+      ul_port_id: [4, 5, 6, 7]               # Uplink eAxC port values.
+
+
 # e2:
 #   enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
 #   e2sm_kpm_enabled: true            # Enable KPM service module
@@ -67,6 +98,8 @@ metrics:
   addr: grafana-srsran-metrics-server              # Metrics-server IP
   port: 55555                     # Metrics-server Port  
 
+hal:
+   eal_args: "--lcores '(0-1)@(0-23)'"
 
 log:
   filename: stdout         # Path of the log file.
