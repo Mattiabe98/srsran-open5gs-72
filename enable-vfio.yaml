@@ -1,7 +1,7 @@
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
 metadata:
-  name: iavf-vfio
+  name: vfio
   labels:
     machineconfiguration.openshift.io/role: master
 spec:
