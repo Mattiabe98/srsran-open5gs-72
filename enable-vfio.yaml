@@ -17,6 +17,5 @@ spec:
             source: data:text/plain;charset=utf-8;base64,b3B0aW9ucyB2ZmlvLXBjaSBpZHM9ODA4NjoxODg5Cg==
         - path: /etc/modules-load.d/vfio-pci.conf
           mode: 0644
-          overwrite: true
           contents:
             inline: vfio-pci
