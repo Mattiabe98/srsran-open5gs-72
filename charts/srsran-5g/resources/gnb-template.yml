@@ -28,10 +28,10 @@ cu_cp:
 #   rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
 
 cell_cfg:
-  dl_arfcn: {{ .Values.config.cell_cfg.dl_arfcn }}                  # ARFCN of the downlink carrier (center frequency).
-  band: {{ .Values.config.cell_cfg.band }}                           # The NR band.
-  channel_bandwidth_MHz: {{ .Values.config.cell_cfg.channel_bandwidth_MHz }}          # Bandwith in MHz. Number of PRBs will be automatically derived.
-  common_scs: {{ .Values.config.cell_cfg.common_scs }}                    # Subcarrier spacing in kHz used for data.
+  dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
+  band: 77                           # The NR band.
+  channel_bandwidth_MHz: 100          # Bandwith in MHz. Number of PRBs will be automatically derived.
+  common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
   pdcch:
@@ -42,11 +42,18 @@ cell_cfg:
       ss2_type: common              # Search Space type, has to be set to common
       dci_format_0_1_and_1_1: false # Set correct DCI format (fallback)
   prach:
-    prach_config_index: 1           # Sets PRACH config to match what is expected by srsUE      
-  pdsch:
-    mcs_table: qam64                # Sets PDSCH MCS to 64 QAM
+    prach_config_index: 159           # Sets PRACH config to match what is expected by srsUE      
+    prach_root_sequence_index: 1
+    prach_frequency_start: 0
+    zero_correlation_zone: 0
   pusch:
-    mcs_table: qam64                # Sets PUSCH MCS to 64 QAM
+    dmrs_additional_position: 2
+  tdd_ul_dl_cfg:
+    nof_dl_symbols: 6                                               # Number of Downlink symbols at the beginning of the slot following full Downlink slots. OAI Config: nrofDownlinkSymbols
+    nof_ul_symbols: 4                                               # Number of Uplink symbols at the end of the slot preceding the first full Uplink slot. OAI Config: nrofUplinkSymbols
+    nof_dl_slots: 7                                                 # Number of consecutive full Downlink slots.  OAI Config: nrofDownlinkSlots
+    nof_ul_slots: 2                                                 # Number of consecutive full Uplink slots.  OAI Config: nrofUplinkSlots
+
 
   slicing:
   {{- range .Values.config.slicing }}
@@ -56,13 +63,13 @@ cell_cfg:
 
 ru_ofh:
   t1a_max_cp_dl: 470
-  t1a_min_cp_dl: 419
-  t1a_max_cp_ul: 336
+  t1a_min_cp_dl: 285
+  t1a_max_cp_ul: 429
   t1a_min_cp_ul: 285
-  t1a_max_up: 345
-  t1a_min_up: 294
-  ta4_max: 200
-  ta4_min: 0
+  t1a_max_up: 350
+  t1a_min_up: 125
+  ta4_max: 180
+  ta4_min: 110
   is_prach_cp_enabled: false           # Configures if Control-Plane messages should be used to receive PRACH messages.
   compr_method_ul: bfp                 # Uplink compression method.
   compr_bitwidth_ul: 9                 # Uplink IQ samples bitwidth after compression.
@@ -79,7 +86,7 @@ ru_ofh:
       du_mac_addr: 72:0E:9B:5F:81:DF   # DU MAC address.
       vlan_tag_cp: 10                   # VLAN tag value for CP.
       vlan_tag_up: 10                   # VLAN tag value for UP.
-      prach_port_id: [8]            # PRACH eAxC port value.
+      prach_port_id: [8, 9, 10, 11]            # PRACH eAxC port value.
       dl_port_id: [0, 1, 2, 3]         # Downlink eAxC port values.
       ul_port_id: [4, 5, 6, 7]               # Uplink eAxC port values.
 
