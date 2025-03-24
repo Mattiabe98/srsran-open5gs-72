@@ -60,17 +60,17 @@ affinity: {}
 interfaceName: "/dev/ptp0"
 
 startupProbe:
-  enabled: true
+  enabled: false
   failureThreshold: 30
   periodSeconds: 10
 
 livenessProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 5
   periodSeconds: 5
 
 readinessProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 5
   periodSeconds: 5
 
