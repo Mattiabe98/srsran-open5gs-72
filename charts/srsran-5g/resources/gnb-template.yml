@@ -34,6 +34,8 @@ cell_cfg:
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
+  nof_antennas_dl: 4                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
+  nof_antennas_ul: 4                    # Optional UINT (1). Sets the number of antennas for uplink transmission. Supported: [1, 2, 4].  
   pdcch:
     common:
       ss0_index: 0                  # Set search space zero index to match srsUE capabilities
