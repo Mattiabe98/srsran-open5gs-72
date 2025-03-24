@@ -119,6 +119,11 @@ spec:
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
+          resources:
+            requests:
+              hugepages-1Gi: "8Gi"
+            limits:
+              hugepages-1Gi: "8Gi"   
           volumeMounts:
             - name: srsran-5g-config
               mountPath: /gnb-template.yml
@@ -126,6 +131,8 @@ spec:
             - name: entrypoint
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
+            - mountPath: /dev/hugepages
+              name: hugepage            
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -137,6 +144,9 @@ spec:
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
             defaultMode: 0777
+        - emptyDir:
+            medium: HugePages
+          name: hugepage        
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
