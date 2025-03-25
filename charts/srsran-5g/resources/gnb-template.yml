@@ -101,7 +101,7 @@ metrics:
   port: 55555                     # Metrics-server Port  
 
 hal:
-   eal_args: "--lcores '(0-1)@(0-23)'"
+   eal_args: "--lcores (0-1)@(0-23)"
 
 log:
   filename: stdout         # Path of the log file.
