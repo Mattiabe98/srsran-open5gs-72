@@ -137,7 +137,9 @@ spec:
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
             - mountPath: /dev/hugepages
-              name: hugepage            
+              name: hugepage           
+            - mountPath: /dev/vfio
+              name: vfio  
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -145,6 +147,10 @@ spec:
         - name: srsran-5g-config
           configMap:
             name: {{ include "common.names.fullname" . }}
+        - name: vfio
+          hostPath:
+            path: /dev/vfio
+            type: Directory
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
