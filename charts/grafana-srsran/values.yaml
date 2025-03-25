@@ -44,7 +44,7 @@ grafana:
         - name: InfluxDB
           type: influxdb
           access: proxy
-          url: http://influxdb2.srs5g.svc.cluster.local:8086
+          url: http://influxdb2.srs72.svc.cluster.local:8086
           uid: JOSE3g9KVz
           jsonData:
             version: Flux
@@ -61,7 +61,7 @@ metrics-server:
     port: 55555
     bucket: srsran
     testbed: default
-    url: http://influxdb2.srs5g.svc.cluster.local:8086
+    url: http://influxdb2.srs72.svc.cluster.local:8086
     org: srs
     token: "605bc59413b7d5457d181ccf20f9fda15693f81b068d70396cc183081b264f3b"
     serviceType: "ClusterIP"
