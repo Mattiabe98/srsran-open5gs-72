@@ -30,7 +30,7 @@ cu_cp:
 cell_cfg:
   dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
-  channel_bandwidth_MHz: 100          # Bandwith in MHz. Number of PRBs will be automatically derived.
+  channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
@@ -83,7 +83,7 @@ ru_ofh:
       vlan_tag_up: 10                   # VLAN tag value for UP.
       prach_port_id: [8, 9, 10, 11]            # PRACH eAxC port value.
       dl_port_id: [0, 1, 2, 3]         # Downlink eAxC port values.
-      ul_port_id: [4, 5, 6, 7]               # Uplink eAxC port values.
+      ul_port_id: [0, 1, 2, 3]              # Uplink eAxC port values.
 
 
 # e2:
