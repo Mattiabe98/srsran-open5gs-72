@@ -80,6 +80,7 @@ spec:
           {{- else }}
           args:
             - exec /entrypoint.sh;
+              sleep 10000;
           {{- end }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           env:
