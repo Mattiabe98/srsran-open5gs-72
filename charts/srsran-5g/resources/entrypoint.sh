@@ -30,5 +30,6 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     -e "s/\${E2_ADDR}/$E2_ADDR/g" \
     < /gnb-template.yml > /gnb.yml
 
+echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:01:00.0
 /usr/local/bin/gnb -c /gnb.yml
