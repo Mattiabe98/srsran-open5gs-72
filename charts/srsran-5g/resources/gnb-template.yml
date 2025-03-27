@@ -34,8 +34,8 @@ cell_cfg:
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
   tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
-  nof_antennas_dl: 4                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
-  nof_antennas_ul: 4                    # Optional UINT (1). Sets the number of antennas for uplink transmission. Supported: [1, 2, 4].  
+  nof_antennas_dl: 2                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
+  nof_antennas_ul: 2                    # Optional UINT (1). Sets the number of antennas for uplink transmission. Supported: [1, 2, 4].  
   prach:
     prach_config_index: 159           # Sets PRACH config to match what is expected by srsUE      
     prach_root_sequence_index: 1
@@ -43,12 +43,23 @@ cell_cfg:
     zero_correlation_zone: 0
   pusch:
     dmrs_additional_position: 2
+    msg3_delta_preamble: 2
+  pucch:
+    p0_nominal: -96
+  pdcch:
+    common:
+      coreset0_index: 11
+      ss0_index: 0
   tdd_ul_dl_cfg:
+    dl_ul_tx_period: 10
     nof_dl_symbols: 6                                               # Number of Downlink symbols at the beginning of the slot following full Downlink slots. OAI Config: nrofDownlinkSymbols
     nof_ul_symbols: 4                                               # Number of Uplink symbols at the end of the slot preceding the first full Uplink slot. OAI Config: nrofUplinkSymbols
     nof_dl_slots: 7                                                 # Number of consecutive full Downlink slots.  OAI Config: nrofDownlinkSlots
     nof_ul_slots: 2                                                 # Number of consecutive full Uplink slots.  OAI Config: nrofUplinkSlots
-
+  ssb:
+    ssb_period: 20     
+  ul_common:
+    p_max: 23
 
   slicing:
   {{- range .Values.config.slicing }}
