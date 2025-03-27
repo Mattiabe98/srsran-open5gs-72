@@ -123,12 +123,12 @@ spec:
           resources:
             requests:
               hugepages-1Gi: "8Gi"
-              memory: 4Gi
-              cpu: 4
-            limits:
-              hugepages-1Gi: "8Gi"
               memory: 8Gi
               cpu: 8
+            limits:
+              hugepages-1Gi: "8Gi"
+              memory: 32Gi
+              cpu: 32
           volumeMounts:
             - name: srsran-5g-config
               mountPath: /gnb-template.yml
