@@ -68,6 +68,7 @@ cell_cfg:
 
 
 ru_ofh:
+  ru_bandwidth_MHz: 100
   t1a_max_cp_dl: 470
   t1a_min_cp_dl: 285
   t1a_max_cp_ul: 429
