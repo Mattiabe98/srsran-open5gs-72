@@ -8,7 +8,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   annotations: 
-    cpu-load-balancing.crio.io: true
+    cpu-load-balancing.crio.io: "disable"
 spec:
   runtimeClassName: performance-cpu-profile
   selector:
