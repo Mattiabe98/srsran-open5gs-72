@@ -65,7 +65,7 @@ ru_ofh:
   t1a_min_up: 125
   ta4_max: 180
   ta4_min: 110
-  is_prach_cp_enabled: false           # Configures if Control-Plane messages should be used to receive PRACH messages.
+  is_prach_cp_enabled: true           # Configures if Control-Plane messages should be used to receive PRACH messages.
   compr_method_ul: bfp                 # Uplink compression method.
   compr_bitwidth_ul: 9                 # Uplink IQ samples bitwidth after compression.
   compr_method_dl: bfp                 # Downlink compression method.
