@@ -124,11 +124,11 @@ spec:
             requests:
               hugepages-1Gi: "8Gi"
               memory: 32Gi
-              cpu: 28
+              cpu: 16
             limits:
               hugepages-1Gi: "8Gi"
               memory: 32Gi
-              cpu: 28
+              cpu: 16
           volumeMounts:
             - name: srsran-5g-config
               mountPath: /gnb-template.yml
