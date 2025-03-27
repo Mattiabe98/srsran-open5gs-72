@@ -113,11 +113,11 @@ metrics:
   port: 55555                     # Metrics-server Port  
 
 hal:
-   eal_args: "--lcores (0-1)@(28-31) -a 0000:01:00.0"
+   eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
 
 expert_execution:
   affinities:
-    isolated_cpus: "28-31" # Core 28, 29, 30, 31 are isolated
+    isolated_cpus: "4-7" # Core 28, 29, 30, 31 are isolated
   # cell_affinities:
   #   -
   #     l1_dl_cpus: "28,29"  # DL threads on cores 28 and 29
