@@ -10,7 +10,6 @@ metadata:
   annotations: 
     cpu-load-balancing.crio.io: "disable"
 spec:
-  runtimeClassName: performance-cpu-profile
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
   {{- if .Values.updateStrategy }}
@@ -68,6 +67,7 @@ spec:
         {{- end }}
       containers:
         - name: {{ include "common.names.fullname" . }}-gnb
+          runtimeClassName: performance-cpu-profile
           image: {{ template "srsran.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.command }}
