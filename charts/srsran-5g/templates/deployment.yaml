@@ -124,8 +124,8 @@ spec:
           resources:
             requests:
               hugepages-1Gi: "8Gi"
-              memory: 8Gi
-              cpu: 8
+              memory: 32Gi
+              cpu: 32
             limits:
               hugepages-1Gi: "8Gi"
               memory: 32Gi
