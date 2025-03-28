@@ -41,9 +41,12 @@ cell_cfg:
     prach_root_sequence_index: 1
     prach_frequency_start: 0
     zero_correlation_zone: 0
+    ra_resp_window: 10
+    nof_cb_preambles_per_ssb: 15
   pusch:
     dmrs_additional_position: 2
     msg3_delta_preamble: 2
+    p0_nominal_with_grant: -100
   pucch:
     p0_nominal: -96
   pdcch:
@@ -58,6 +61,7 @@ cell_cfg:
     nof_ul_slots: 2                                                 # Number of consecutive full Uplink slots.  OAI Config: nrofUplinkSlots
   ssb:
     ssb_period: 20     
+    ssb_block_power_dbm: 0
   ul_common:
     p_max: 23
 
