@@ -71,14 +71,14 @@ ru_ofh:
   ru_bandwidth_MHz: 100
   t1a_max_cp_dl: 336
   t1a_min_cp_dl: 285
-  t1a_max_cp_ul: 429
-  t1a_min_cp_ul: 285
+  t1a_max_cp_ul: 211
+  t1a_min_cp_ul: 160
   t1a_max_up: 345
   t1a_min_up: 294
   ta4_max: 331
   ta4_min: 50
-  ignore_ecpri_seq_id: true            # Optional BOOLEAN (false). Sets whether or not to ignore eCPRI sequence ID field value. Supported [false, true].
-  ignore_ecpri_payload_size: true      # Optional BOOLEAN (false). Sets whether or not to ignore eCPRI payload size field value. Supported [false, true].
+  # ignore_ecpri_seq_id: true            # Optional BOOLEAN (false). Sets whether or not to ignore eCPRI sequence ID field value. Supported [false, true].
+  # ignore_ecpri_payload_size: true      # Optional BOOLEAN (false). Sets whether or not to ignore eCPRI payload size field value. Supported [false, true].
   is_prach_cp_enabled: false           # Configures if Control-Plane messages should be used to receive PRACH messages.
   compr_method_ul: bfp                 # Uplink compression method.
   compr_bitwidth_ul: 9                 # Uplink IQ samples bitwidth after compression.
