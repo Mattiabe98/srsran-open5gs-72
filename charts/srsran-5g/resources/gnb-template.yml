@@ -28,7 +28,7 @@ cu_cp:
 #   rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
 
 cell_cfg:
-  dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
+  dl_arfcn: 665352                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
