@@ -23,6 +23,7 @@ if [[ ! -z "$UE_HOSTNAME" ]] ; then
     export UE_ADDRESS="$(resolve_ip "$UE_HOSTNAME")"
 fi
 
+export E2_ADDR=$(resolve_ip "$E2_HOSTNAME")
 
 
 sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
