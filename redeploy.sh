@@ -1,12 +1,14 @@
 #/bin/bash
 helm uninstall open5gs
-helm uninstall srsran-gnb
-helm uninstall srsran-ue
-sleep 1
+helm uninstall srsran-5g
+helm uninstall linuxptp
+helm uninstall influxdb2
+helm uninstall grafana-srsran
+sleep 2
 git pull
 helm install open5gs charts/open5gs
-sleep 40
-helm install srsran-gnb charts/srsran-5g-zmq
-sleep 5
-helm install srsran-ue charts/srsran-ue
-
+#helm install linuxptp charts/linuxptp
+helm install influxdb2 charts/influxdb2
+helm install grafana-srsran charts/grafana-srsran
+echo "Waiting for gNB and carriers"
+echo "helm install srsran-5g charts/srsran-5g"

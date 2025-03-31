@@ -1,0 +1,11 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: KubeletConfig
+metadata:
+  name: sysctl-ip-forward
+spec:
+  machineConfigPoolSelector:
+    matchLabels:
+      custom-kubelet: sysctl
+  kubeletConfig:
+    allowedUnsafeSysctls:
+    - "net.ipv4.ip_forward"

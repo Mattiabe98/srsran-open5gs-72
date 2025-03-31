@@ -1,0 +1,12 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: iommu
+  labels:
+    machineconfiguration.openshift.io/role: master  # Targeting only worker (SNO) nodes
+spec:
+  kernelArguments:
+    - "intel_iommu=on"
+    - "iommu=pt"
+  nodeSelector:
+    kubernetes.io/hostname: okd-sno

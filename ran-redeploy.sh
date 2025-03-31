@@ -1,9 +1,5 @@
 #/bin/bash
-helm uninstall srsran-gnb
-helm uninstall srsran-ue
-sleep 1
+helm uninstall srsran-5g
 git pull
-helm install srsran-gnb charts/srsran-5g-zmq
-sleep 5
-helm install srsran-ue charts/srsran-ue
+helm install srsran-5g charts/srsran-5g
 

@@ -1,0 +1,17 @@
+﻿apiVersion: performance.openshift.io/v2
+kind: PerformanceProfile
+metadata:
+  name: cpu-profile
+spec:
+  cpu:
+    reserved: "0-3"
+    isolated: "4-31"
+  globallyDisableIrqLoadBalancing: true
+  realTimeKernel:
+    enabled: true
+  workloadHints:
+    highPowerConsumption: false
+    perPodPowerManagement: false
+    realTime: true
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
