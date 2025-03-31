@@ -20,13 +20,13 @@ keywords:
   - gradiant
 dependencies:
   - name: common
-    repository: https://charts.bitnami.com/bitnami
+    repository: oci://registry-1.docker.io/bitnamicharts
     tags:
       - bitnami-common
     version: 1.x.x
   - name: mongodb
     version: ~12.1.19
-    repository: https://charts.bitnami.com/bitnami
+    repository: file://../mongodb
     condition: mongodb.enabled
   - name: open5gs-amf
     version: ~2.2.5
