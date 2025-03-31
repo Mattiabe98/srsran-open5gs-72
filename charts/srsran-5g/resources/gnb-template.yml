@@ -111,6 +111,7 @@ metrics:
   enable_json_metrics: true       # Enable reporting metrics in JSON format
   addr: grafana-srsran-metrics-server              # Metrics-server IP
   port: 55555                     # Metrics-server Port  
+  json_metrics_filename: gnb_metrics.json
 
 hal:
    eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
