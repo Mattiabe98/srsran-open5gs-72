@@ -43,7 +43,7 @@ cell_cfg:
     p0_nominal: -96
   pdcch:
     common:
-      coreset0_index: 0                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
+      coreset0_index: 11                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
       ss0_index: 0                              # Optional UINT (0). Sets the SearchSpace#0 index. Supported: [0 - 15].
     dedicated:
       coreset1_rb_start: 0                      # Optional INT (0). Sets the starting common resource block (CRB) number for CORESET 1, relative to CRB0. Supported: [0 - 275].
