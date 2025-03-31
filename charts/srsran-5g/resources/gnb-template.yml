@@ -31,8 +31,8 @@ cell_cfg:
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
-  plmn: {{ .Values.config.cell_cfg.plmn }}                   # PLMN broadcasted by the gNB.
-  tac: {{ .Values.config.cell_cfg.tac }}                            # Tracking area code (needs to match the core configuration).
+  plmn: "00101"                   # PLMN broadcasted by the gNB.
+  tac: 1                            # Tracking area code (needs to match the core configuration).
   nof_antennas_dl: 2                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
   nof_antennas_ul: 2                    # Optional UINT (1). Sets the number of antennas for uplink transmission. Supported: [1, 2, 4].  
   prach:
