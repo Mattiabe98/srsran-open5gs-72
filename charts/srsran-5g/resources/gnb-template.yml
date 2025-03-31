@@ -19,15 +19,8 @@ cu_cp:
               -
                 sst: 1
 
-# ru_sdr:
-#   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
-#   device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
-#   srate: {{ .Values.config.ru_sdr.srate }}
-#   tx_gain: {{ .Values.config.ru_sdr.tx_gain }}                     # Transmit gain of the RF might need to adjusted to the given situation.
-#   rx_gain: {{ .Values.config.ru_sdr.rx_gain }}                       # Receive gain of the RF might need to adjusted to the given situation.
-
 cell_cfg:
-  dl_arfcn: 666648                  # ARFCN of the downlink carrier (center frequency).
+  dl_arfcn: 665352                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
@@ -50,10 +43,14 @@ cell_cfg:
     p0_nominal: -96
   pdcch:
     common:
-      coreset0_index: 0
-  #     ss0_index: 0
+      coreset0_index: 0                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
+      ss1_n_candidates: {0, 0, 1, 0, 0}         # Optional UINT ({0, 0, 1, 0, 0}). Sets the number of PDCCH candidates per aggregation level for SearchSpace#1. Supported: any 5 value array containing the following UINT values [0, 1, 2, 3, 4, 5, 6, 7, 8].
+      ss0_index: 0                              # Optional UINT (0). Sets the SearchSpace#0 index. Supported: [0 - 15].
+      max_coreset0_duration:                    # Optional INT. Sets the maximum CORESET#0 duration in OFDM symbols to consider when deriving CORESET#0 index. Supported: [1 - 2].
+    dedicated:
+      coreset1_rb_start: 1                      # Optional INT (0). Sets the starting common resource block (CRB) number for CORESET 1, relative to CRB0. Supported: [0 - 275].
   tdd_ul_dl_cfg:
-    dl_ul_tx_period: 10
+    dl_ul_tx_period: 20
     nof_dl_symbols: 6                                               # Number of Downlink symbols at the beginning of the slot following full Downlink slots. OAI Config: nrofDownlinkSymbols
     nof_ul_symbols: 4                                               # Number of Uplink symbols at the end of the slot preceding the first full Uplink slot. OAI Config: nrofUplinkSymbols
     nof_dl_slots: 7                                                 # Number of consecutive full Downlink slots.  OAI Config: nrofDownlinkSlots
