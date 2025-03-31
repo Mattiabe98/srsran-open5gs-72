@@ -19,6 +19,12 @@ cu_cp:
               -
                 sst: 1
 
+  mobility:
+    trigger_handover_from_measurements: false   # Optional BOOLEAN (false). Sets whether or not to start HO if neighbor cells become stronger. Supported: [false, true].
+    cells:                                      # Optional TEXT. Sets the list of cells known to the CU-CP, their configs (if not provided over F1) and their respective neighbor cells.
+      -                                         # Define Cell 1
+        ssb_offset: 2
+
 # ru_sdr:
 #   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
 #   device_args: {{ .Values.config.ru_sdr.device_args }}     # Optionally pass arguments to the selected RF driver.
