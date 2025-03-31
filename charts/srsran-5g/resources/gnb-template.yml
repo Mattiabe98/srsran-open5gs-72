@@ -58,9 +58,9 @@ cell_cfg:
     nof_ul_symbols: 4                                               # Number of Uplink symbols at the end of the slot preceding the first full Uplink slot. OAI Config: nrofUplinkSymbols
     nof_dl_slots: 7                                                 # Number of consecutive full Downlink slots.  OAI Config: nrofDownlinkSlots
     nof_ul_slots: 2                                                 # Number of consecutive full Uplink slots.  OAI Config: nrofUplinkSlots
-  ssb:
-    ssb_period: 20     
-    ssb_block_power_dbm: 0
+  # ssb:
+  #   ssb_period: 20     
+  #   ssb_block_power_dbm: 0
   ul_common:
     p_max: 23
 
