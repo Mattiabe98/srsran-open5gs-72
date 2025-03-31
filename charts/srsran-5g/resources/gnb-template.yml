@@ -48,7 +48,7 @@ cell_cfg:
     dedicated:
       coreset1_rb_start: 0                      # Optional INT (0). Sets the starting common resource block (CRB) number for CORESET 1, relative to CRB0. Supported: [0 - 275].
   tdd_ul_dl_cfg:
-    dl_ul_tx_period: 20
+    dl_ul_tx_period: 10
     nof_dl_symbols: 6                                               # Number of Downlink symbols at the beginning of the slot following full Downlink slots. OAI Config: nrofDownlinkSymbols
     nof_ul_symbols: 4                                               # Number of Uplink symbols at the end of the slot preceding the first full Uplink slot. OAI Config: nrofUplinkSymbols
     nof_dl_slots: 7                                                 # Number of consecutive full Downlink slots.  OAI Config: nrofDownlinkSlots
