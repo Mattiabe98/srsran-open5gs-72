@@ -85,7 +85,7 @@ config:
   subnetList:
     - subnet: 10.45.0.0/16
       gateway: 10.45.0.1
-      dnn: internet
+      dnn: oai
       dev: ogstun
       mask: 16
       createDev: true
