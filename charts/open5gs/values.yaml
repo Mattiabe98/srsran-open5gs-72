@@ -8,10 +8,10 @@ populate:
     tag: 0.10.3
     pullPolicy: IfNotPresent
   initCommands: 
-  - open5gs-dbctl add_ue_with_apn 001010000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai 1
-  - open5gs-dbctl add_ue_with_apn 001010000000002 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai 1
-  - open5gs-dbctl add_ue_with_apn 001010000000003 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai 1
-  - open5gs-dbctl add_ue_with_apn 001010000000004 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai 1
+  - open5gs-dbctl add_ue_with_apn 001010000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai
+  - open5gs-dbctl add_ue_with_apn 001010000000002 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai
+  - open5gs-dbctl add_ue_with_apn 001010000000003 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai
+  - open5gs-dbctl add_ue_with_apn 001010000000004 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 oai
 # Common
 mongodb:
   enabled: true
