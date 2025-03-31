@@ -8,10 +8,10 @@ global:
 #    peer: 64
 
 nrf:
-  serving: # 5G roaming requires PLMN in NRF
-    {{- range .Values.config.servingList }}
-    - {{- toYaml . | nindent 6 }}
-    {{- end }}
+  # serving: # 5G roaming requires PLMN in NRF
+  #   {{- range .Values.config.servingList }}
+  #   - {{- toYaml . | nindent 6 }}
+  #   {{- end }}
   sbi:
     server:
     - dev: eth0
