@@ -14,11 +14,10 @@ cu_cp:
       - tac: 1
         plmn_list:
           -
-            plmn: "99970"
+            plmn: "00101"
             tai_slice_support_list:
               -
                 sst: 1
-                sd: 0x111111
 
 # ru_sdr:
 #   device_driver: {{ .Values.config.ru_sdr.device_driver }}                                               # The RF driver name.
