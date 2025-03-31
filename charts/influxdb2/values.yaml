@@ -159,7 +159,7 @@ initScripts:
 ##
 service:
   type: ClusterIP
-  port: 80
+  port: 8086
   targetPort: 8086
   annotations: {}
   labels: {}
