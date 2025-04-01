@@ -78,6 +78,11 @@ bsf:
   enabled: true
 nrf:
   enabled: true
+  config:
+    servingList:
+      - plmn_id:
+          mcc: 001
+          mnc: 01
 nssf:
   enabled: true
   config:
