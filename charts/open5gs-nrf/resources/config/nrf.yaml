@@ -17,6 +17,7 @@ nrf:
     server:
     - dev: eth0
       port: {{ .Values.containerPorts.sbi }}
+      advertise: open5gs-nrf-sbi.srs72.svc.cluster.local
 
 ################################################################################
 # SBI Server
