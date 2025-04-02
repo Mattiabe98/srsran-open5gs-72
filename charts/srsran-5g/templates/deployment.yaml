@@ -7,8 +7,6 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-  annotations: 
-    cpu-load-balancing.crio.io: "disable"
 spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
@@ -26,9 +24,9 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
         {{- end }}
       annotations:
-        {{- if .Values.podAnnotations }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
-        {{- end }}
+        cpu-quota.crio.io: "disable"
+        cpu-load-balancing.crio.io: "disable"
+        irq-load-balancing.crio.io: "disable"
     spec:
       runtimeClassName: performance-cpu-profile
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
