@@ -26,7 +26,6 @@ spec:
       annotations:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
-        irq-load-balancing.crio.io: "disable"
     spec:
       runtimeClassName: performance-cpu-profile
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
