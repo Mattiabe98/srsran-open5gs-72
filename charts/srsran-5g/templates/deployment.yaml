@@ -27,7 +27,7 @@ spec:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
     spec:
-      runtimeClass: performance-cpu-profile
+      runtimeClassName: performance-cpu-profile
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
