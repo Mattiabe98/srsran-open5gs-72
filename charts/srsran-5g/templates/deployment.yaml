@@ -27,7 +27,7 @@ spec:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
     spec:
-      runtimeClassName: performance-cpu-profile
+      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -140,6 +140,7 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
+      runtimeClassName: performance-cpu-profile
       volumes:
         - name: srsran-5g-config
           configMap:
