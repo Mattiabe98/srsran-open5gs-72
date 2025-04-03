@@ -125,7 +125,7 @@ expert_execution:
     -
        l1_dl_cpus: 9,10
        l1_ul_cpus: 11,12
-       l2_cell_cpus: 16 # Runs on one of the low_priority_cpus
+       l2_cell_cpus: 16
        ru_cpus: 15
 
 
