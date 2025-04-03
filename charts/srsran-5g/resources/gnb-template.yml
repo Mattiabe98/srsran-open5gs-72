@@ -118,10 +118,10 @@ hal:
 
 expert_execution:
   affinities:
-    isolated_cpus: 8-19 # Core 28, 29, 30, 31 are isolated
-    low_priority_cpus: 6,7
+    isolated_cpus: 8,9,10,11,12,13,14,15,16,17,18,19 # Core 28, 29, 30, 31 are isolated
+    low_priority_cpus: 13,14
     ru_timing_cpu: 8
-    ofh: 18-19
+    ofh: 18,19
   cell_affinities:
     -
        l1_dl_cpus: 9,10
