@@ -116,18 +116,18 @@ metrics:
 hal:
    eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
 
-# expert_execution:
-#   affinities:
-#     isolated_cpus: 8,9,10,11,12,13,14,15,16,17,18,19 # Core 28, 29, 30, 31 are isolated
-#     low_priority_cpus: 13,14
-#     ru_timing_cpu: 8
-#     ofh: 18,19
-#   cell_affinities:
-#     -
-#        l1_dl_cpus: 9,10
-#        l1_ul_cpus: 11,12
-#        l2_cell_cpus: 16 # Runs on one of the low_priority_cpus
-#        ru_cpus: 15
+expert_execution:
+  affinities:
+    isolated_cpus: 8,9,10,11,12,13,14,15,16,17,18,19 # Core 28, 29, 30, 31 are isolated
+    low_priority_cpus: 13,14
+    # ru_timing_cpu: 8
+    # ofh: 18,19
+  cell_affinities:
+    -
+       l1_dl_cpus: 9,10
+       l1_ul_cpus: 11,12
+       l2_cell_cpus: 16 # Runs on one of the low_priority_cpus
+       ru_cpus: 15
 
 
 log:
