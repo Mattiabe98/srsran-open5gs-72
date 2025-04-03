@@ -116,9 +116,9 @@ metrics:
 hal:
    eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
 
-expert_execution:
-  affinities:
-    isolated_cpus: "4-7" # Core 28, 29, 30, 31 are isolated
+# expert_execution:
+#   affinities:
+#     isolated_cpus: "4-7" # Core 28, 29, 30, 31 are isolated
   # cell_affinities:
   #   -
   #     l1_dl_cpus: "8,9"  # DL threads on cores 28 and 29
