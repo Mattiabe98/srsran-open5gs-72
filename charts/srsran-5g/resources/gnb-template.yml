@@ -107,15 +107,15 @@ ru_ofh:
 #   bind_addr: ${AMF_BIND_ADDR}
 #   port: 36421                       # RIC port
 
-# metrics:
-#   rlc_report_period: 1000           # Set reporting period to 1s
-#   enable_json_metrics: true       # Enable reporting metrics in JSON format
-#   addr: grafana-srsran-metrics-server              # Metrics-server IP
-#   port: 55555                     # Metrics-server Port  
-#   autostart_stdout_metrics: true
+metrics:
+  rlc_report_period: 1000           # Set reporting period to 1s
+  enable_json_metrics: true       # Enable reporting metrics in JSON format
+  addr: grafana-srsran-metrics-server              # Metrics-server IP
+  port: 55555                     # Metrics-server Port  
+  autostart_stdout_metrics: true
 
 hal:
-   eal_args: "--lcores (0-1)@(4-9) -a 0000:01:00.0"
+   eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
 
 expert_execution:
   affinities:
