@@ -35,10 +35,13 @@ cell_cfg:
     zero_correlation_zone: 0
     ra_resp_window: 10
     # nof_cb_preambles_per_ssb: 15
+  pdsch:
+    mcs_table: qam256
   pusch:
     dmrs_additional_position: 2
     msg3_delta_preamble: 2
     p0_nominal_with_grant: -100
+    mcs_table: qam256
   pucch:
     p0_nominal: -96
   pdcch:
