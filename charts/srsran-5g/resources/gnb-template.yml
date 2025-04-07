@@ -120,15 +120,15 @@ hal:
 
 expert_execution:
   affinities:
-    low_priority_cpus: 13,14
-    ru_timing_cpu: 8
-    ofh: 18,19
+    low_priority_cpus: 13
+    ru_timing_cpu: 8,9
+    ofh: 19
   cell_affinities:
     -
        l1_dl_cpus: 9,10
        l1_ul_cpus: 11,12
-       l2_cell_cpus: 16
-       ru_cpus: 15
+       l2_cell_cpus: 17,18
+       ru_cpus: 15,16
 
 
 log:
