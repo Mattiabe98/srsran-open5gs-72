@@ -99,20 +99,20 @@ ru_ofh:
       ul_port_id: [0, 1]              # Uplink eAxC port values.
 
 
-e2:
-  enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
-  e2sm_kpm_enabled: true            # Enable KPM service module
-  e2sm_rc_enabled: true             # Enable RC service module
-  addr: ${E2_ADDR}                 # RIC IP address
-  bind_addr: ${AMF_BIND_ADDR}
-  port: 36421                       # RIC port
+# e2:
+#   enable_du_e2: true                # Enable DU E2 agent (one for each DU instance)
+#   e2sm_kpm_enabled: true            # Enable KPM service module
+#   e2sm_rc_enabled: true             # Enable RC service module
+#   addr: ${E2_ADDR}                 # RIC IP address
+#   bind_addr: ${AMF_BIND_ADDR}
+#   port: 36421                       # RIC port
 
-metrics:
-  rlc_report_period: 1000           # Set reporting period to 1s
-  enable_json_metrics: true       # Enable reporting metrics in JSON format
-  addr: grafana-srsran-metrics-server              # Metrics-server IP
-  port: 55555                     # Metrics-server Port  
-  autostart_stdout_metrics: true
+# metrics:
+#   rlc_report_period: 1000           # Set reporting period to 1s
+#   enable_json_metrics: true       # Enable reporting metrics in JSON format
+#   addr: grafana-srsran-metrics-server              # Metrics-server IP
+#   port: 55555                     # Metrics-server Port  
+#   autostart_stdout_metrics: true
 
 hal:
    eal_args: "--lcores (0-1)@(0-23) -a 0000:01:00.0"
