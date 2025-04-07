@@ -116,7 +116,7 @@ metrics:
   autostart_stdout_metrics: true
 
 hal:
-   eal_args: "-l 4-7 -a 0000:01:00.0"
+   eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
 
 expert_execution:
   affinities:
