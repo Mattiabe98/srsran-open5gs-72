@@ -116,12 +116,12 @@ metrics:
   autostart_stdout_metrics: true
 
 hal:
-   eal_args: "--lcores (0-1)@(4-7) -a 0000:01:00.0"
+   eal_args: "-l 4-7 -a 0000:01:00.0"
 
 expert_execution:
   affinities:
     low_priority_cpus: 13
-    ru_timing_cpu: 8,14
+    ru_timing_cpu: 8
     ofh: 19
   cell_affinities:
     -
