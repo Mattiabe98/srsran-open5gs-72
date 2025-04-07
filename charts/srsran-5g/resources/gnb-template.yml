@@ -121,7 +121,7 @@ hal:
 expert_execution:
   affinities:
     low_priority_cpus: 13
-    ru_timing_cpu: 8,9
+    ru_timing_cpu: 8,14
     ofh: 19
   cell_affinities:
     -
