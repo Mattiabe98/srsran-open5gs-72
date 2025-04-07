@@ -88,7 +88,7 @@ ru_ofh:
   compr_bitwidth_prach: 9              # PRACH IQ samples bitwidth after compression.
   enable_ul_static_compr_hdr: true     # Configures if the compression header is present for uplink User-Plane messages (false) or not present (true).
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
-  iq_scaling: 5.5                   # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
+  iq_scaling: 4                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
     - network_interface: 0000:01:00.0     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
@@ -121,7 +121,7 @@ hal:
 expert_execution:
   affinities:
     low_priority_cpus: 13
-    ru_timing_cpu: 8,14        # TRY TWO cores again for timing (8 was idle, 14 was free)
+    ru_timing_cpu: 8        # TRY TWO cores again for timing (8 was idle, 14 was free)
     ofh: 19                    # Unchanged (was idle)
   cell_affinities:
     -
