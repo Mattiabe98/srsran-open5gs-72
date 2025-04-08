@@ -138,7 +138,7 @@ expert_execution:
       pdsch_cb_batch_length: 0                # Optional UINT (0). Sets PDSCH flexible processor clodeblock-batch size. Supported values: 
                                               # 'auto' -> adapts the batch length to the number of threads dedicated to downlink processing 
                                               # 'synchronous' -> disables batch-splitting and ensure that TB processing remains within the calling thread without parallelization
-      nof_pusch_decoder_threads: 1            # Optional UINT (1). Sets the number of threads used to encode PUSCH.
+      nof_pusch_decoder_threads: 4            # Optional UINT (1). Sets the number of threads used to encode PUSCH.
       nof_ul_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess uplink.
       nof_dl_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess downlink.
 
