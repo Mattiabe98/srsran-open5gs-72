@@ -63,10 +63,21 @@ spec:
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hostAliases "context" $) | nindent 8 }}
       # yamllint enable rule:indentation
       {{- end }}
-      {{- if .Values.initContainers }}
       initContainers:
-        {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
-        {{- end }}
+        - name: init
+          image: docker.io/oaisoftwarealliance/oai-tcpdump-init:alpine-3.20
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - until curl --connect-timeout 1 --max-time 2 {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .Values.config.sbi.client.nrf.uri }} 2>/dev/null; do echo waiting for core to start; sleep 1; done
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 1m
+            limits:
+              memory: 50Mi
+              cpu: 1m
       containers:
         - name: {{ include "common.names.fullname" . }}
           image: {{ template "open5gs.scp.image" . }}
