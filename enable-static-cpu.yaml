@@ -1,11 +1,11 @@
 apiVersion: machineconfiguration.openshift.io/v1
 kind: KubeletConfig
 metadata:
-  name: sysctl-ip-forward
+  name: cpumanager-enabled
 spec:
   machineConfigPoolSelector:
     matchLabels:
-      pools.operator.machineconfiguration.openshift.io/master: ""
+      custom-kubelet: cpumanager-enabled
   kubeletConfig:
-    allowedUnsafeSysctls:
-    - "net.ipv4.ip_forward"
+     cpuManagerPolicy: static
+     cpuManagerReconcilePeriod: 5s

@@ -16,7 +16,7 @@ spec:
   - name: gtp-c
     port: 2123
     protocol: UDP
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   selector:
     app.kubernetes.io/name: {{ include "srsepc.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

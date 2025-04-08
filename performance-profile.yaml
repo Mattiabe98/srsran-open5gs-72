@@ -2,10 +2,15 @@
 kind: PerformanceProfile
 metadata:
   name: cpu-profile
+  annotations:
+    kubeletconfig.experimental: |
+      {"allowedUnsafeSysctls":["net.ipv4.ip_forward"]}
 spec:
   cpu:
     reserved: "0-3"
     isolated: "4-31"
+  machineConfigPoolSelector:
+    pools.operator.machineconfiguration.openshift.io/master: ""
   globallyDisableIrqLoadBalancing: true
   realTimeKernel:
     enabled: true

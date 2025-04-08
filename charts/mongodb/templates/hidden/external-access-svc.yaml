@@ -45,7 +45,7 @@ spec:
   {{- if $root.Values.externalAccess.hidden.service.sessionAffinityConfig }}
   sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" $root.Values.externalAccess.hidden.service.sessionAffinityConfig "context" $) | nindent 4 }}
   {{- end }}
-  publishNotReadyAddresses: true
+  publishNotReadyAddresses: false
   ports:
     - name: {{ $root.Values.externalAccess.hidden.service.portName | quote }}
       port: {{ $root.Values.externalAccess.hidden.service.ports.mongodb }}
