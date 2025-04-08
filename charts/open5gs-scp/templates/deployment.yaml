@@ -1,3 +1,4 @@
+{{ $open5gsName := .Release.Name }}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
