@@ -71,7 +71,7 @@ spec:
           command:
             - /bin/sh
             - -c
-            - until curl --connect-timeout 1 --max-time 2 {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .Values.config.sbi.client.nrf.uri }} 2>/dev/null; do echo waiting for core to start; sleep 1; done
+            - until curl --connect-timeout 1 --max-time 2 {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .Values.config.sbi.client.nrf.uri }} >/dev/null 2>&1 || [ $? -eq 52 ]; do echo waiting for core to start; sleep 1; done
           resources:
             requests:
               memory: 50Mi
