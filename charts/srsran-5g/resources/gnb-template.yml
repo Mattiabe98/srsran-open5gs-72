@@ -22,7 +22,7 @@ cu_cp:
 cell_cfg:
   dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
-  channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
+  channel_bandwidth_MHz: 100          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: "00101"                   # PLMN broadcasted by the gNB.
   tac: 1                            # Tracking area code (needs to match the core configuration).
@@ -69,7 +69,7 @@ cell_cfg:
 
 
 ru_ofh:
-  ru_bandwidth_MHz: 40
+  ru_bandwidth_MHz: 100
   t1a_max_cp_dl: 336
   t1a_min_cp_dl: 285
   t1a_max_cp_ul: 211
@@ -88,7 +88,7 @@ ru_ofh:
   compr_bitwidth_prach: 9              # PRACH IQ samples bitwidth after compression.
   enable_ul_static_compr_hdr: true     # Configures if the compression header is present for uplink User-Plane messages (false) or not present (true).
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
-  iq_scaling: 0.7                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
+  iq_scaling: 0.6                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
     - network_interface: 0000:01:00.0     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
