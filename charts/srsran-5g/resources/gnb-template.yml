@@ -127,7 +127,7 @@ expert_execution:
     -
        l1_dl_cpus: 9,10         # Unchanged (were idle)
        l1_ul_cpus: 11,12        # Unchanged (were idle)
-       l2_cell_cpus: 17         # REVERT to single core (18 was idle)
+       l2_cell_cpus: 14,15         # REVERT to single core (18 was idle)
        ru_cpus: 16            # REVERT to single core (15 was idle)
 
 
