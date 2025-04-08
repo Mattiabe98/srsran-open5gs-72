@@ -129,6 +129,19 @@ expert_execution:
        l1_ul_cpus: 11,12        # Unchanged (were idle)
        l2_cell_cpus: 14,15         # REVERT to single core (18 was idle)
        ru_cpus: 16            # REVERT to single core (15 was idle)
+  threads:
+    non_rt:
+      nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
+      non_rt_task_queue_size: 2048            # Optional UINT (2048). Sets the non real time task worker queue size. 
+    upper_phy:
+      pdsch_processor_type: auto              # Optional TEXT (auto). Sets the PDSCH processor type. Supported: [auto, generic, concurrent, lite].
+      pdsch_cb_batch_length: 0                # Optional UINT (0). Sets PDSCH flexible processor clodeblock-batch size. Supported values: 
+                                              # 'auto' -> adapts the batch length to the number of threads dedicated to downlink processing 
+                                              # 'synchronous' -> disables batch-splitting and ensure that TB processing remains within the calling thread without parallelization
+      nof_pusch_decoder_threads: 1            # Optional UINT (1). Sets the number of threads used to encode PUSCH.
+      nof_ul_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess uplink.
+      nof_dl_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess downlink.
+
 
 
 log:
