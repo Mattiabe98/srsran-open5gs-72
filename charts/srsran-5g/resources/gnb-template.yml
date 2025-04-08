@@ -123,7 +123,8 @@ expert_execution:
     low_priority_cpus: 13
     ru_timing_cpu: 8        # TRY TWO cores again for timing (8 was idle, 14 was free)
     ofh:
-      - ru_txrx_cpus: 18,19                 # Unchanged (was idle)
+      - ru_txrx_cpus: 18  # Thread 1 runs on core 19
+      - ru_txrx_cpus: 19  # Thread 2 runs on core 20
   cell_affinities:
     -
        l1_dl_cpus: 9,10         # Unchanged (were idle)
