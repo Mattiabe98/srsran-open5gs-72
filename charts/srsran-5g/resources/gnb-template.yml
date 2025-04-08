@@ -44,12 +44,12 @@ cell_cfg:
     mcs_table: qam256
   pucch:
     p0_nominal: -96
-  # pdcch:
-  #   common:
-  #     coreset0_index: 11                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
-  #     ss0_index: 0                              # Optional UINT (0). Sets the SearchSpace#0 index. Supported: [0 - 15].
-  #   dedicated:
-  #     coreset1_rb_start: 0                      # Optional INT (0). Sets the starting common resource block (CRB) number for CORESET 1, relative to CRB0. Supported: [0 - 275].
+  pdcch:
+    common:
+      coreset0_index: 11                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
+      ss0_index: 0                              # Optional UINT (0). Sets the SearchSpace#0 index. Supported: [0 - 15].
+    dedicated:
+      coreset1_rb_start: 0                      # Optional INT (0). Sets the starting common resource block (CRB) number for CORESET 1, relative to CRB0. Supported: [0 - 275].
   tdd_ul_dl_cfg:
     dl_ul_tx_period: 10
     nof_dl_symbols: 6                                               # Number of Downlink symbols at the beginning of the slot following full Downlink slots. OAI Config: nrofDownlinkSymbols
@@ -88,7 +88,7 @@ ru_ofh:
   compr_bitwidth_prach: 9              # PRACH IQ samples bitwidth after compression.
   enable_ul_static_compr_hdr: true     # Configures if the compression header is present for uplink User-Plane messages (false) or not present (true).
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
-  iq_scaling: 0.6                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
+  iq_scaling: 0.7                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
     - network_interface: 0000:01:00.0     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
