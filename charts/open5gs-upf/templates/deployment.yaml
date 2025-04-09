@@ -93,7 +93,13 @@ spec:
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
           {{- else }}
           command:
-            - "open5gs-upfd" 
+            - /bin/sh
+            - -c
+            - |
+              open5gs-upfd &
+              pid=$!  # Get the PID of the open5gs-upfd process
+              taskset -pc 30 $pid  # Lock open5gs-upfd to core 30
+              wait $pid  # Wait for the open5gs-upfd process to finish
           {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
