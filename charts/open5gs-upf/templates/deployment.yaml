@@ -148,26 +148,26 @@ spec:
         {{- if .Values.sidecars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
-      - name: iperf3
-        image: docker.io/oaisoftwarealliance/oai-tcpdump-init:alpine-3.20
-        imagePullPolicy: IfNotPresent
-        securityContext:
-           capabilities:
+        - name: iperf3
+          image: "docker.io/oaisoftwarealliance/oai-tcpdump-init:alpine-3.20"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
               add:
-               - NET_ADMIN
-               - NET_RAW
+                - NET_ADMIN
+                - NET_RAW
               drop:
-               - ALL
-        {{- if .Values.start.iperf3}}
-        command:
-          - /bin/sh
-          - -c
-          - iperf3 -s
-        {{- else}}
-        command:
-          - /bin/sleep
-          - infinity
-        {{- end}}        
+                - ALL
+          {{- if .Values.start.iperf3 }}
+          command:
+            - /bin/sh
+            - -c
+            - iperf3 -s
+          {{- else }}
+          command:
+            - /bin/sleep
+            - infinity
+          {{- end }}      
       volumes:
         - name: config
           configMap:
