@@ -6,6 +6,9 @@ metadata:
     kubeletconfig.experimental: |
       {"allowedUnsafeSysctls":["net.ipv4.ip_forward"]}
 spec:
+  additionalKernelArgs:
+  - "kthread_cpus=0-3"   # Confines most kernel threads to reserved CPUs
+  - "mitigations=off"    # WARNING: Disables CPU security mitigations!
   cpu:
     reserved: "0-3"
     isolated: "4-31"
