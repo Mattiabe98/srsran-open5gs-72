@@ -28,7 +28,6 @@ spec:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
     spec:
-      hostPID: true
       shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.podSecurityContext.enabled }}
