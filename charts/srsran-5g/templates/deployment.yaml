@@ -149,6 +149,10 @@ spec:
           command: [ "/bin/sh", "-c" ]
           args:
             - exec /start-metrics.sh
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/bash", "-c", "/start-metrics.sh graceful_shutdown"]    
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
