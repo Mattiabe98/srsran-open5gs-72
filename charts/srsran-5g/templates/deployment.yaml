@@ -146,6 +146,11 @@ spec:
           imagePullPolicy: Always
           securityContext:
             privileged: true
+            capabilities:
+              add:
+                - CAP_PERFMON
+                - CAP_SYS_PTRACE
+                - CAP_SYSLOG            
           command: [ "/bin/sh", "-c" ]
           args:
             - exec /start-metrics.sh
