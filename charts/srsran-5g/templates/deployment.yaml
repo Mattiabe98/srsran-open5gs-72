@@ -8,6 +8,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  hostPID: true
   shareProcessNamespace: true
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
