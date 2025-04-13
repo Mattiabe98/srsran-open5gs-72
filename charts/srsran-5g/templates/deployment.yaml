@@ -161,10 +161,6 @@ spec:
             - name: metrics
               mountPath:  /start-metrics.sh
               subPath: start-metrics.sh
-            - mountPath: /proc
-              name: proc
-            - name: sys
-              mountPath: /sys  # Mount /sys from the host
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           stdin: true
@@ -175,14 +171,6 @@ spec:
         - name: srsran-5g-config
           configMap:
             name: {{ include "common.names.fullname" . }}
-        - name: proc
-          hostPath:
-            path: /proc
-            type: Directory
-        - name: sys
-          hostPath:
-            path: /sys
-            type: Directory
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
