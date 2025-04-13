@@ -2,6 +2,7 @@
 
 
 echo "Starting perf monitoring..."
+trap 'echo "Received SIGTERM, exiting..."; kill $PERF_PID; wait $PERF_PID; exit 0' SIGTERM
 
 # Find the PID of the gnb process (replace with exact name if necessary)
 GNB_PID=$(pgrep -f "/usr/local/bin/gnb -c /gnb.yml");
@@ -16,7 +17,7 @@ fi;
 echo "Starting perf monitoring for gnb process (PID: $GNB_PID)..."
 perf record -e cycles,instructions,cache-misses -F 1 -g -p $GNB_PID -o /mnt/data/perf.data;
 PERF_PID=$!
-
+wait $PERF_PID
 
 
 echo "Starting turbostat monitoring..."
