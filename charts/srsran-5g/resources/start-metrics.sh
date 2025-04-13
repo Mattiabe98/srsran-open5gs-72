@@ -1,16 +1,13 @@
 #!/bin/bash
 
-
-echo "Starting perf monitoring..."
-
 # Find the PID of the gnb process (replace with exact name if necessary)
-GNB_PID=$(pgrep -f "/usr/local/bin/gnb -c /gnb.yml");
+# GNB_PID=$(pgrep -f "/usr/local/bin/gnb -c /gnb.yml");
 
-if [ -z "$GNB_PID" ]; then
-    echo "gnb process not found. Exiting.";
-    sleep 100;
-    exit 1;
-fi;
+# if [ -z "$GNB_PID" ]; then
+#     echo "gnb process not found. Exiting.";
+#     sleep 100;
+#     exit 1;
+# fi;
 
 
 # # Check if graceful_shutdown argument is passed
@@ -34,7 +31,5 @@ fi;
 
 
 echo "Starting turbostat monitoring..."
-sleep 100;
 # Start turbostat in the background (write output to a file)
-turbostat --Summary --interval 1 -o /mnt/data/turbostat_output.txt &
-TURBOSTAT_PID=$!
+turbostat --Summary --interval 1 -o /mnt/data/turbostat_output.txt;
