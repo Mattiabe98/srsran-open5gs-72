@@ -4,18 +4,17 @@
 echo "Starting perf monitoring..."
 
 # Find the PID of the gnb process (replace with exact name if necessary)
-GNB_PID=$(pgrep -f "gnb");
+GNB_PID=$(pgrep -f "/usr/local/bin/gnb -c /gnb.yml");
 
-sleep 1000;
 if [ -z "$GNB_PID" ]; then
     echo "gnb process not found. Exiting.";
-    sleep 10000;
+    sleep 100;
     exit 1;
 fi;
 
 # Start perf monitoring attached to the gnb PID in the background
 echo "Starting perf monitoring for gnb process (PID: $GNB_PID)..."
-perf record -e cycles,instructions,cache-misses -F 1000 -g -p $GNB_PID -o /mnt/data/perf.data &
+perf record -e cycles,instructions,cache-misses -F 1 -g -p $GNB_PID -o /mnt/data/perf.data &
 PERF_PID=$!
 
 
