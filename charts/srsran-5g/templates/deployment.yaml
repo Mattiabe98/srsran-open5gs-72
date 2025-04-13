@@ -8,8 +8,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  hostPID: true
-  shareProcessNamespace: true
+
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
   {{- if .Values.updateStrategy }}
@@ -29,7 +28,8 @@ spec:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
     spec:
-      
+      hostPID: true
+      shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
