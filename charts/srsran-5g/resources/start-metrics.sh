@@ -12,10 +12,25 @@ if [ -z "$GNB_PID" ]; then
     exit 1;
 fi;
 
-# Start perf monitoring attached to the gnb PID in the background
+
+# Check if graceful_shutdown argument is passed
+if [ "$1" == "graceful_shutdown" ]; then
+    echo "Gracefully shutting down perf..."
+    PERF_PID=$(cat /mnt/data/perf_pid.txt)
+    kill -TERM $PERF_PID
+    exit 0
+fi
+
+# Normal startup flow for metrics
 echo "Starting perf monitoring for gnb process (PID: $GNB_PID)..."
-perf record -e cycles,instructions,cache-misses -F 1 -g -p $GNB_PID -o /mnt/data/perf.data;
+perf record -e cycles,instructions,cache-misses -F 1 -g -p $GNB_PID -o /mnt/data/perf.data &
 PERF_PID=$!
+
+# Save PERF_PID to a file for later use in preStop hook
+echo $PERF_PID > /mnt/data/perf_pid.txt
+
+# Wait for the perf process to complete
+wait $PERF_PID
 
 
 echo "Starting turbostat monitoring..."
