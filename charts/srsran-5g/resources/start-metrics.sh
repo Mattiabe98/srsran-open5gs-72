@@ -23,7 +23,7 @@ fi
 
 # Normal startup flow for metrics
 echo "Starting perf monitoring for gnb process (PID: $GNB_PID)..."
-perf record -e cycles,instructions,cache-misses -F 1 -p $GNB_PID -o /mnt/data/perf.data &
+perf stat -I 1000 -p $GNB_PID -o /mnt/data/perf.data &
 PERF_PID=$!
 
 # Save PERF_PID to a file for later use in preStop hook
