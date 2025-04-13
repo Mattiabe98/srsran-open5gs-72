@@ -34,7 +34,7 @@ fi;
 
 
 echo "Starting turbostat monitoring..."
-
+sleep 100;
 # Start turbostat in the background (write output to a file)
 turbostat --Summary --interval 1 -o /mnt/data/turbostat_output.txt &
 TURBOSTAT_PID=$!
