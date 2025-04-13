@@ -6,6 +6,7 @@ echo "Starting perf monitoring..."
 # Find the PID of the gnb process (replace with exact name if necessary)
 GNB_PID=$(pgrep -f "gnb");
 
+sleep 1000;
 if [ -z "$GNB_PID" ]; then
     echo "gnb process not found. Exiting.";
     sleep 10000;
