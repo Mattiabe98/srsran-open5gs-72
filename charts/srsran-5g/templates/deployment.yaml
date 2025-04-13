@@ -148,7 +148,7 @@ spec:
             privileged: true
           command: [ "/bin/sh", "-c" ]
           args:
-            - exec /tmp/xApp/start-metrics.sh;
+            - exec /start-metrics.sh
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -157,6 +157,9 @@ spec:
           volumeMounts:
             - name: local-storage
               mountPath: /mnt/data
+            - name: metrics
+              mountPath:  /start-metrics.sh
+              subPath: start-metrics.sh
             - mountPath: /proc
               name: proc
             - name: sys
@@ -182,6 +185,10 @@ spec:
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
+            defaultMode: 0777
+        - name: metrics
+          configMap:
+            name: {{ include "common.names.fullname" . }}-metrics
             defaultMode: 0777
         - emptyDir:
             medium: HugePages
