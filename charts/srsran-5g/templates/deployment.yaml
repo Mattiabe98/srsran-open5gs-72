@@ -140,7 +140,7 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
-        {{- if or .Values.start.turbostat .Values.start.perf }}
+        {{- if .Values.start.turbostat }}
         - name: hw-metrics
           image: "docker.io/boing7898/ric-plt-xapp-frame-py:latest"
           imagePullPolicy: Always
