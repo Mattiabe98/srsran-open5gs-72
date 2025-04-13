@@ -164,7 +164,6 @@ spec:
               name: proc
             - name: sys
               mountPath: /sys  # Mount /sys from the host
-            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           stdin: true
