@@ -11,7 +11,7 @@ replicaCount: 1
 image:
   repository: softwareradiosystems/linuxptp
   pullPolicy: IfNotPresent
-  tag: v4.3_1.1.0
+  tag: v4.3_1.1.1
 
 imagePullSecrets:
   - name: regcred
@@ -82,11 +82,12 @@ config:
   logSyncInterval: "-4"
   logMinDelayReqInterval: "-4"
   serverOnly: "0"
+  clientOnly: "1"
   G.8275.portDS.localPriority: "128"
   ptp_dst_mac: "01:80:C2:00:00:0E"
   network_transport: "L2"
   domainNumber: "24"
-  tx_timestamp_timeout: "50"
+  tx_timestamp_timeout: "10"
   ts2phc:
     enabled: false
     use_syslog: 0
