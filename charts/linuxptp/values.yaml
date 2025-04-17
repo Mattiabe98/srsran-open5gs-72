@@ -57,7 +57,7 @@ tolerations:
 
 affinity: {}
 
-interfaceName: "/dev/ptp4"
+interfaceName: "ens2f2"
 
 startupProbe:
   enabled: false
