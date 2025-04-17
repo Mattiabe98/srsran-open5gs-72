@@ -174,7 +174,7 @@ spec:
           stdin: true
           tty: true
         {{- end }}
-      runtimeClassName: performance-cpu-profile
+      runtimeClassName: performance-srsran-profile
       volumes:
         - name: srsran-5g-config
           configMap:
