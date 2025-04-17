@@ -52,7 +52,7 @@ spec:
             path: "/var/run"
         - name: dev
           hostPath:
-            path: "/dev/ptp0"
+            path: "/dev/ptp4"
       containers:
         - name: {{ .Chart.Name }}-ptp4l
           securityContext:
