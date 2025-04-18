@@ -13,9 +13,6 @@ image:
   pullPolicy: IfNotPresent
   tag: v4.3_1.1.1
 
-imagePullSecrets:
-  - name: regcred
-
 nameOverride: "linuxptp-chart"
 fullnameOverride: "linuxptp-chart"
 
