@@ -111,7 +111,7 @@ e2:
 metrics:
   rlc_report_period: 1000           # Set reporting period to 1s
   enable_json_metrics: true       # Enable reporting metrics in JSON format
-  addr: grafana-srsran-metrics-server              # Metrics-server IP
+  addr: grafana-srsran-metrics-server.srs72.svc.cluster.local              # Metrics-server IP
   port: 55555                     # Metrics-server Port  
   autostart_stdout_metrics: true
 
