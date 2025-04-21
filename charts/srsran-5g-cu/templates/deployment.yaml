@@ -127,7 +127,7 @@ spec:
               memory: 64Gi
               cpu: 16
           volumeMounts:
-            - name: srsran-5g-config
+            - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
               subPath: gnb-template.yml
             - name: entrypoint
@@ -176,7 +176,7 @@ spec:
         {{- end }}
       runtimeClassName: performance-srsran-profile
       volumes:
-        - name: srsran-5g-config
+        - name: srsran-5g-cu-config
           configMap:
             name: {{ include "common.names.fullname" . }}
         - name: local-storage
