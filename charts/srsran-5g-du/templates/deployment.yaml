@@ -76,8 +76,8 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- else }}
           args:
-            - exec /entrypoint.sh;
-            # - sleep 10000;
+            # - exec /entrypoint.sh;
+            - sleep 10000;
           {{- end }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           env:
