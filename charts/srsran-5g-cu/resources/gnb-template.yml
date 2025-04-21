@@ -5,6 +5,9 @@
 
 
 cu_cp:
+  f1ap:
+    bind_addr: 120.0.10.1                    # Optional TEXT (127.0.0.1). Sets the F1-c bind address. 
+    procedure_timeout: 1000                  # Optional INT (1000). Sets the time the F1AP waits for a DU response in milliseconds.
   inactivity_timer: 7200
   amf:
     addr: ${AMF_ADDR}               # The address or hostname of the AMF.
@@ -17,6 +20,21 @@ cu_cp:
             tai_slice_support_list:
               -
                 sst: 1
+
+cu_up: 
+  gtpu_queue_size: 2048                # Optional INT (2048). Sets the GTP-U queue size, in PDUs.
+  gtpu_reordering_timer: 0             # Optional INT (0). Sets the GTP-U RX reordering timer (in milliseconds).
+  warn_on_drop: false                  # Optional BOOLEAN (false). Enables the option to log a warning for dropped packets in GTP-U and PDCP due to full queues. Supported: [false, true].
+
+  f1u:
+      socket:                               # Define UDP/IP socket(s) for F1-U interface.
+        -                                     # Socket 1
+          bind_addr: 127.0.3.1                  # Required TEXT. Sets the address that the F1-U socket will bind to.
+          ext_addr: 8.8.8.8                     # Optional TEXT. Sets the address that is reported as the F1-U bind address. If empty, the real bind address is used.
+          udp:
+            max_rx_msgs: 256                        # Optional UINT (256). Sets the maximum packets read from the socket in a single syscall.
+            pool_threshold: 0.9                     # Optional FLOAT (0.9). Sets the pool occupancy threshold, after which packets are dropped. Supported [0 - 1.0]. 
+  
 
 e2:
   enable_cu_cp_e2: true                # Optional BOOLEAN (false). Enables the CU-CP E2 agent. Supported: [false, true]. 
