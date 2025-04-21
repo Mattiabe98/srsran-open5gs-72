@@ -47,7 +47,7 @@ extraDeploy: []
 ## @section srsran parameters
 
 ## Bitnami srsran and srsran-monitor-moduleimage version
-## ref: https://hub.docker.com/r/openverso/srsran-5g/tags/
+## ref: https://hub.docker.com/r/openverso/srsran-5g-du/tags/
 ## @param image.srsran.registry srsran image registry
 ## @param image.srsran.repository srsran Image name
 ## @param image.srsran.tag srsran Image tag
@@ -66,7 +66,7 @@ extraDeploy: []
 image:
   srsran:
     registry: docker.io
-    repository: boing7898/srsran-5g-zmq
+    repository: boing7898/srsran-5g-du-zmq
     tag: "latest"
     digest: ""
     ## Specify a imagePullPolicy
