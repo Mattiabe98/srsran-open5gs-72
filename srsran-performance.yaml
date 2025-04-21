@@ -8,17 +8,18 @@ spec:
   - data: |
       [main]
       summary=SRS tuned profile
-      include=-provider-${f:exec:cat:/var/lib/ocp-tuned/provider},openshift
+      include=openshift-node
 
       [bootloader]
       #Command line arguments passed to the kernel at system boot time
       #Any changes here will only take effect after reboot.
-      cmdline="nosoftlockup selinux=0 enforcing=0 nmi_watchdog=0 crashkernel=auto softlockup_panic=0 nosoftlockup audit=0 mce=off mitigations=off tsc=nowatchdog skew_tick=1"
-      [cpu]
-      energy_perf_bias=performance
-      force_latency=cstate.id:1|99
-      governor=performance
-      min_perf_pct=100
+      cmdline_openshift_node_custom=+skew_tick=1 +nosoftlockup +nmi_watchdog=0 +crashkernel=auto +softlockup_panic=0 +audit=0 +mce=off +mitigations=off +tsc=nowatchdog +tsc=reliable
+      cmdline_openshift_node_hugepages=hugepagesz=1G hugepages=32
+      #[cpu]
+      #energy_perf_bias=performance
+      #force_latency=cstate.id:1|99
+      #governor=performance
+      #min_perf_pct=100
 
       [sysctl]
 
@@ -66,7 +67,7 @@ spec:
 
     name: srsran-performance
   recommend:
-  - profile: srsran-performance
+  - machineConfigLabels:
+      machineconfiguration.openshift.io/role: "master"
     priority: 10
-    match:
-    - label: node-role.kubernetes.io/master
+    profile: srsran-performance

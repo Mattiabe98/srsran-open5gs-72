@@ -8,7 +8,8 @@ metadata:
 spec:
   additionalKernelArgs:
   - "kthread_cpus=0-3"   # Confines most kernel threads to reserved CPUs
-  - "mitigations=off"    # WARNING: Disables CPU security mitigations!
+  - "intel_iommu=on"
+  - "iommu=pt"
   cpu:
     reserved: "0-3"
     isolated: "4-31"
@@ -20,6 +21,6 @@ spec:
   workloadHints:
     highPowerConsumption: false
     perPodPowerManagement: false
-    realTime: true
+    realTime: false
   nodeSelector:
     node-role.kubernetes.io/master: ""
