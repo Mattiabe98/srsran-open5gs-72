@@ -29,9 +29,9 @@ spec:
         k8s.v1.cni.cncf.io/networks: |-
           [
             {
-              "name": "sriov-midhaul-cu",        # Name of the NetworkAttachmentDefinition
-              "interface": "net1",           # Name of the VF interface inside the pod
-              "ips": ["192.168.77.10/24"]   # <<< STATIC IP for CU pod's net1 (VF)
+              "name": "sriov-midhaul-cu",
+              "interface": "net1",
+              "ips": ["192.168.77.10/24"]
             }
           ]        
     spec:
