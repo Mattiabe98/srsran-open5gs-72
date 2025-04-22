@@ -123,8 +123,8 @@ spec:
               subPath: entrypoint.sh
             - name: vpp-config
               mountPath: /etc/vpp/
-            - mountPath: /dev/vfio
-              name: vfio
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
             - name: memif-socket
               mountPath: /run/memif
             {{- if .Values.extraVolumeMounts }}
@@ -171,14 +171,14 @@ spec:
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun # Assumes /dev/net/tun exists on the host node
+            type: CharDevice
         - name: memif-socket
           hostPath:
             path: /var/run/memif
             type: DirectoryOrCreate
-        - name: vfio
-          hostPath:
-            path: /dev/vfio
-            type: Directory
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
