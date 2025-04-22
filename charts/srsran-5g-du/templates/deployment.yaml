@@ -197,7 +197,9 @@ spec:
             name: {{ include "common.names.fullname" . }}-metrics
             defaultMode: 0777
         - name: memif-socket
-          emptyDir: {}
+          hostPath:
+            path: /var/run/memif
+            type: DirectoryOrCreate
         - emptyDir:
             medium: HugePages
           name: hugepage        
