@@ -61,3 +61,4 @@ ip route add 10.10.1.1/32 via 10.10.1.4 dev vpp1host
 # echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
 # stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
+sleep infinity
