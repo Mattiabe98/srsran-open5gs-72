@@ -6,7 +6,7 @@
 
 cu_cp:
   f1ap:
-    bind_addr: 10.10.1.1                   # Optional TEXT (127.0.0.1). Sets the F1-c bind address. 
+    bind_addr: 192.168.77.10                  # Optional TEXT (127.0.0.1). Sets the F1-c bind address. 
     procedure_timeout: 1000                  # Optional INT (1000). Sets the time the F1AP waits for a DU response in milliseconds.
   inactivity_timer: 7200
   amf:
@@ -29,7 +29,7 @@ cu_up:
   f1u:
       socket:                               # Define UDP/IP socket(s) for F1-U interface.
         -                                     # Socket 1
-          bind_addr: 10.10.1.1                 # Required TEXT. Sets the address that the F1-U socket will bind to.
+          bind_addr: 192.168.77.10                 # Required TEXT. Sets the address that the F1-U socket will bind to.
           udp:
             max_rx_msgs: 256                        # Optional UINT (256). Sets the maximum packets read from the socket in a single syscall.
             pool_threshold: 0.9                     # Optional FLOAT (0.9). Sets the pool occupancy threshold, after which packets are dropped. Supported [0 - 1.0]. 
