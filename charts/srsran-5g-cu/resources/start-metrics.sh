@@ -3,7 +3,7 @@
 echo "Starting turbostat monitoring..."
 
 # Output file
-LOGFILE="/mnt/data/turbostat_output.txt"
+LOGFILE="/mnt/data/turbostat_output_cu.txt"
 
 INTERVAL=5
 
