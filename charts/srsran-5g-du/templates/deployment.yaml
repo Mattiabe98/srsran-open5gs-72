@@ -26,6 +26,14 @@ spec:
       annotations:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
+        k8s.v1.cni.cncf.io/networks: |-
+          [
+            {
+              "name": "sriov-midhaul-du",        # Name of the NetworkAttachmentDefinition
+              "interface": "net1",           # Name of the VF interface inside the pod
+              "ips": ["192.168.77.11/24"]   # <<< STATIC IP for DU pod's net1 (VF)
+            }
+          ]
     spec:
       shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
