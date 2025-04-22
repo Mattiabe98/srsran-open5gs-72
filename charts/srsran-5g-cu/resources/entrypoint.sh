@@ -59,5 +59,5 @@ vppctl -s /run/vpp/cli-cu.sock ip route add 10.10.1.3/32 via 10.10.2.2 memif1/0
       
 ip route add 10.10.1.3/32 via 10.10.1.2 dev vpp1host
 
-echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
+# echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
+# stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
