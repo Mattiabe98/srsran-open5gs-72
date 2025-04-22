@@ -114,13 +114,6 @@ spec:
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
-          resources:
-            requests:
-              memory: 64Gi
-              cpu: 8
-            limits:
-              memory: 64Gi
-              cpu: 8
           volumeMounts:
             - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
