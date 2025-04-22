@@ -197,7 +197,7 @@ spec:
             defaultMode: 0777
         - name: vpp-config
           configMap:
-            name: vpp-config
+            name: vpp-cu-config
             defaultMode: 0777
         - name: metrics
           configMap:
