@@ -48,7 +48,6 @@ metrics:
   enable_json_metrics: true       # Enable reporting metrics in JSON format
   addr: grafana-srsran-metrics-server             # Metrics-server IP
   port: 55555                     # Metrics-server Port  
-  autostart_stdout_metrics: true
 
 
 expert_execution:
