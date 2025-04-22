@@ -33,30 +33,64 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 
 vpp -c /etc/vpp/startup.conf &
 
-# Wait for VPP socket to exist so we can talk to it
-while [ ! -e /run/vpp/cli-du.sock ]; do
-    sleep 0.2
-done
+# Wait for VPP socket
+VPP_SOCK="/run/vpp/cli-du.sock"
+echo "Waiting for VPP socket $VPP_SOCK..."
+while [ ! -S "$VPP_SOCK" ]; do sleep 0.2; done
+echo "VPP socket found."
 
-ip link add name vpp1out type veth peer name vpp1host
-ip link set dev vpp1out  up
-ip link set dev vpp1host up
-ip addr add 10.10.1.3/24 dev vpp1host
+# --- VPP Configuration ---
+VPP_TAP_IF_NAME="tap-du" # Kernel interface name VPP will create
+VPP_TAP_IP="10.10.1.4"   # VPP's IP on the tap link
+KERNEL_TAP_IP="10.10.1.3" # Kernel's IP on the tap link
+TAP_SUBNET="10.10.1.0/24"
+TAP_CIDR="24"
 
-vppctl -s /run/vpp/cli-du.sock create host-interface name vpp1out
-vppctl -s /run/vpp/cli-du.sock set int state host-vpp1out up
-vppctl -s /run/vpp/cli-du.sock set int ip address host-vpp1out 10.10.1.4/24
+REMOTE_MEMIF_IP="10.10.2.1"
+REMOTE_KERNEL_IP="10.10.1.1"
+LOCAL_MEMIF_IP="10.10.2.2"
+MEMIF_SUBNET="10.10.2.0/24"
 
-vppctl -s /run/vpp/cli-du.sock create memif socket id 1 filename /run/memif/memif.sock
-vppctl -s /run/vpp/cli-du.sock create interface memif id 0 socket-id 1 slave
-vppctl -s /run/vpp/cli-du.sock set int state memif1/0 up
-vppctl -s /run/vpp/cli-du.sock set int ip address memif1/0 10.10.2.2/24
+echo "Configuring VPP TAP interface..."
+# Create tapv2 interface (id 0), let VPP create kernel dev named tap-du
+vppctl -s "$VPP_SOCK" create tap id 0 host-if-name "$VPP_TAP_IF_NAME" v2
 
-ip route add 10.10.2.0/24 via 10.10.1.4
+echo "Assigning IP to VPP TAP interface..."
+vppctl -s "$VPP_SOCK" set int ip address tap0 "$VPP_TAP_IP/$TAP_CIDR" # VPP uses internal name tap0
+vppctl -s "$VPP_SOCK" set int state tap0 up
 
-vppctl -s /run/vpp/cli-du.sock ip route add 10.10.1.1/32 via 10.10.2.1 memif1/0
-      
-ip route add 10.10.1.1/32 via 10.10.1.4 dev vpp1host
+# Wait for kernel interface to appear
+echo "Waiting for kernel TAP interface $VPP_TAP_IF_NAME..."
+while ! ip link show "$VPP_TAP_IF_NAME" > /dev/null 2>&1; do sleep 0.2; done
+echo "Kernel TAP interface found."
+
+# --- Kernel Configuration ---
+echo "Configuring kernel TAP interface..."
+ip link set dev "$VPP_TAP_IF_NAME" up
+ip addr add "$KERNEL_TAP_IP/$TAP_CIDR" dev "$VPP_TAP_IF_NAME"
+
+# --- Memif Configuration ---
+echo "Configuring Memif interface..."
+vppctl -s "$VPP_SOCK" create memif socket id 1 filename /run/memif/memif.sock
+# Crucial: Wait for socket file to be created by master
+echo "Waiting for memif socket file..."
+while [ ! -S /run/memif/memif.sock ]; do sleep 0.2; done
+echo "Memif socket file found."
+vppctl -s "$VPP_SOCK" create interface memif id 0 socket-id 1 slave
+vppctl -s "$VPP_SOCK" set int state memif1/0 up
+vppctl -s "$VPP_SOCK" set int ip address memif1/0 "$LOCAL_MEMIF_IP/$TAP_CIDR"
+
+# --- Routing ---
+echo "Configuring routes..."
+# Kernel: Reach memif net via VPP's tap IP
+ip route add "$MEMIF_SUBNET" via "$VPP_TAP_IP" dev "$VPP_TAP_IF_NAME"
+# Kernel: Reach remote kernel IP via VPP's tap IP
+ip route add "$REMOTE_KERNEL_IP/32" via "$VPP_TAP_IP" dev "$VPP_TAP_IF_NAME"
+
+# VPP: Reach remote kernel IP via remote memif IP
+vppctl -s "$VPP_SOCK" ip route add "$REMOTE_KERNEL_IP/32" via "$REMOTE_MEMIF_IP" memif1/0
+
+echo "DU Configuration Complete."
 
 # echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
