@@ -96,8 +96,6 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 
 # echo "DU Configuration Complete."
 
-# echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-# /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
-# stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
-apt update && apt install -y iputils-ping
-sleep infinity
+echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
+/opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
+stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
