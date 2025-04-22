@@ -8,7 +8,7 @@
 ## @param global.storageClass Global StorageClass for Persistent Volume(s)
 ##
 start:
-  turbostat: true
+  turbostat: false
 
 global:
   imageRegistry: ""
