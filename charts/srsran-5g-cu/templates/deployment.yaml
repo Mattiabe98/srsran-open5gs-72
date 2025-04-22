@@ -26,14 +26,7 @@ spec:
       annotations:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
-        k8s.v1.cni.cncf.io/networks: |-
-          [
-            {
-              "name": "sriov-midhaul-cu",
-              "interface": "net1",
-              "ips": ["192.168.77.10/24"]
-            }
-          ]        
+        k8s.v1.cni.cncf.io/networks: sriov-midhaul-cu
     spec:
       shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
