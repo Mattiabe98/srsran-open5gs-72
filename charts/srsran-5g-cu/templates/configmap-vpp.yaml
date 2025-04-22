@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: vpp-config
+  name: vpp-cu-config
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 data:
   startup.conf: |
