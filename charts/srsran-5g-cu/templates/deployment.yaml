@@ -132,7 +132,8 @@ spec:
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
             - name: vpp-config
-              mountPath: /etc/startup.conf
+              mountPath: /etc/vpp/
+              subPath: startup.conf
             - mountPath: /dev/vfio
               name: vfio
             - name: memif-socket
