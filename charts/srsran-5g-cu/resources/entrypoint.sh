@@ -91,4 +91,5 @@ vppctl -s "$VPP_SOCK" ip route add "$REMOTE_KERNEL_IP/32" via "$REMOTE_MEMIF_IP"
 echo "CU Configuration Complete."
 # echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
+apt update && apt install -y iputils-ping
 sleep infinity
