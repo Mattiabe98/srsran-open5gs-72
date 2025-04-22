@@ -6,13 +6,13 @@
 gnb_du_id: 1
 
 f1ap:                               # Interface between DU and CU-CP
-  cu_cp_addr: 192.168.100.1              # Required TEXT (127.0.10.1). Sets the CU-CP F1-C address to connect to. 
-  bind_addr: 192.168.100.2                # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
+  cu_cp_addr: 10.10.1.1              # Required TEXT (127.0.10.1). Sets the CU-CP F1-C address to connect to. 
+  bind_addr: 10.10.1.3                # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
 
 f1u: 
   queue_size: 2048                      # Optional INT (2048). Sets the F1-U PDU queue size in bytes.
   socket:
-    bind_addr: 192.168.100.2                 # Required TEXT (127.0.10.1). Sets the DU F1-U bind address.
+    bind_addr: 10.10.1.3                 # Required TEXT (127.0.10.1). Sets the DU F1-U bind address.
     ext_addr:                             # Optional TEXT. Set the external IP address that is advertised to receive F1-U packets from the CU-UP. If left empty, the bind address is used.
     five_qi: 9                            # Optional UINT (9). Sets the 5QI value for the F1-U socket. Supported: [0 - 255].
     udp: 
