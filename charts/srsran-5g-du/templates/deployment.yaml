@@ -133,6 +133,9 @@ spec:
             - name: entrypoint
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
+            - name: vpp-config
+              mountPath:  /startup.conf
+              subPath: startup.conf
             - mountPath: /dev/hugepages
               name: hugepage           
             - mountPath: /dev/vfio
@@ -195,6 +198,10 @@ spec:
         - name: metrics
           configMap:
             name: {{ include "common.names.fullname" . }}-metrics
+            defaultMode: 0777
+        - name: vpp-config
+          configMap:
+            name: vpp-config
             defaultMode: 0777
         - name: memif-socket
           hostPath:
