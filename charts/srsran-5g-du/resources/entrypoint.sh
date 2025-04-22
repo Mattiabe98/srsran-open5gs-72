@@ -31,6 +31,17 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     -e "s/\${E2_ADDR}/$E2_ADDR/g" \
     < /gnb-template.yml > /gnb.yml
 
+vpp -c /etc/vpp/startup.conf &
+
+# Wait for VPP socket to exist so we can talk to it
+while [ ! -e /run/vpp/cli.sock ]; do
+    sleep 0.2
+done
+
+vppctl create interface memif id 0 socket-id 0 socket /run/memif/memif.sock slave
+vppctl set interface state memif0 up
+vppctl set interface ip address memif0 192.168.100.2/30
+
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
 stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
