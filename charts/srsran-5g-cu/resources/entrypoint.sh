@@ -55,10 +55,10 @@ MEMIF_SUBNET="10.10.2.0/24"
 echo "Configuring VPP TAP interface..."
 # Create tapv2 interface (id 0), let VPP create kernel dev named tap-cu
 # Optional: Can set host ip here too with `host-ip4-addr KERNEL_TAP_IP/TAP_CIDR`
-vppctl -s "$VPP_SOCK" create tap id 0 host-if-name "$VPP_TAP_IF_NAME" v2
+vppctl -s "$VPP_SOCK" create tap id 0 host-if-name "$VPP_TAP_IF_NAME"
 
-echo "Assigning IP to VPP TAP interface..."
-vppctl -s "$VPP_SOCK" set int ip address tap0 "$VPP_TAP_IP/$TAP_CIDR" # VPP uses internal name tap0, tap1 etc.
+echo "Assigning IP to VPP TAP interface tap0..."
+vppctl -s "$VPP_SOCK" set int ip address tap0 "$VPP_TAP_IP/$TAP_CIDR"
 vppctl -s "$VPP_SOCK" set int state tap0 up
 
 # Wait for kernel interface to appear
