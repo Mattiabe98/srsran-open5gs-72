@@ -23,9 +23,6 @@ spec:
         {{- if .Values.podLabels }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
         {{- end }}
-      annotations:
-        cpu-quota.crio.io: "disable"
-        cpu-load-balancing.crio.io: "disable"
     spec:
       shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
