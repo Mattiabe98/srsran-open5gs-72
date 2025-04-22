@@ -136,7 +136,9 @@ spec:
             - mountPath: /dev/hugepages
               name: hugepage           
             - mountPath: /dev/vfio
-              name: vfio  
+              name: vfio
+            - name: memif-socket
+              mountPath: /run/memif
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -194,6 +196,8 @@ spec:
           configMap:
             name: {{ include "common.names.fullname" . }}-metrics
             defaultMode: 0777
+        - name: memif-socket
+          emptyDir: {}
         - emptyDir:
             medium: HugePages
           name: hugepage        
