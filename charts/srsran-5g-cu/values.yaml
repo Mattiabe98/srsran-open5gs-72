@@ -66,7 +66,7 @@ extraDeploy: []
 image:
   srsran:
     registry: docker.io
-    repository: boing7898/srsran-5g-cu-zmq
+    repository: boing7898/srsran-5g-zmq
     tag: "latest"
     digest: ""
     ## Specify a imagePullPolicy
