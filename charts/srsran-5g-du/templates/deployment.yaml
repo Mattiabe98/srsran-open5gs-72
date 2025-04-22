@@ -134,7 +134,7 @@ spec:
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
             - name: vpp-config
-              mountPath:  /startup.conf
+              mountPath:  /etc/vpp/
               subPath: startup.conf
             - mountPath: /dev/hugepages
               name: hugepage           
