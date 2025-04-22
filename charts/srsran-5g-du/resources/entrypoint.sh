@@ -55,6 +55,8 @@ vppctl -s /run/vpp/cli-du.sock set int ip address memif1/0 10.10.2.2/24
 ip route add 10.10.2.0/24 via 10.10.1.4
 
 vppctl -s /run/vpp/cli-du.sock ip route add 10.10.1.1/32 via 10.10.2.1 memif1/0
+      
+ip route add 10.10.1.1/32 via 10.10.1.4 dev vpp1host
 
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
