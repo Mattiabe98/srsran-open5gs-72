@@ -128,9 +128,11 @@ spec:
           resources:
             requests:
               memory: 16Gi
+              intel.com/intel_sriov_netdevice: "1"
               cpu: 8
             limits:
               memory: 16Gi
+              intel.com/intel_sriov_netdevice: "1"
               cpu: 8
           volumeMounts:
             - name: srsran-5g-cu-config
