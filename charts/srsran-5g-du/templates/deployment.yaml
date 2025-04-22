@@ -176,7 +176,12 @@ spec:
               mountPath:  /start-metrics.sh
               subPath: start-metrics.sh
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            requests:
+              cpu: "100m"       # Request 100 millicores (0.1 CPU)
+              memory: "64Mi"    # Request 64 Mebibytes of RAM
+            limits:
+              cpu: "100m"       # Limit MUST equal request for Guaranteed QoS
+              memory: "64Mi"    # Limit MUST equal request for Guaranteed QoS
           stdin: true
           tty: true
         {{- end }}
