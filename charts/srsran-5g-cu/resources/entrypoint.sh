@@ -58,8 +58,8 @@ echo "Configuring VPP TAP interface..."
 VPP_TAP_RX_RING=4096
 VPP_TAP_TX_RING=4096
 
-vppctl -s "$VPP_SOCK" create tap id 0 host-if-name "$VPP_TAP_IF_NAME" \
-  rx-ring-size $VPP_TAP_RX_RING tx-ring-size $VPP_TAP_TX_RING
+vppctl -s "$VPP_SOCK" create tap id 0 host-if-name "$VPP_TAP_IF_NAME" 
+#  rx-ring-size $VPP_TAP_RX_RING tx-ring-size $VPP_TAP_TX_RING
 
 echo "Assigning IP to VPP TAP interface tap0..."
 vppctl -s "$VPP_SOCK" set int ip address tap0 "$VPP_TAP_IP/$TAP_CIDR"
