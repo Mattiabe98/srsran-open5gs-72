@@ -141,6 +141,8 @@ spec:
               name: vfio
             - name: memif-socket
               mountPath: /run/memif
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -185,6 +187,10 @@ spec:
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun # Assumes /dev/net/tun exists on the host node
+            type: CharDevice
         - name: vfio
           hostPath:
             path: /dev/vfio
