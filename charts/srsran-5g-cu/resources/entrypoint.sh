@@ -34,13 +34,23 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 vpp -c /etc/vpp/startup.conf &
 
 # Wait for VPP socket to exist so we can talk to it
-while [ ! -e /run/vpp/cli.sock ]; do
+while [ ! -e /run/vpp/cli-cu.sock ]; do
     sleep 0.2
 done
 
-vppctl create interface memif id 0 socket-id 0 socket /run/memif/memif.sock master
-vppctl set interface state memif0 up
-vppctl set interface ip address memif0 192.168.100.1/30
+ip link add name vpp1out type veth peer name vpp1host
+ip link set dev vpp1out up
+ip link set dev vpp1host up
+ip addr add 10.10.1.1/24 dev vpp1host
+
+vppctl create host-interface name vpp1out
+vppctl set int state host-vpp1out up
+vppctl set int ip address host-vpp1out 10.10.1.2/24
+
+vppctl create memif socket id 1 filename /run/memif/memif.sock
+vppctl create interface memif id 0 socket-id 1 master
+vppctl set int state memif0/0 up
+vppctl set int ip address memif0/0 10.10.2.1/24
 
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
