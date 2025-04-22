@@ -120,12 +120,12 @@ spec:
           resources:
             requests:
               hugepages-1Gi: "32Gi"
-              memory: 64Gi
-              cpu: 16
+              memory: 16Gi
+              cpu: 8
             limits:
               hugepages-1Gi: "32Gi"
-              memory: 64Gi
-              cpu: 16
+              memory: 16Gi
+              cpu: 8
           volumeMounts:
             - name: srsran-5g-du-config
               mountPath: /gnb-template.yml
@@ -180,6 +180,7 @@ spec:
           stdin: true
           tty: true
         {{- end }}
+      runtimeClassName: performance-srsran-profile
       volumes:
         - name: srsran-5g-du-config
           configMap:
