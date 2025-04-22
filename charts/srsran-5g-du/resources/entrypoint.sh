@@ -43,14 +43,14 @@ ip link set dev vpp1out  up
 ip link set dev vpp1host up
 ip addr add 10.10.1.3/24 dev vpp1host
 
-vppctl create host-interface name vpp1out
-vppctl set int state host-vpp1out up
-vppctl set int ip address host-vpp1out 10.10.1.4/24
+vppctl -s /run/vpp/cli-du.sock create host-interface name vpp1out
+vppctl -s /run/vpp/cli-du.sock set int state host-vpp1out up
+vppctl -s /run/vpp/cli-du.sock set int ip address host-vpp1out 10.10.1.4/24
 
-vppctl create memif socket id 1 filename /run/memif/memif.sock
-vppctl create interface memif id 0 socket-id 1 slave
-vppctl set int state memif0/0 up
-vppctl set int ip address memif0/0 10.10.2.2/24
+vppctl -s /run/vpp/cli-du.sock create memif socket id 1 filename /run/memif/memif.sock
+vppctl -s /run/vpp/cli-du.sock create interface memif id 0 socket-id 1 slave
+vppctl -s /run/vpp/cli-du.sock set int state memif1/0 up
+vppctl -s /run/vpp/cli-du.sock set int ip address memif1/0 10.10.2.2/24
 
 
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
