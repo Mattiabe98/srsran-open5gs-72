@@ -11,7 +11,7 @@ if [[ -n "$AMF_HOSTNAME" ]]; then
 fi
 
 if [[ -z "${AMF_BIND_ADDR}" ]] ; then
-    export AMF_BIND_ADDR=$(hostname -I)
+    export AMF_BIND_ADDR=$(hostname -I | awk '{print $1}')
 fi
 
 if [[ ! -z "$GNB_HOSTNAME" ]] ; then 
