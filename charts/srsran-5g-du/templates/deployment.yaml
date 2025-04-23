@@ -149,45 +149,6 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
-        {{- if .Values.start.turbostat }}
-        - name: hw-metrics
-          image: "docker.io/boing7898/ric-plt-xapp-frame-py:latest"
-          imagePullPolicy: Always
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - CAP_PERFMON
-                - CAP_SYS_PTRACE
-                - CAP_SYSLOG            
-          command: [ "/bin/sh", "-c" ]
-          args:
-            - exec /start-metrics.sh
-          lifecycle:
-            preStop:
-              exec:
-                command: ["/bin/bash", "-c", "/start-metrics.sh graceful_shutdown"]    
-          env:
-            {{- range $key, $value := .Values.env }}
-            - name: {{ $key }}
-              value: "{{ $value }}"
-            {{- end }}
-          volumeMounts:
-            - name: local-storage
-              mountPath: /mnt/data
-            - name: metrics
-              mountPath:  /start-metrics.sh
-              subPath: start-metrics.sh
-          resources:
-            requests:
-              cpu: "100m"       # Request 100 millicores (0.1 CPU)
-              memory: "64Mi"    # Request 64 Mebibytes of RAM
-            limits:
-              cpu: "100m"       # Limit MUST equal request for Guaranteed QoS
-              memory: "64Mi"    # Limit MUST equal request for Guaranteed QoS
-          stdin: true
-          tty: true
-        {{- end }}
       runtimeClassName: performance-srsran-profile
       volumes:
         - name: srsran-5g-du-config
