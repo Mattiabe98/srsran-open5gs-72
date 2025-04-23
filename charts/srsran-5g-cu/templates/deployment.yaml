@@ -155,7 +155,6 @@ spec:
         - name: null-override
           hostPath:
             path: /dev/null
-            type: File
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
