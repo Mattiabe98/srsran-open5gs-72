@@ -37,22 +37,22 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # DPDK device bind
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
 
-# Start turbostat in the background
-(
-    echo "Starting turbostat monitoring..."
-    mkdir -p /mnt/data
-    TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
-    LOGFILE="/mnt/data/turbostat_output_du_$TIMESTAMP.txt"
-    INTERVAL=5
+# # Start turbostat in the background
+# (
+#     echo "Starting turbostat monitoring..."
+#     mkdir -p /mnt/data
+#     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
+#     LOGFILE="/mnt/data/turbostat_output_du_$TIMESTAMP.txt"
+#     INTERVAL=5
 
-    turbostat --interval "$INTERVAL" 2>/dev/null | while IFS= read -r line; do
-        if [[ "$line" =~ ^\ *- ]]; then
-            UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%S")
-            echo "[$UTC_TIME UTC]" >> "$LOGFILE"
-        fi
-        echo "$line" >> "$LOGFILE"
-    done
-) >/dev/null 2>&1 &
+#     turbostat --interval "$INTERVAL" 2>/dev/null | while IFS= read -r line; do
+#         if [[ "$line" =~ ^\ *- ]]; then
+#             UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%S")
+#             echo "[$UTC_TIME UTC]" >> "$LOGFILE"
+#         fi
+#         echo "$line" >> "$LOGFILE"
+#     done
+# ) >/dev/null 2>&1 &
 
 # Launch srsDU
 stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
