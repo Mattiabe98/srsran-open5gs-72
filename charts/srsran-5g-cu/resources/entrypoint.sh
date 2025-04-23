@@ -37,7 +37,7 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 (
     echo "Starting turbostat monitoring..."
     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
-    LOGFILE="/mnt/data/turbostat_output_du_$TIMESTAMP.txt"
+    LOGFILE="/mnt/data/turbostat_output_cu_$TIMESTAMP.txt"
     INTERVAL=5
 
     turbostat --interval "$INTERVAL" | while IFS= read -r line; do
