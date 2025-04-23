@@ -131,6 +131,8 @@ spec:
             - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
               subPath: gnb-template.yml
+            - name: local-storage
+              mountPath: /mnt/data
             - name: entrypoint
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
