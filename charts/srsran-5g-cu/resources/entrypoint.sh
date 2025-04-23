@@ -33,19 +33,19 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 
 
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-
 (
     echo "Starting turbostat monitoring..."
+    mkdir -p /mnt/data
     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
     LOGFILE="/mnt/data/turbostat_output_cu_$TIMESTAMP.txt"
     INTERVAL=5
 
-    turbostat --interval "$INTERVAL" | while IFS= read -r line; do
+    turbostat --interval "$INTERVAL" 2>/dev/null | while IFS= read -r line; do
         if [[ "$line" =~ ^\ *- ]]; then
             UTC_TIME=$(date -u +"%Y-%m-%d %H:%M:%S")
             echo "[$UTC_TIME UTC]" >> "$LOGFILE"
         fi
         echo "$line" >> "$LOGFILE"
     done
-) &
+) >/dev/null 2>&1 &
 stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
