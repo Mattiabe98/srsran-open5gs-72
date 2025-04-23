@@ -92,7 +92,7 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 # vppctl -s "$VPP_SOCK" ip route add "$REMOTE_KERNEL_IP/32" via "$REMOTE_MEMIF_IP" memif1/0
 
 # echo "CU Configuration Complete."
-# echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-# stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
-apt update && apt install -y iputils-ping
-sleep infinity
+echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
+stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
+# apt update && apt install -y iputils-ping
+# sleep infinity
