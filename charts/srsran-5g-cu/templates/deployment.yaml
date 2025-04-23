@@ -154,7 +154,7 @@ spec:
             name: {{ include "common.names.fullname" . }}
         - name: null-override
           hostPath:
-            path: /dev/null
+            path: /var/home/core/cpu
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
