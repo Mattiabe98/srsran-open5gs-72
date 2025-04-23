@@ -31,8 +31,7 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     -e "s/\${E2_ADDR}/$E2_ADDR/g" \
     < /gnb-template.yml > /gnb.yml
 
-sleep infinity
-# echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
+echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # (
 #     echo "Starting turbostat monitoring..."
 #     mkdir -p /mnt/data
@@ -48,4 +47,4 @@ sleep infinity
 #         echo "$line" >> "$LOGFILE"
 #     done
 # ) >/dev/null 2>&1 &
-# stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
+stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
