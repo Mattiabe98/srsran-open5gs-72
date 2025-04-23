@@ -131,8 +131,6 @@ spec:
             - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
               subPath: gnb-template.yml
-            - name: null-override # Mount /dev/null over the specific file
-              mountPath: /sys/fs/cgroup/cpuset.cpus.effective
             - name: local-storage
               mountPath: /mnt/data
             - name: entrypoint
@@ -152,9 +150,6 @@ spec:
         - name: srsran-5g-cu-config
           configMap:
             name: {{ include "common.names.fullname" . }}
-        - name: null-override
-          hostPath:
-            path: /var/home/core/cpu
         - name: local-storage
           persistentVolumeClaim:
             claimName: local-pvc
