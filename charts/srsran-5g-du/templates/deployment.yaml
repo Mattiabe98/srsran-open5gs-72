@@ -149,6 +149,9 @@ spec:
             - name: entrypoint
               mountPath:  /entrypoint.sh
               subPath: entrypoint.sh
+            - name: monitoring
+              mountPath:  /monitoring.py
+              subPath: monitoring.py
             - name: vpp-config
               mountPath:  /etc/vpp/
             - mountPath: /dev/hugepages
@@ -182,9 +185,9 @@ spec:
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
             defaultMode: 0777
-        - name: metrics
+        - name: monitoring
           configMap:
-            name: {{ include "common.names.fullname" . }}-metrics
+            name: {{ include "common.names.fullname" . }}-monitoring
             defaultMode: 0777
         - name: vpp-config
           configMap:
