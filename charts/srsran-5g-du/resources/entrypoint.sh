@@ -41,7 +41,7 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 (
     echo "Starting monitoring..."
     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
-    LOGFILE="/mnt/data/monitoring_$TIMESTAMP.txt"
+    LOGFILE="/mnt/data/monitoring/monitoring_$TIMESTAMP.txt"
 
     python3 /monitoring.py -N 1 >> "$LOGFILE" 2>&1
 ) &
