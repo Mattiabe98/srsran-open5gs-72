@@ -145,6 +145,8 @@ spec:
           resources: {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: local-storage
+              mountPath: /mnt/data
             - name: config
               mountPath:  /opt/open5gs/etc/open5gs/upf.yaml
               subPath: "upf.yaml"
@@ -179,6 +181,9 @@ spec:
             - infinity
           {{- end }}      
       volumes:
+        - name: local-storage
+          persistentVolumeClaim:
+            claimName: local-pvc
         - name: config
           configMap:
             name: {{ include "common.names.fullname" . }}
