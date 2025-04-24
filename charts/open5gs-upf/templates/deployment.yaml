@@ -96,8 +96,8 @@ spec:
             - /bin/sh
             - -c
             - |
-              open5gs-upfd &
-              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3
+              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &
+              open5gs-upfd
           {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
