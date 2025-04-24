@@ -2,9 +2,15 @@
 
 # --- Configuration ---
 SERVER="$1"
+ROUNDS="$2"
 
 if [ -z "$SERVER" ]; then
-  echo "Usage: $0 <server_ip>"
+  echo "Usage: $0 <server_ip> <number of rounds>"
+  exit 1
+fi
+
+if [ -z "$ROUNDS" ]; then
+  echo "Usage: $0 <server_ip> <number of rounds>"
   exit 1
 fi
 
@@ -17,7 +23,7 @@ LOG_BASENAME="iperf3_traffic"
 DURATION=60
 BURST_DURATION=10
 SLEEP_BETWEEN=7
-ROUNDS=16
+
 
 UPLINK_RATES=("5M" "10M" "20M" "30M" "35M")
 UPLINK_MAX_ATTEMPT_RATE="40M"
