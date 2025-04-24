@@ -23,4 +23,7 @@ iptables -t nat -A POSTROUTING -s {{ .subnet }} ! -o {{ .dev }} -j MASQUERADE;
 {{- end }}
 {{- end }}
 
+echo "Updating iPerf3.."
+curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3
+
 $@
