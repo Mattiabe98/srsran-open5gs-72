@@ -193,6 +193,7 @@ spec:
         - name: iperf3-test
           configMap:
             name: {{ include "common.names.fullname" . }}-iperf3
+            defaultMode: 0777            
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
