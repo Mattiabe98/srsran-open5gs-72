@@ -1,7 +1,7 @@
 #/bin/bash
-helm uninstall srsran-cu
-helm uninstall srsran-du
+helm uninstall srsran-5g-cu
+helm uninstall srsran-5g-du
 git pull
-helm install srsran-cu charts/srsran-5g-cu
-helm install srsran-du charts/srsran-5g-du
+helm install srsran-5g-cu charts/srsran-5g-cu
+helm install srsran-5g-du charts/srsran-5g-du
 
