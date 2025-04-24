@@ -97,10 +97,7 @@ spec:
             - -c
             - |
               open5gs-upfd &
-              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &
-              pid=$!  # Get the PID of the open5gs-upfd process
-              taskset -pc 63 $pid  # Lock open5gs-upfd to core 30
-              wait $pid  # Wait for the open5gs-upfd process to finish
+              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3
           {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
