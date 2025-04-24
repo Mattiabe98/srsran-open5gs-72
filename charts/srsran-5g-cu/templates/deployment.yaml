@@ -131,17 +131,11 @@ spec:
             - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
               subPath: gnb-template.yml
-            - name: local-storage
-              mountPath: /mnt/data
             - name: entrypoint
               mountPath: /entrypoint.sh
               subPath: entrypoint.sh
-            - name: vpp-config
-              mountPath: /etc/vpp/
             - name: dev-net-tun
               mountPath: /dev/net/tun
-            - name: memif-socket
-              mountPath: /run/memif
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -157,22 +151,10 @@ spec:
           hostPath:
             path: /dev/net/tun # Assumes /dev/net/tun exists on the host node
             type: CharDevice
-        - name: memif-socket
-          hostPath:
-            path: /var/run/memif
-            type: DirectoryOrCreate
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
-            defaultMode: 0777
-        - name: vpp-config
-          configMap:
-            name: vpp-cu-config
-            defaultMode: 0777
-        - name: metrics
-          configMap:
-            name: {{ include "common.names.fullname" . }}-metrics
-            defaultMode: 0777      
+            defaultMode: 0777 
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
