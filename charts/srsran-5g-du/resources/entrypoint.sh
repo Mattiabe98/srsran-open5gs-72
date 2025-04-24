@@ -43,7 +43,7 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
     LOGFILE="/mnt/data/monitoring/monitoring_$TIMESTAMP.txt"
 
-    python3 /monitoring.py -N 1 >> "$LOGFILE" 2>&1
+    python3 /monitoring.py -N 1 -c 0-63 >> "$LOGFILE" 2>&1
 ) &
 
 # Launch srsDU in the foreground
