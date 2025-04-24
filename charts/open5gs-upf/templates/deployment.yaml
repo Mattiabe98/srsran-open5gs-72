@@ -150,6 +150,9 @@ spec:
             - name: config
               mountPath:  /opt/open5gs/etc/open5gs/upf.yaml
               subPath: "upf.yaml"
+            - name: iperf3-test
+              mountPath:  /iperf3-test.sh
+              subPath: "iperf3-test.sh"
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -187,6 +190,9 @@ spec:
         - name: config
           configMap:
             name: {{ include "common.names.fullname" . }}
+        - name: iperf3-test
+          configMap:
+            name: {{ include "common.names.fullname" . }}-iperf3
         - name: entrypoint
           configMap:
             name: {{ include "common.names.fullname" . }}-entrypoint
