@@ -42,9 +42,8 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
     echo "Starting monitoring..."
     TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
     LOGFILE="/mnt/data/monitoring_$TIMESTAMP.txt"
-    INTERVAL=5
 
-    python3 /monitoring.py >> "$LOGFILE" 2>&1
+    python3 /monitoring.py -N 1 >> "$LOGFILE" 2>&1
 ) &
 
 # Launch srsDU in the foreground
