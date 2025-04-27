@@ -42,7 +42,7 @@ PARALLEL_STREAMS_BURST=5
 
 
 # --- Script Setup ---
-TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
+TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
 LOGFILE="${LOG_DIR}/${LOG_BASENAME}_${TIMESTAMP}.log"
 FAILURE_COUNT=0
 
