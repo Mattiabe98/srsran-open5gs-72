@@ -113,6 +113,18 @@ def find_rapl_domains():
     except Exception as e: print(f"Warning: Finding RAPL domains: {e}")
     return domains
 
+def get_cpuidle_state_info(cpu_id):
+    state_info = {}; base_path = f'/sys/devices/system/cpu/cpu{cpu_id}/cpuidle'
+    try:
+        if not os.path.isdir(base_path): return state_info
+        for i in range(MAX_CPUIDLE_STATES):
+            name_path = os.path.join(base_path, f'state{i}/name'); time_path = os.path.join(base_path, f'state{i}/time')
+            if not os.path.exists(name_path): continue
+            name = read_sysfs_str(name_path)
+            if name and os.path.exists(time_path): state_info[name] = {'time': time_path}
+    except Exception as e: print(f"Warning: Probing cpuidle for CPU {cpu_id}: {e}")
+    return state_info
+
 def get_effective_cpus():
     paths = ['/sys/fs/cgroup/cpuset.cpus.effective', '/sys/fs/cgroup/cpuset/cpuset.effective_cpus']
     cpu_str = None; path_read = None
