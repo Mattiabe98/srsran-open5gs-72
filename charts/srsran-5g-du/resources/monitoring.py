@@ -444,16 +444,28 @@ def main():
                     ram_watt = ""
                     pkg_temp_str = ""
 
-                    if d_pkg: # Check if delta package data exists
-                        pkg_watt_val = (d_pkg.energy_pkg_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
-                        ram_watt_val = (d_pkg.energy_dram_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
+                    if d_pkg:
+                        # --- Handle 48-bit wraparound ---
+                        MAX_ENERGY_UJ = 2**48  # 48-bit counter max
+                    
+                        energy_pkg_delta = d_pkg.energy_pkg_uj
+                        if energy_pkg_delta < 0:
+                            energy_pkg_delta += MAX_ENERGY_UJ
+                    
+                        energy_dram_delta = d_pkg.energy_dram_uj
+                        if energy_dram_delta < 0:
+                            energy_dram_delta += MAX_ENERGY_UJ
+                    
+                        pkg_watt_val = (energy_pkg_delta / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
+                        ram_watt_val = (energy_dram_delta / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
 
                         # Optional Sanity Check Warning (adjust threshold as needed)
                         MAX_REASONABLE_PKG_WATTS = 1000 # Example threshold
                         if pkg_watt_val > MAX_REASONABLE_PKG_WATTS:
                             print(f"Warning: High PkgWatt calculated: {pkg_watt_val:.2f}W for Pkg {pkg_id}")
+                            sys.exit(1)
                         if ram_watt_val > MAX_REASONABLE_PKG_WATTS/2 : # DRAM usually lower
-                             print(f"Warning: High RAMWatt calculated: {ram_watt_val:.2f}W for Pkg {pkg_id}")
+                            print(f"Warning: High RAMWatt calculated: {ram_watt_val:.2f}W for Pkg {pkg_id}")
 
                         pkg_watt = f"{pkg_watt_val:.2f}"
                         ram_watt = f"{ram_watt_val:.2f}"
