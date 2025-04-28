@@ -85,40 +85,33 @@ def get_tjmax(cpu_id):
     return tjmax
 
 def find_rapl_domains():
+    """Finds sysfs paths for package and DRAM RAPL domains via powercap."""
     domains = {'pkg': [], 'dram': []}; powercap_base = "/sys/class/powercap"
     try:
         if not os.path.isdir(powercap_base): return domains
+        # Find package domains
         for path in glob.glob(os.path.join(powercap_base, "intel-rapl:*")):
             if os.path.isdir(path) and ':' not in os.path.basename(path).split(':')[-1]:
                 name = read_sysfs_str(os.path.join(path, "name"))
                 energy_path = os.path.join(path, "energy_uj")
-                if name and name.startswith("package") and os.path.exists(energy_path):
-                    try: id_ = int(name.split('-')[-1]); domains['pkg'].append({'id': id_, 'path': energy_path})
-                    except: domains['pkg'].append({'id': -1, 'path': energy_path})
+                max_energy_path = os.path.join(path, "max_energy_range_uj") # Path to max range
+                if name and name.startswith("package") and os.path.exists(energy_path) and os.path.exists(max_energy_path): # Check max exists
+                    try: id_ = int(name.split('-')[-1]); domains['pkg'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path}) # Store max path
+                    except: domains['pkg'].append({'id': -1, 'path': energy_path, 'max_path': max_energy_path})
+        # Find DRAM domains
         for path in glob.glob(os.path.join(powercap_base, "intel-rapl:*:*")):
              if os.path.isdir(path):
                  name = read_sysfs_str(os.path.join(path, "name"))
                  energy_path = os.path.join(path, "energy_uj")
-                 if name == "dram" and os.path.exists(energy_path):
+                 max_energy_path = os.path.join(path, "max_energy_range_uj") # Path to max range
+                 if name == "dram" and os.path.exists(energy_path) and os.path.exists(max_energy_path): # Check max exists
                      try:
                          parent = os.path.basename(os.path.dirname(path)); id_ = int(parent.split(':')[-1])
-                         domains['dram'].append({'id': id_, 'path': energy_path})
-                     except: domains['dram'].append({'id': -1, 'path': energy_path})
+                         domains['dram'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path}) # Store max path
+                     except: domains['dram'].append({'id': -1, 'path': energy_path, 'max_path': max_energy_path})
         domains['pkg'].sort(key=lambda x: x['id']); domains['dram'].sort(key=lambda x: x['id'])
     except Exception as e: print(f"Warning: Finding RAPL domains: {e}")
     return domains
-
-def get_cpuidle_state_info(cpu_id):
-    state_info = {}; base_path = f'/sys/devices/system/cpu/cpu{cpu_id}/cpuidle'
-    try:
-        if not os.path.isdir(base_path): return state_info
-        for i in range(MAX_CPUIDLE_STATES):
-            name_path = os.path.join(base_path, f'state{i}/name'); time_path = os.path.join(base_path, f'state{i}/time')
-            if not os.path.exists(name_path): continue
-            name = read_sysfs_str(name_path)
-            if name and os.path.exists(time_path): state_info[name] = {'time': time_path}
-    except Exception as e: print(f"Warning: Probing cpuidle for CPU {cpu_id}: {e}")
-    return state_info
 
 def get_effective_cpus():
     paths = ['/sys/fs/cgroup/cpuset.cpus.effective', '/sys/fs/cgroup/cpuset/cpuset.effective_cpus']
@@ -191,13 +184,25 @@ class CPUData:
 
         return d
 
+def calculate_delta_energy(current_uj, prev_uj, max_range_uj):
+    """Calculates energy delta correctly handling wrap-around based on max_range."""
+    if current_uj >= prev_uj:
+        # No wrap-around detected or counter hasn't incremented
+        delta = current_uj - prev_uj
+    else:
+        # Wrap-around detected
+        delta = (max_range_uj - prev_uj) + current_uj
+    return delta
+
 class PkgData:
      def __init__(self):
         self.timestamp = 0.0
         self.pkg_temp = None
-        # self.pkg_throttle_cnt = 0 # Removed
         self.energy_pkg_uj = 0
         self.energy_dram_uj = 0
+        # Store the max range read during initialization
+        self.max_energy_pkg_uj = 0
+        self.max_energy_dram_uj = 0
 
      def delta(self, prev):
         if not isinstance(prev, PkgData) or self.timestamp <= prev.timestamp: return None
@@ -206,14 +211,24 @@ class PkgData:
         if d.timestamp == 0: d.timestamp = 1e-9
 
         d.pkg_temp = self.pkg_temp
-        # d.pkg_throttle_cnt = self.pkg_throttle_cnt - prev.pkg_throttle_cnt # Removed
-        d.energy_pkg_uj = self.energy_pkg_uj - prev.energy_pkg_uj if self.energy_pkg_uj >= prev.energy_pkg_uj else (2**64 - prev.energy_pkg_uj) + self.energy_pkg_uj
-        d.energy_dram_uj = self.energy_dram_uj - prev.energy_dram_uj if self.energy_dram_uj >= prev.energy_dram_uj else (2**64 - prev.energy_dram_uj) + self.energy_dram_uj
+
+        # Use the specific max_range for correct delta calculation
+        d.energy_pkg_uj = calculate_delta_energy(
+            self.energy_pkg_uj, prev.energy_pkg_uj, self.max_energy_pkg_uj
+        )
+        d.energy_dram_uj = calculate_delta_energy(
+            self.energy_dram_uj, prev.energy_dram_uj, self.max_energy_dram_uj
+        )
+
+        # Keep max range info for potential debugging if needed
+        d.max_energy_pkg_uj = self.max_energy_pkg_uj
+        d.max_energy_dram_uj = self.max_energy_dram_uj
+
         return d
 
 # --- Data Collection ---
 
-def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_state_info, pstate_info):
+def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_state_info, pstate_paths):
     """Reads all relevant counters using MSR and sysfs."""
     current_irqs = parse_interrupts()
     timestamp = time.monotonic()
@@ -222,18 +237,52 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
     all_pkg_ids = {info['pkg_id'] for info in topology.values() if info['pkg_id'] != -1}
     pkg_data = {pkg_id: PkgData() for pkg_id in all_pkg_ids}
 
-    # Read global p-state perf percentages once per interval
-    min_perf = read_sysfs_int(pstate_info.get('min_perf_pct'))
-    max_perf = read_sysfs_int(pstate_info.get('max_perf_pct'))
+    min_perf = read_sysfs_int(pstate_paths.get('min_perf_pct'))
+    max_perf = read_sysfs_int(pstate_paths.get('max_perf_pct'))
 
     cores_visited_for_temps = set()
     pkgs_visited_for_temps = set()
     pkgs_visited_for_rapl = set()
-    # No need for throttle sets anymore
 
+    # --- Read Global/Package values ONCE per interval ---
+    for pkg_id in all_pkg_ids:
+        p_data = pkg_data[pkg_id]
+        p_data.timestamp = timestamp
+        rep_cpu = -1
+        for c, t in topology.items():
+            if t['pkg_id'] == pkg_id: rep_cpu = c; break
+        if rep_cpu == -1: continue
+
+        # Read Pkg Temp MSR
+        pkg_therm_stat = read_msr(rep_cpu, MSR_IA32_PACKAGE_THERM_STATUS)
+        if pkg_therm_stat is not None:
+            dts = (pkg_therm_stat >> 16) & 0x7F
+            p_data.pkg_temp = tjmax - dts
+
+        # Read RAPL sysfs paths and max values
+        pkg_rapl_info, dram_rapl_info = None, None
+        for domain in rapl_domains_info.get('pkg', []):
+             if domain['id'] == pkg_id: pkg_rapl_info = domain; break
+        if not pkg_rapl_info and len(rapl_domains_info.get('pkg', [])) == 1 and rapl_domains_info['pkg'][0]['id'] == -1:
+             pkg_rapl_info = rapl_domains_info['pkg'][0]
+        for domain in rapl_domains_info.get('dram', []):
+             if domain['id'] == pkg_id: dram_rapl_info = domain; break
+        if not dram_rapl_info and len(rapl_domains_info.get('dram', [])) == 1 and rapl_domains_info['dram'][0]['id'] == -1:
+             if len(all_pkg_ids) == 1 or pkg_id == 0:
+                 dram_rapl_info = rapl_domains_info['dram'][0]
+
+        if pkg_rapl_info:
+            p_data.max_energy_pkg_uj = read_sysfs_int(pkg_rapl_info['max_path']) or (2**64 -1) # Default high if read fails
+            p_data.energy_pkg_uj = read_sysfs_int(pkg_rapl_info['path']) or 0
+        if dram_rapl_info:
+            p_data.max_energy_dram_uj = read_sysfs_int(dram_rapl_info['max_path']) or (2**64 -1) # Default high if read fails
+            p_data.energy_dram_uj = read_sysfs_int(dram_rapl_info['path']) or 0
+
+
+    # --- Read Per-CPU values ---
     for cpu_id in target_cpus:
         data = cpu_data[cpu_id]
-        data.timestamp = timestamp
+        data.timestamp = timestamp # Ensure all CPUs share the exact same start timestamp
         data.tsc = read_msr(cpu_id, MSR_IA32_TSC) or 0
         data.aperf = read_msr(cpu_id, MSR_IA32_APERF) or 0
         data.mperf = read_msr(cpu_id, MSR_IA32_MPERF) or 0
@@ -242,9 +291,8 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
         data.actual_mhz = act_mhz_khz / 1000 if act_mhz_khz is not None else None
         data.governor = read_sysfs_str(f'/sys/devices/system/cpu/cpu{cpu_id}/cpufreq/scaling_governor')
         data.epb = read_sysfs_int(f'/sys/devices/system/cpu/cpu{cpu_id}/power/energy_perf_bias')
-        data.min_perf_pct = min_perf # Assign global value
-        data.max_perf_pct = max_perf # Assign global value
-
+        data.min_perf_pct = min_perf
+        data.max_perf_pct = max_perf
 
         if cpu_id in cpuidle_state_info:
             for state_name, paths in cpuidle_state_info[cpu_id].items():
@@ -263,35 +311,7 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
             for c_id in target_cpus:
                  if topology[c_id]['core_id'] == core_id:
                      cpu_data[c_id].core_temp = temp_val
-                     cpu_data[c_id].core_throttled = throttled_val # MSR status bit
-
-        pkg_id = topology[cpu_id]['pkg_id']
-        if pkg_id != -1:
-            if pkg_id not in pkg_data: continue
-            p_data = pkg_data[pkg_id]
-            if p_data.timestamp == 0.0: p_data.timestamp = timestamp
-
-            if pkg_id not in pkgs_visited_for_temps:
-                pkgs_visited_for_temps.add(pkg_id)
-                pkg_therm_stat = read_msr(cpu_id, MSR_IA32_PACKAGE_THERM_STATUS)
-                if pkg_therm_stat is not None:
-                    dts = (pkg_therm_stat >> 16) & 0x7F
-                    p_data.pkg_temp = tjmax - dts
-
-            if pkg_id not in pkgs_visited_for_rapl:
-                pkgs_visited_for_rapl.add(pkg_id)
-                pkg_rapl_path, dram_rapl_path = None, None
-                for domain in rapl_domains_info.get('pkg', []):
-                     if domain['id'] == pkg_id: pkg_rapl_path = domain['path']; break
-                if not pkg_rapl_path and len(rapl_domains_info.get('pkg', [])) == 1 and rapl_domains_info['pkg'][0]['id'] == -1:
-                    pkg_rapl_path = rapl_domains_info['pkg'][0]['path']
-                for domain in rapl_domains_info.get('dram', []):
-                     if domain['id'] == pkg_id: dram_rapl_path = domain['path']; break
-                if not dram_rapl_path and len(rapl_domains_info.get('dram', [])) == 1 and rapl_domains_info['dram'][0]['id'] == -1:
-                     if len(all_pkg_ids) == 1 or pkg_id == 0:
-                         dram_rapl_path = rapl_domains_info['dram'][0]['path']
-                if pkg_rapl_path: p_data.energy_pkg_uj = read_sysfs_int(pkg_rapl_path) or 0
-                if dram_rapl_path: p_data.energy_dram_uj = read_sysfs_int(dram_rapl_path) or 0
+                     cpu_data[c_id].core_throttled = throttled_val
 
     return cpu_data, pkg_data
 
@@ -444,28 +464,16 @@ def main():
                     ram_watt = ""
                     pkg_temp_str = ""
 
-                    if d_pkg:
-                        # --- Handle 48-bit wraparound ---
-                        MAX_ENERGY_UJ = 2**48  # 48-bit counter max
-                    
-                        energy_pkg_delta = d_pkg.energy_pkg_uj
-                        if energy_pkg_delta < 0:
-                            energy_pkg_delta += MAX_ENERGY_UJ
-                    
-                        energy_dram_delta = d_pkg.energy_dram_uj
-                        if energy_dram_delta < 0:
-                            energy_dram_delta += MAX_ENERGY_UJ
-                    
-                        pkg_watt_val = (energy_pkg_delta / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
-                        ram_watt_val = (energy_dram_delta / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
+                    if d_pkg: # Check if delta package data exists
+                        pkg_watt_val = (d_pkg.energy_pkg_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
+                        ram_watt_val = (d_pkg.energy_dram_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
 
                         # Optional Sanity Check Warning (adjust threshold as needed)
                         MAX_REASONABLE_PKG_WATTS = 1000 # Example threshold
                         if pkg_watt_val > MAX_REASONABLE_PKG_WATTS:
                             print(f"Warning: High PkgWatt calculated: {pkg_watt_val:.2f}W for Pkg {pkg_id}")
-                            sys.exit(1)
                         if ram_watt_val > MAX_REASONABLE_PKG_WATTS/2 : # DRAM usually lower
-                            print(f"Warning: High RAMWatt calculated: {ram_watt_val:.2f}W for Pkg {pkg_id}")
+                             print(f"Warning: High RAMWatt calculated: {ram_watt_val:.2f}W for Pkg {pkg_id}")
 
                         pkg_watt = f"{pkg_watt_val:.2f}"
                         ram_watt = f"{ram_watt_val:.2f}"
