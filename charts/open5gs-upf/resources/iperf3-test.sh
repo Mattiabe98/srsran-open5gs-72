@@ -27,7 +27,7 @@ SLEEP_BETWEEN=7
 
 UPLINK_RATES=("5M" "10M" "20M" "30M" "35M")
 UPLINK_MAX_ATTEMPT_RATE="40M"
-DOWNLINK_RATES=("10M" "50M" "100M" "150M" "200M" "250M" "300M")
+DOWNLINK_RATES=("10M" "50M" "100M" "150M" "200M" "250M" "300M" "350M")
 BURSTY_UPLINK_RATE="50M"
 BURSTY_DOWNLINK_RATE="300M"
 BIDIR_UDP_RATE="30M"
@@ -96,6 +96,9 @@ cleanup() {
     # Be cautious if other iperf3 processes might be running
     log "Attempting to clean up any stray iperf3 client processes..."
     pkill -f "iperf3 -c $SERVER"
+    log "Sleeping for 5 minutes to record idle metrics..."
+    sleep 300
+    log "Finished."
     exit 0
 }
 
@@ -136,29 +139,29 @@ for i in $(seq 1 $ROUNDS); do
     # --- Section 1: Standard TCP (Unconstrained Rate) ---
     log "--- Testing Unconstrained TCP ---"
     # Pass the COMPLETE command string, including -J, as the second argument
-    run_test "TCP Uplink (Single Stream, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -J"
-    run_test "TCP Downlink (Single Stream, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -R -J"
-    run_test "TCP Uplink ($PARALLEL_STREAMS_SUSTAINED Parallel, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -P $PARALLEL_STREAMS_SUSTAINED -J"
-    run_test "TCP Downlink ($PARALLEL_STREAMS_SUSTAINED Parallel, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -P $PARALLEL_STREAMS_SUSTAINED -R -J"
+    run_test "TCP Uplink (Single Stream, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -J -R"
+    run_test "TCP Downlink (Single Stream, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -J"
+    run_test "TCP Uplink ($PARALLEL_STREAMS_SUSTAINED Parallel, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -P $PARALLEL_STREAMS_SUSTAINED -J -R"
+    run_test "TCP Downlink ($PARALLEL_STREAMS_SUSTAINED Parallel, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -P $PARALLEL_STREAMS_SUSTAINED -J"
 
     # --- Section 2: Rate-Limited TCP ---
     log "--- Testing Rate-Limited TCP ---"
     for rate in "${UPLINK_RATES[@]}"; do
-        run_test "TCP Uplink (Rate Limited: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $rate -J"
+        run_test "TCP Uplink (Rate Limited: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $rate -J -R"
     done
-    run_test "TCP Uplink (Rate Limited: $UPLINK_MAX_ATTEMPT_RATE - Expecting Cap)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $UPLINK_MAX_ATTEMPT_RATE -J"
+    run_test "TCP Uplink (Rate Limited: $UPLINK_MAX_ATTEMPT_RATE - Expecting Cap)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $UPLINK_MAX_ATTEMPT_RATE -J -R"
     for rate in "${DOWNLINK_RATES[@]}"; do
-         run_test "TCP Downlink (Rate Limited: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $rate -R -J"
+         run_test "TCP Downlink (Rate Limited: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -b $rate -J"
     done
 
     # --- Section 3: Standard UDP ---
     log "--- Testing Standard UDP ---"
     for rate in "${UPLINK_RATES[@]}"; do
-        run_test "UDP Uplink (Rate: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $rate -t $DURATION -J"
+        run_test "UDP Uplink (Rate: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $rate -t $DURATION -J -R"
     done
-    run_test "UDP Uplink (Rate: $UPLINK_MAX_ATTEMPT_RATE - Expecting Loss/Cap)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $UPLINK_MAX_ATTEMPT_RATE -t $DURATION -J"
+    run_test "UDP Uplink (Rate: $UPLINK_MAX_ATTEMPT_RATE - Expecting Loss/Cap)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $UPLINK_MAX_ATTEMPT_RATE -t $DURATION -J -R"
     for rate in "${DOWNLINK_RATES[@]}"; do
-        run_test "UDP Downlink (Rate: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $rate -t $DURATION -R -J"
+        run_test "UDP Downlink (Rate: $rate)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $rate -t $DURATION -J"
     done
 
     # --- Section 4: Bidirectional Tests ---
@@ -168,19 +171,19 @@ for i in $(seq 1 $ROUNDS); do
 
     # --- Section 5: Small Packet / High Packet Rate Tests ---
     log "--- Testing Small Packet / High Packet Rate ---"
-    run_test "UDP Uplink (Small Packets: ${SMALL_PACKET_LEN}B, Rate: ${SMALL_PACKET_RATE})" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $SMALL_PACKET_RATE -t $DURATION -l $SMALL_PACKET_LEN -J"
-    run_test "UDP Downlink (Small Packets: ${SMALL_PACKET_LEN}B, Rate: ${SMALL_PACKET_RATE})" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $SMALL_PACKET_RATE -t $DURATION -l $SMALL_PACKET_LEN -R -J"
-    run_test "TCP Uplink (Small MSS: ${SMALL_MSS}B, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -J"
-    run_test "TCP Downlink (Small MSS: ${SMALL_MSS}B, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -R -J"
+    run_test "UDP Uplink (Small Packets: ${SMALL_PACKET_LEN}B, Rate: ${SMALL_PACKET_RATE})" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $SMALL_PACKET_RATE -t $DURATION -l $SMALL_PACKET_LEN -J -R"
+    run_test "UDP Downlink (Small Packets: ${SMALL_PACKET_LEN}B, Rate: ${SMALL_PACKET_RATE})" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $SMALL_PACKET_RATE -t $DURATION -l $SMALL_PACKET_LEN -J"
+    run_test "TCP Uplink (Small MSS: ${SMALL_MSS}B, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -J -R"
+    run_test "TCP Downlink (Small MSS: ${SMALL_MSS}B, Uncapped)" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -J"
     low_rate_small_mss=${UPLINK_RATES[1]} # Example: use the 10M rate
-    run_test "TCP Uplink (Small MSS: ${SMALL_MSS}B, Rate: ${low_rate_small_mss})" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -b ${low_rate_small_mss} -J"
+    run_test "TCP Uplink (Small MSS: ${SMALL_MSS}B, Rate: ${low_rate_small_mss})" "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -M $SMALL_MSS -b ${low_rate_small_mss} -J -R"
 
     # --- Section 6: Bursty Traffic ---
     log "--- Testing Bursty Traffic ---"
-    run_test "UDP Bursty Uplink (${BURSTY_UPLINK_RATE} for ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $BURSTY_UPLINK_RATE -t $BURST_DURATION -J"
-    run_test "UDP Bursty Downlink (${BURSTY_DOWNLINK_RATE} for ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $BURSTY_DOWNLINK_RATE -t $BURST_DURATION -R -J"
-    run_test "TCP Bursty Uplink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J"
-    run_test "TCP Bursty Downlink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -R -J"
+    run_test "UDP Bursty Uplink (${BURSTY_UPLINK_RATE} for ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $BURSTY_UPLINK_RATE -t $BURST_DURATION -J -R"
+    run_test "UDP Bursty Downlink (${BURSTY_DOWNLINK_RATE} for ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -u -b $BURSTY_DOWNLINK_RATE -t $BURST_DURATION -J"
+    run_test "TCP Bursty Uplink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J -R"
+    run_test "TCP Bursty Downlink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)" "iperf3 -c $SERVER -p $IPERF_PORT -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J"
 
     log "===== Finished Round $i ====="
 
