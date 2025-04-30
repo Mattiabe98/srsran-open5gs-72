@@ -149,10 +149,10 @@ spec:
               mountPath:  /opt/open5gs/etc/open5gs/upf.yaml
               subPath: "upf.yaml"
             - name: iperf3-test
-              mountPath:  /iperf3-test.sh
+              mountPath: /iperf3-test.sh
               subPath: "iperf3-test.sh"
             - name: iperf3-simple
-              mountPath:  /iperf3-simple.sh
+              mountPath: /iperf3-simple.sh
               subPath: "iperf3-simple.sh"
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
