@@ -4,5 +4,5 @@ metadata:
   name: {{ include "common.names.fullname" . }}-iperf3-simple
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 data:
-  iperf3-simple-test.sh: |
-{{ tpl (.Files.Get "resources/iperf3-simple-test.sh") . | indent 4 }}
+  downclock-test.sh: |
+{{ tpl (.Files.Get "resources/downclock-test.sh") . | indent 4 }}
