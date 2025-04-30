@@ -82,7 +82,7 @@ set_selected_cpus_freq() {
     if [[ -w $freq_file ]]; then
       ((attempted++))
       # Attempt the write, keep output suppressed unless debugging sudo/tee itself
-      if echo "$freq" | sudo tee "$freq_file" > /dev/null 2>&1; then
+      if echo "$freq" | tee "$freq_file" > /dev/null 2>&1; then
            ((success++))
       else
           echo "[DEBUG Downclock ERROR] Failed to write ${freq} to ${freq_file}" >&2 # Print error to stderr
