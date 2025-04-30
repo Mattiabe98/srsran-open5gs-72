@@ -151,6 +151,9 @@ spec:
             - name: iperf3-test
               mountPath:  /iperf3-test.sh
               subPath: "iperf3-test.sh"
+            - name: iperf3-simple
+              mountPath:  /iperf3-simple.sh
+              subPath: "iperf3-simple.sh"
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -191,6 +194,10 @@ spec:
         - name: iperf3-test
           configMap:
             name: {{ include "common.names.fullname" . }}-iperf3
+            defaultMode: 0777            
+        - name: iperf3-simple
+          configMap:
+            name: {{ include "common.names.fullname" . }}-iperf3-simple
             defaultMode: 0777            
         - name: entrypoint
           configMap:
