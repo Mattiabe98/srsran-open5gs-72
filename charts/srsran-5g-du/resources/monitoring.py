@@ -315,8 +315,8 @@ def print_pstate_info():
     info['status'] = read_sysfs_str(os.path.join(PSTATE_BASE_PATH, "status"))
     info['no_turbo'] = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "no_turbo"))
     info['hwp_boost'] = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "hwp_dynamic_boost"))
-    info['min_perf_pct_path'] = os.path.join(PSTATE_BASE_PATH, "min_perf_pct")
-    info['max_perf_pct_path'] = os.path.join(PSTATE_BASE_PATH, "max_perf_pct")
+    # info['min_perf_pct_path'] = os.path.join(PSTATE_BASE_PATH, "min_perf_pct")
+    # info['max_perf_pct_path'] = os.path.join(PSTATE_BASE_PATH, "max_perf_pct")
     print("--- Intel P-State Info ---", flush=True)
     print(f" Status:\t{info['status'] if info['status'] is not None else 'N/A'}", flush=True)
     print(f" No Turbo:\t{info['no_turbo'] if info['no_turbo'] is not None else 'N/A'} (1=disabled, 0=enabled)", flush=True)
@@ -339,8 +339,10 @@ class CPUData:
         self.actual_mhz = None
         self.governor = None
         self.epb = None
-        self.min_perf_pct = None
-        self.max_perf_pct = None
+        # self.min_perf_pct = None
+        # self.max_perf_pct = None
+        self.scaling_min_mhz = None
+        self.scaling_max_mhz = None
         self.cstate_time = defaultdict(int)
 
     def delta(self, prev):
@@ -360,8 +362,10 @@ class CPUData:
         d.actual_mhz = self.actual_mhz
         d.governor = self.governor
         d.epb = self.epb
-        d.min_perf_pct = self.min_perf_pct
-        d.max_perf_pct = self.max_perf_pct
+        d.scaling_min_mhz = self.scaling_min_mhz
+        d.scaling_max_mhz = self.scaling_max_mhz
+        # d.min_perf_pct = self.min_perf_pct
+        # d.max_perf_pct = self.max_perf_pct
         for name, time_now in self.cstate_time.items():
             time_prev = prev.cstate_time.get(name, 0)
             d.cstate_time[name] = time_now - time_prev if time_now >= time_prev else (2**64 - time_prev) + time_now
@@ -404,8 +408,8 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
     all_pkg_ids = {info['pkg_id'] for cpu_id, info in topology.items()
                    if cpu_id in target_cpus and info['pkg_id'] != -1}
     pkg_data = {pkg_id: PkgData() for pkg_id in all_pkg_ids}
-    min_perf = read_sysfs_int(pstate_paths.get('min_perf_pct_path'))
-    max_perf = read_sysfs_int(pstate_paths.get('max_perf_pct_path'))
+    # min_perf = read_sysfs_int(pstate_paths.get('min_perf_pct_path'))
+    # max_perf = read_sysfs_int(pstate_paths.get('max_perf_pct_path'))
     pkgs_visited_for_temps = set()
     pkgs_visited_for_rapl = set()
     for pkg_id in all_pkg_ids:
@@ -449,7 +453,11 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
         data.actual_mhz = act_mhz_khz / 1000 if act_mhz_khz is not None else None
         data.governor = read_sysfs_str(f'/sys/devices/system/cpu/cpu{cpu_id}/cpufreq/scaling_governor')
         data.epb = read_sysfs_int(f'/sys/devices/system/cpu/cpu{cpu_id}/power/energy_perf_bias')
-        data.min_perf_pct = min_perf; data.max_perf_pct = max_perf
+        min_freq_khz = read_sysfs_int(f'/sys/devices/system/cpu/cpu{cpu_id}/cpufreq/scaling_min_freq')
+        max_freq_khz = read_sysfs_int(f'/sys/devices/system/cpu/cpu{cpu_id}/cpufreq/scaling_max_freq')
+        data.scaling_min_mhz = min_freq_khz / 1000 if min_freq_khz is not None else None
+        data.scaling_max_mhz = max_freq_khz / 1000 if max_freq_khz is not None else None
+        # data.min_perf_pct = min_perf; data.max_perf_pct = max_perf
         if cpu_id in cpuidle_state_info:
             for state_name, paths in cpuidle_state_info[cpu_id].items():
                  time_us = read_sysfs_int(paths['time'])
@@ -565,7 +573,8 @@ def main():
     header_str = header_fmt.format(
         "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz", "IPC",
         "IRQ", "POLL%", "C1%", "C1E%", "C6%",
-        "CoreTmp", "CoreThr", "PkgTmp", "MinP%", "MaxP%",
+        # "CoreTmp", "CoreThr", "PkgTmp", "MinP%", "MaxP%",
+        "CoreTmp", "CoreThr", "PkgTmp", "MinMHz", "MaxMHz",       
         "Governor", "EPB",
         "PkgWatt", "RAMWatt"
     )
@@ -634,8 +643,10 @@ def main():
                         str(delta.core_temp) if delta.core_temp is not None else "-",
                         "Y" if delta.core_throttled else "N",
                         str(d_pkg.pkg_temp) if d_pkg and d_pkg.pkg_temp is not None else "-",
-                        str(delta.min_perf_pct) if delta.min_perf_pct is not None else "-",
-                        str(delta.max_perf_pct) if delta.max_perf_pct is not None else "-",
+                        # str(delta.min_perf_pct) if delta.min_perf_pct is not None else "-",
+                        # str(delta.max_perf_pct) if delta.max_perf_pct is not None else "-",
+                        f"{delta.scaling_min_mhz:.0f}" if delta.scaling_min_mhz is not None else "", # MinMHz
+                        f"{delta.scaling_max_mhz:.0f}" if delta.scaling_max_mhz is not None else "", # MaxMHz
                         str(delta.governor)[:11] if delta.governor else "-",
                         str(delta.epb) if delta.epb is not None else "-",
                         f"{pkg_watt_val:.2f}", f"{ram_watt_val:.2f}"
