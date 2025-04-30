@@ -48,7 +48,7 @@ set_selected_cpus_freq() {
   for cpu_id in "${CPU_LIST[@]}"; do
     freq_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_max_freq"
     if [[ -f $freq_file ]]; then
-      echo $freq | sudo tee "$freq_file" > /dev/null
+      echo $freq | tee "$freq_file" > /dev/null
     fi
   done
 }
