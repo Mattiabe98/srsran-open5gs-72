@@ -17,7 +17,7 @@ fi
 echo "Using server IP: $SERVER"
 IPERF_PORT="5201" # Default iPerf3 port
 
-LOG_DIR="/mnt/data/iperf3-tests" # Ensure this directory exists
+LOG_DIR="/mnt/data/downclock-test" # Ensure this directory exists
 LOG_BASENAME="iperf3_traffic"
 
 DURATION=60
