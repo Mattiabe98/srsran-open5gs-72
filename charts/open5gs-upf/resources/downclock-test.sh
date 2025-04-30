@@ -76,10 +76,7 @@ set_selected_cpus_freq() {
   for cpu_id in "${CPU_LIST[@]}"; do
     local freq_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_max_freq"
     # Check if file exists and is writable before attempting to write
-    if [[ -w $freq_file ]]; then
-      # Use sudo to write, redirect stdout and stderr to silence it completely
-      echo "$freq" | tee "$freq_file" > /dev/null 2>&1
-    fi
+    echo "$freq" | tee "$freq_file" > /dev/null 2>&1
      # Silently check governor (optional but good practice)
      local gov_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_governor"
      if [[ -e $gov_file ]]; then
