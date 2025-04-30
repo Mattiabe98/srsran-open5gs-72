@@ -16,16 +16,14 @@ MSR_IA32_APERF = 0xE8
 MSR_IA32_THERM_STATUS = 0x19C
 MSR_IA32_PACKAGE_THERM_STATUS = 0x1B1
 MSR_IA32_TEMPERATURE_TARGET = 0x1A2
+MSR_IA32_FIXED_CTR0 = 0x309 # Instructions Retired
+MSR_IA32_FIXED_CTR1 = 0x30A # Unhalted Core Cycles
 
 # --- Constants ---
 MAX_CPUIDLE_STATES = 10
-PSTATE_BASE_PATH = "/sys/devices/system/cpu/intel_pstate" # Path for global p-state info
+PSTATE_BASE_PATH = "/sys/devices/system/cpu/intel_pstate"
 
 # --- Helper Functions ---
-# (read_sysfs_int, read_sysfs_str, read_msr, parse_interrupts,
-#  get_cpu_topology, get_tjmax, find_rapl_domains,
-#  get_cpuidle_state_info, get_effective_cpus remain the same)
-# ... (paste previous helper functions here) ...
 def read_sysfs_int(path):
     try:
         fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
@@ -85,29 +83,26 @@ def get_tjmax(cpu_id):
     return tjmax
 
 def find_rapl_domains():
-    """Finds sysfs paths for package and DRAM RAPL domains via powercap."""
     domains = {'pkg': [], 'dram': []}; powercap_base = "/sys/class/powercap"
     try:
         if not os.path.isdir(powercap_base): return domains
-        # Find package domains
         for path in glob.glob(os.path.join(powercap_base, "intel-rapl:*")):
             if os.path.isdir(path) and ':' not in os.path.basename(path).split(':')[-1]:
                 name = read_sysfs_str(os.path.join(path, "name"))
                 energy_path = os.path.join(path, "energy_uj")
-                max_energy_path = os.path.join(path, "max_energy_range_uj") # Path to max range
-                if name and name.startswith("package") and os.path.exists(energy_path) and os.path.exists(max_energy_path): # Check max exists
-                    try: id_ = int(name.split('-')[-1]); domains['pkg'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path}) # Store max path
+                max_energy_path = os.path.join(path, "max_energy_range_uj")
+                if name and name.startswith("package") and os.path.exists(energy_path) and os.path.exists(max_energy_path):
+                    try: id_ = int(name.split('-')[-1]); domains['pkg'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path})
                     except: domains['pkg'].append({'id': -1, 'path': energy_path, 'max_path': max_energy_path})
-        # Find DRAM domains
         for path in glob.glob(os.path.join(powercap_base, "intel-rapl:*:*")):
              if os.path.isdir(path):
                  name = read_sysfs_str(os.path.join(path, "name"))
                  energy_path = os.path.join(path, "energy_uj")
-                 max_energy_path = os.path.join(path, "max_energy_range_uj") # Path to max range
-                 if name == "dram" and os.path.exists(energy_path) and os.path.exists(max_energy_path): # Check max exists
+                 max_energy_path = os.path.join(path, "max_energy_range_uj")
+                 if name == "dram" and os.path.exists(energy_path) and os.path.exists(max_energy_path):
                      try:
                          parent = os.path.basename(os.path.dirname(path)); id_ = int(parent.split(':')[-1])
-                         domains['dram'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path}) # Store max path
+                         domains['dram'].append({'id': id_, 'path': energy_path, 'max_path': max_energy_path})
                      except: domains['dram'].append({'id': -1, 'path': energy_path, 'max_path': max_energy_path})
         domains['pkg'].sort(key=lambda x: x['id']); domains['dram'].sort(key=lambda x: x['id'])
     except Exception as e: print(f"Warning: Finding RAPL domains: {e}")
@@ -136,8 +131,6 @@ def get_effective_cpus():
                 if cpu_str: break
             except Exception as e: print(f"Warning: Reading {path}: {e}.")
     if cpu_str is None or cpu_str == "":
-        # if path_read: print(f"Warning: Effective CPU file '{path_read}' empty/unreadable. Using process affinity.")
-        # else: print("Warning: Cannot read cgroup effective CPUs, using process affinity.")
         try: return sorted(list(os.sched_getaffinity(0)))
         except OSError: print("Error: Cannot get process affinity."); return []
     cpus = set()
@@ -148,6 +141,24 @@ def get_effective_cpus():
         except ValueError: print(f"Warning: Parsing part '{part}' in '{cpu_str}'")
     return sorted(list(cpus))
 
+def print_pstate_info():
+    info = {'min_perf_pct': None, 'max_perf_pct': None}
+    if not os.path.exists(PSTATE_BASE_PATH):
+        print("intel_pstate sysfs directory not found.")
+        return info
+    status = read_sysfs_str(os.path.join(PSTATE_BASE_PATH, "status"))
+    no_turbo = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "no_turbo"))
+    hwp_boost = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "hwp_dynamic_boost"))
+    info['min_perf_pct'] = os.path.join(PSTATE_BASE_PATH, "min_perf_pct")
+    info['max_perf_pct'] = os.path.join(PSTATE_BASE_PATH, "max_perf_pct")
+    print("--- Intel P-State Info ---", flush=True)
+    print(f" Status:\t{status if status is not None else 'N/A'}", flush=True)
+    print(f" No Turbo:\t{no_turbo if no_turbo is not None else 'N/A'} (1=disabled, 0=enabled)", flush=True)
+    print(f" HWP Boost:\t{hwp_boost if hwp_boost is not None else 'N/A'} (1=enabled, 0=disabled)", flush=True)
+    print("--------------------------", flush=True)
+    return info
+
+
 # --- Data Structures ---
 class CPUData:
     def __init__(self):
@@ -155,15 +166,16 @@ class CPUData:
         self.tsc = 0
         self.aperf = 0
         self.mperf = 0
+        self.instr_retired = 0 # Added IPC
+        self.core_cycles = 0   # Added IPC
         self.irq_count = 0
         self.core_temp = None
         self.core_throttled = False
-        # self.core_throttle_cnt = 0 # Removed
         self.actual_mhz = None
         self.governor = None
         self.epb = None
-        self.min_perf_pct = None # Added
-        self.max_perf_pct = None # Added
+        self.min_perf_pct = None
+        self.max_perf_pct = None
         self.cstate_time = defaultdict(int)
 
     def delta(self, prev):
@@ -172,38 +184,35 @@ class CPUData:
              else: return None
         if self.tsc < prev.tsc: return None
 
-        d = CPUData()
-        d.timestamp = self.timestamp - prev.timestamp
+        d = CPUData(); d.timestamp = self.timestamp - prev.timestamp
         if d.timestamp == 0: d.timestamp = 1e-9
 
         d.tsc = self.tsc - prev.tsc
         d.aperf = self.aperf - prev.aperf if self.aperf >= prev.aperf else (2**64 - prev.aperf) + self.aperf
         d.mperf = self.mperf - prev.mperf if self.mperf >= prev.mperf else (2**64 - prev.mperf) + self.mperf
+        d.instr_retired = self.instr_retired - prev.instr_retired if self.instr_retired >= prev.instr_retired else (2**64 - prev.instr_retired) + self.instr_retired
+        d.core_cycles = self.core_cycles - prev.core_cycles if self.core_cycles >= prev.core_cycles else (2**64 - prev.core_cycles) + self.core_cycles
         d.irq_count = self.irq_count - prev.irq_count
-        # d.core_throttle_cnt = self.core_throttle_cnt - prev.core_throttle_cnt # Removed
 
         d.core_temp = self.core_temp
         d.core_throttled = self.core_throttled
         d.actual_mhz = self.actual_mhz
         d.governor = self.governor
         d.epb = self.epb
-        d.min_perf_pct = self.min_perf_pct # Keep current value
-        d.max_perf_pct = self.max_perf_pct # Keep current value
+        d.min_perf_pct = self.min_perf_pct
+        d.max_perf_pct = self.max_perf_pct
 
-        for state_name, current_time in self.cstate_time.items():
-            prev_time = prev.cstate_time.get(state_name, 0)
-            d.cstate_time[state_name] = current_time - prev_time if current_time >= prev_time else (2**64 - prev_time) + current_time
-
+        for name, time_now in self.cstate_time.items():
+            time_prev = prev.cstate_time.get(name, 0)
+            d.cstate_time[name] = time_now - time_prev if time_now >= time_prev else (2**64 - time_prev) + time_now
         return d
 
 def calculate_delta_energy(current_uj, prev_uj, max_range_uj):
     """Calculates energy delta correctly handling wrap-around based on max_range."""
-    if current_uj >= prev_uj:
-        # No wrap-around detected or counter hasn't incremented
-        delta = current_uj - prev_uj
-    else:
-        # Wrap-around detected
-        delta = (max_range_uj - prev_uj) + current_uj
+    if max_range_uj <= 0: max_range_uj = 2**64 # Fallback
+    if current_uj >= prev_uj: delta = current_uj - prev_uj
+    else: delta = (max_range_uj - prev_uj) + current_uj
+    if delta > max_range_uj: return 0 # Sanity check fail
     return delta
 
 class PkgData:
@@ -212,30 +221,18 @@ class PkgData:
         self.pkg_temp = None
         self.energy_pkg_uj = 0
         self.energy_dram_uj = 0
-        # Store the max range read during initialization
         self.max_energy_pkg_uj = 0
         self.max_energy_dram_uj = 0
 
      def delta(self, prev):
         if not isinstance(prev, PkgData) or self.timestamp <= prev.timestamp: return None
-        d = PkgData()
-        d.timestamp = self.timestamp - prev.timestamp
+        d = PkgData(); d.timestamp = self.timestamp - prev.timestamp
         if d.timestamp == 0: d.timestamp = 1e-9
-
         d.pkg_temp = self.pkg_temp
-
-        # Use the specific max_range for correct delta calculation
-        d.energy_pkg_uj = calculate_delta_energy(
-            self.energy_pkg_uj, prev.energy_pkg_uj, self.max_energy_pkg_uj
-        )
-        d.energy_dram_uj = calculate_delta_energy(
-            self.energy_dram_uj, prev.energy_dram_uj, self.max_energy_dram_uj
-        )
-
-        # Keep max range info for potential debugging if needed
+        d.energy_pkg_uj = calculate_delta_energy(self.energy_pkg_uj, prev.energy_pkg_uj, self.max_energy_pkg_uj)
+        d.energy_dram_uj = calculate_delta_energy(self.energy_dram_uj, prev.energy_dram_uj, self.max_energy_dram_uj)
         d.max_energy_pkg_uj = self.max_energy_pkg_uj
         d.max_energy_dram_uj = self.max_energy_dram_uj
-
         return d
 
 # --- Data Collection ---
@@ -265,13 +262,11 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
             if t['pkg_id'] == pkg_id: rep_cpu = c; break
         if rep_cpu == -1: continue
 
-        # Read Pkg Temp MSR
         pkg_therm_stat = read_msr(rep_cpu, MSR_IA32_PACKAGE_THERM_STATUS)
         if pkg_therm_stat is not None:
             dts = (pkg_therm_stat >> 16) & 0x7F
             p_data.pkg_temp = tjmax - dts
 
-        # Read RAPL sysfs paths and max values
         pkg_rapl_info, dram_rapl_info = None, None
         for domain in rapl_domains_info.get('pkg', []):
              if domain['id'] == pkg_id: pkg_rapl_info = domain; break
@@ -284,20 +279,22 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
                  dram_rapl_info = rapl_domains_info['dram'][0]
 
         if pkg_rapl_info:
-            p_data.max_energy_pkg_uj = read_sysfs_int(pkg_rapl_info['max_path']) or (2**64 -1) # Default high if read fails
+            p_data.max_energy_pkg_uj = read_sysfs_int(pkg_rapl_info['max_path']) or (2**64 -1)
             p_data.energy_pkg_uj = read_sysfs_int(pkg_rapl_info['path']) or 0
         if dram_rapl_info:
-            p_data.max_energy_dram_uj = read_sysfs_int(dram_rapl_info['max_path']) or (2**64 -1) # Default high if read fails
+            p_data.max_energy_dram_uj = read_sysfs_int(dram_rapl_info['max_path']) or (2**64 -1)
             p_data.energy_dram_uj = read_sysfs_int(dram_rapl_info['path']) or 0
 
 
     # --- Read Per-CPU values ---
     for cpu_id in target_cpus:
         data = cpu_data[cpu_id]
-        data.timestamp = timestamp # Ensure all CPUs share the exact same start timestamp
+        data.timestamp = timestamp
         data.tsc = read_msr(cpu_id, MSR_IA32_TSC) or 0
         data.aperf = read_msr(cpu_id, MSR_IA32_APERF) or 0
         data.mperf = read_msr(cpu_id, MSR_IA32_MPERF) or 0
+        data.instr_retired = read_msr(cpu_id, MSR_IA32_FIXED_CTR0) or 0 # Read Inst Retired
+        data.core_cycles = read_msr(cpu_id, MSR_IA32_FIXED_CTR1) or 0   # Read Core Cycles
         data.irq_count = current_irqs.get(cpu_id, 0)
         act_mhz_khz = read_sysfs_int(f'/sys/devices/system/cpu/cpu{cpu_id}/cpufreq/scaling_cur_freq')
         data.actual_mhz = act_mhz_khz / 1000 if act_mhz_khz is not None else None
@@ -326,30 +323,6 @@ def get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_st
                      cpu_data[c_id].core_throttled = throttled_val
 
     return cpu_data, pkg_data
-
-# --- P-State Info ---
-def print_pstate_info():
-    """Prints global intel_pstate info if available."""
-    if not os.path.exists(PSTATE_BASE_PATH):
-        print("intel_pstate sysfs directory not found.")
-        return {} # Return empty dict if not found
-
-    info = {}
-    info['status'] = read_sysfs_str(os.path.join(PSTATE_BASE_PATH, "status"))
-    info['no_turbo'] = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "no_turbo"))
-    info['hwp_dynamic_boost'] = read_sysfs_int(os.path.join(PSTATE_BASE_PATH, "hwp_dynamic_boost"))
-    info['min_perf_pct'] = os.path.join(PSTATE_BASE_PATH, "min_perf_pct") # Store path
-    info['max_perf_pct'] = os.path.join(PSTATE_BASE_PATH, "max_perf_pct") # Store path
-
-    print("--- Intel P-State Info ---", flush=True)
-    print(f" Status: {info['status'] if info['status'] is not None else 'N/A'}", flush=True)
-    print(f" No Turbo: {info['no_turbo'] if info['no_turbo'] is not None else 'N/A'} (1=disabled, 0=enabled)", flush=True)
-    print(f" HWP Dynamic Boost: {info['hwp_dynamic_boost'] if info['hwp_dynamic_boost'] is not None else 'N/A'} (1=enabled, 0=disabled)", flush=True)
-    print("--------------------------", flush=True)
-    return info
-
-
-# --- Main Loop ---
 
 # --- Main Loop ---
 
@@ -389,7 +362,7 @@ def main():
     tjmax = get_tjmax(first_cpu)
     rapl_domains_info = find_rapl_domains()
     cpuidle_state_info = {cpu: get_cpuidle_state_info(cpu) for cpu in target_cpus}
-    pstate_info = print_pstate_info() # Print global pstate info once & get paths
+    pstate_info = print_pstate_info()
 
     print(f"Using TjMax: {tjmax}°C", flush=True)
     if not rapl_domains_info['pkg']: print("Warning: No package RAPL domain found via powercap.", flush=True)
@@ -398,17 +371,19 @@ def main():
     # --- Correct Initialization ---
     print("Taking initial measurement...", flush=True)
     prev_cpu_data, prev_pkg_data = get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_state_info, pstate_info)
-    time.sleep(args.interval) # Wait for the first interval before starting the loop
+    time.sleep(args.interval)
     # --------------------------
 
     iteration = 0
     rows_since_header = 0
     max_rows_before_header = args.header_interval * num_target_cpus
 
-    header_fmt = "{:<4}\t{:<3}\t{:>7}\t{:>7}\t{:>5}\t{:>7}\t{:>7}\t{:>10}\t{:>5}\t{:>5}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>4}\t{:>4}\t{:>11}\t{:>3}\t{:>7}\t{:>7}"
+    # Define Header - Added POLL%, IPC. Adjusted widths. TAB delimiter.
+    #                Core CPU  ActMHz   Avg_MHz   Busy%   Bzy_MHz   TSC_MHz      IPC         IRQ   POLL%    C1%   C1E%    C6% CoreTmp CoreThr  PkgTmp MinP% MaxP% Governor   EPB PkgWatt RAMWatt
+    header_fmt = "{:<4}\t{:<3}\t{:>7}\t{:>7}\t{:>5}\t{:>7}\t{:>7}\t{:>4}\t{:>10}\t{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>4}\t{:>4}\t{:>11}\t{:>3}\t{:>7}\t{:>7}"
     header_str = header_fmt.format(
-        "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz", "IRQ",
-        "C1%", "C1E%", "C6%",
+        "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz", "IPC", # Added IPC
+        "IRQ", "POLL%", "C1%", "C1E%", "C6%",
         "CoreTmp", "CoreThr", "PkgTmp", "MinP%", "MaxP%",
         "Governor", "EPB",
         "PkgWatt", "RAMWatt"
@@ -416,34 +391,24 @@ def main():
 
     while True:
         try:
-            # --- Read Current Counters ---
             current_cpu_data, current_pkg_data = get_all_counters(target_cpus, topology, tjmax, rapl_domains_info, cpuidle_state_info, pstate_info)
 
-            # --- Calculate Deltas using previous valid readings ---
             delta_cpu_data = {}
             delta_pkg_data = {}
             valid_delta = True
 
             for cpu_id in target_cpus:
-                # Ensure prev_cpu_data[cpu_id] exists (it should after init)
-                if cpu_id not in prev_cpu_data:
-                    print(f"Warning: Missing previous data for CPU {cpu_id}")
-                    valid_delta = False; break
+                if cpu_id not in prev_cpu_data: valid_delta = False; break
                 delta = current_cpu_data[cpu_id].delta(prev_cpu_data[cpu_id])
                 if delta is None: valid_delta = False; break
                 delta_cpu_data[cpu_id] = delta
-
             if valid_delta:
-                 for pkg_id in current_pkg_data: # Iterate current packages
-                      # Ensure prev_pkg_data[pkg_id] exists
-                      if pkg_id not in prev_pkg_data:
-                           print(f"Warning: Missing previous data for Pkg {pkg_id}")
-                           valid_delta = False; break
+                 for pkg_id in current_pkg_data:
+                      if pkg_id not in prev_pkg_data: valid_delta = False; break
                       delta = current_pkg_data[pkg_id].delta(prev_pkg_data[pkg_id])
                       if delta is None: valid_delta = False; break
                       delta_pkg_data[pkg_id] = delta
 
-            # --- Print Data if Delta Calculation Succeeded ---
             if valid_delta:
                 if rows_since_header == 0:
                     utc_now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -451,90 +416,75 @@ def main():
                     print(header_str, flush=True)
 
                 for cpu_id in target_cpus:
-                    # Use the calculated delta data
                     delta = delta_cpu_data[cpu_id]
                     interval_sec = delta.timestamp
                     core_id_val = topology[cpu_id]['core_id']
                     pkg_id = topology[cpu_id]['pkg_id']
 
+                    # --- Calculations ---
                     avg_mhz = delta.aperf / (interval_sec * 1_000_000) if interval_sec > 0 else 0
                     busy_pct = 100.0 * delta.mperf / delta.tsc if delta.tsc > 0 else 0.0
                     tsc_mhz = delta.tsc / (interval_sec * 1_000_000) if interval_sec > 0 else 0
                     bzy_mhz = (delta.aperf / delta.mperf) * tsc_mhz if delta.mperf > 0 and tsc_mhz > 0 else 0.0
+                    ipc = delta.instr_retired / delta.core_cycles if delta.core_cycles > 0 else 0.0 # Calculate IPC
 
                     interval_us = interval_sec * 1_000_000
+                    poll_time_delta = delta.cstate_time.get('POLL', 0) # Look for POLL state
                     c1_time_delta = delta.cstate_time.get('C1', 0)
                     c1e_time_delta = delta.cstate_time.get('C1E', 0)
                     c6_time_delta = delta.cstate_time.get('C6', 0)
 
+                    poll_pct = min(100.0, 100.0 * poll_time_delta / interval_us) if interval_us > 0 else 0.0
                     c1_pct = min(100.0, 100.0 * c1_time_delta / interval_us) if interval_us > 0 else 0.0
                     c1e_pct = min(100.0, 100.0 * c1e_time_delta / interval_us) if interval_us > 0 else 0.0
                     c6_pct = min(100.0, 100.0 * c6_time_delta / interval_us) if interval_us > 0 else 0.0
 
-                    d_pkg = delta_pkg_data.get(pkg_id) # Get delta package data
-                    pkg_watt = ""
-                    ram_watt = ""
-                    pkg_temp_str = ""
-
-                    if d_pkg: # Check if delta package data exists
-                        pkg_watt_val = (d_pkg.energy_pkg_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
-                        ram_watt_val = (d_pkg.energy_dram_uj / 1_000_000) / interval_sec if interval_sec > 0 else 0.0
-
-                        # Optional Sanity Check Warning (adjust threshold as needed)
-                        MAX_REASONABLE_PKG_WATTS = 1000 # Example threshold
-                        if pkg_watt_val > MAX_REASONABLE_PKG_WATTS:
-                            print(f"Warning: High PkgWatt calculated: {pkg_watt_val:.2f}W for Pkg {pkg_id}")
-                        if ram_watt_val > MAX_REASONABLE_PKG_WATTS/2 : # DRAM usually lower
-                             print(f"Warning: High RAMWatt calculated: {ram_watt_val:.2f}W for Pkg {pkg_id}")
-
-                        pkg_watt = f"{pkg_watt_val:.2f}"
-                        ram_watt = f"{ram_watt_val:.2f}"
-                        pkg_temp_str = str(d_pkg.pkg_temp) if d_pkg.pkg_temp is not None else ""
-
+                    d_pkg = delta_pkg_data.get(pkg_id)
+                    pkg_watt_val = (d_pkg.energy_pkg_uj / 1_000_000) / interval_sec if d_pkg and interval_sec > 0 else 0.0
+                    ram_watt_val = (d_pkg.energy_dram_uj / 1_000_000) / interval_sec if d_pkg and interval_sec > 0 else 0.0
 
                     # --- Formatting Data Row ---
                     print(header_fmt.format(
-                        str(core_id_val) if core_id_val != -1 else "",
-                        cpu_id,
-                        f"{delta.actual_mhz:.1f}" if delta.actual_mhz is not None else "",
-                        f"{avg_mhz:.1f}",
-                        f"{busy_pct:.2f}",
-                        f"{bzy_mhz:.1f}",
-                        f"{tsc_mhz:.1f}",
-                        delta.irq_count if delta.irq_count is not None else "",
-                        f"{c1_pct:.2f}",
-                        f"{c1e_pct:.2f}",
-                        f"{c6_pct:.2f}",
-                        str(delta.core_temp) if delta.core_temp is not None else "",
-                        "Y" if delta.core_throttled else "N",
-                        pkg_temp_str, # Use the potentially empty string
-                        str(delta.min_perf_pct) if delta.min_perf_pct is not None else "",
-                        str(delta.max_perf_pct) if delta.max_perf_pct is not None else "",
-                        str(delta.governor)[:11] if delta.governor else "",
-                        str(delta.epb) if delta.epb is not None else "",
-                        pkg_watt, # Use pre-formatted string
-                        ram_watt  # Use pre-formatted string
+                        str(core_id_val) if core_id_val != -1 else "",        # Core
+                        cpu_id,                                                # CPU
+                        f"{delta.actual_mhz:.1f}" if delta.actual_mhz is not None else "", # ActMHz
+                        f"{avg_mhz:.1f}",                                     # Avg_MHz
+                        f"{busy_pct:.2f}",                                   # Busy%
+                        f"{bzy_mhz:.1f}",                                     # Bzy_MHz
+                        f"{tsc_mhz:.1f}",                                     # TSC_MHz
+                        f"{ipc:.2f}",                                         # IPC << ADDED
+                        delta.irq_count if delta.irq_count is not None else "", # IRQ
+                        f"{poll_pct:.2f}",                                   # POLL% << ADDED
+                        f"{c1_pct:.2f}",                                     # C1%
+                        f"{c1e_pct:.2f}",                                    # C1E%
+                        f"{c6_pct:.2f}",                                     # C6%
+                        str(delta.core_temp) if delta.core_temp is not None else "", # CoreTmp
+                        "Y" if delta.core_throttled else "N",                   # CoreThr
+                        str(d_pkg.pkg_temp) if d_pkg and d_pkg.pkg_temp is not None else "", # PkgTmp
+                        str(delta.min_perf_pct) if delta.min_perf_pct is not None else "", # MinP%
+                        str(delta.max_perf_pct) if delta.max_perf_pct is not None else "", # MaxP%
+                        str(delta.governor)[:11] if delta.governor else "",      # Governor
+                        str(delta.epb) if delta.epb is not None else "",        # EPB
+                        f"{pkg_watt_val:.2f}",                               # PkgWatt
+                        f"{ram_watt_val:.2f}"                                # RAMWatt
                     ), flush=True)
                     rows_since_header += 1
 
                 if rows_since_header >= max_rows_before_header:
                     rows_since_header = 0
             else:
-                 print("Skipping print for interval due to invalid delta calculation.", flush=True)
+                 print(f"Skipping print for interval {iteration+1} due to invalid delta.", flush=True)
 
-
-            # Update state for next iteration *after* potential printing
             prev_cpu_data = current_cpu_data
             prev_pkg_data = current_pkg_data
             iteration += 1
-
             time.sleep(args.interval)
 
         except KeyboardInterrupt:
             print("\nExiting.")
             break
         except Exception as e:
-            print(f"\nRuntime error: {e}", flush=True)
+            print(f"\nRuntime error on iteration {iteration}: {e}", flush=True)
             import traceback
             traceback.print_exc()
             time.sleep(args.interval)
