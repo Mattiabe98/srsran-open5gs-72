@@ -571,7 +571,7 @@ def main():
     # (Header format and string remain the same)
     header_fmt = "{:<4}\t{:<3}\t{:>7}\t{:>7}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>10}\t{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>4}\t{:>4}\t{:>11}\t{:>3}\t{:>7}\t{:>7}"
     header_str = header_fmt.format(
-        "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz", "IPC",
+        "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz",
         "IRQ", "POLL%", "C1%", "C1E%", "C6%",
         # "CoreTmp", "CoreThr", "PkgTmp", "MinP%", "MaxP%",
         "CoreTmp", "CoreThr", "PkgTmp", "MinMHz", "MaxMHz",       
@@ -637,7 +637,7 @@ def main():
                     print(header_fmt.format(
                         str(core_id_val) if core_id_val != -1 else "-", cpu_id,
                         f"{delta.actual_mhz:.1f}" if delta.actual_mhz is not None else "-",
-                        f"{avg_mhz:.1f}", f"{busy_pct:.2f}", f"{bzy_mhz:.1f}", f"{tsc_mhz:.1f}", f"{ipc:.2f}",
+                        f"{avg_mhz:.1f}", f"{busy_pct:.2f}", f"{bzy_mhz:.1f}", f"{tsc_mhz:.1f}",
                         delta.irq_count if delta.irq_count is not None else "-",
                         f"{poll_pct:.2f}", f"{c1_pct:.2f}", f"{c1e_pct:.2f}", f"{c6_pct:.2f}",
                         str(delta.core_temp) if delta.core_temp is not None else "-",
