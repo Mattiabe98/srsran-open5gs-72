@@ -563,7 +563,7 @@ def main():
     # (Header format and string remain the same)
     header_fmt = "{:<4}\t{:<3}\t{:>7}\t{:>7}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>10}\t{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>7}\t{:>7}\t{:>7}\t{:>4}\t{:>4}\t{:>11}\t{:>3}\t{:>7}\t{:>7}"
     header_str = header_fmt.format(
-        "Core", "CPU", "ActMHz", "AvgMHz", "Busy%", "BzyMHz", "TSCMHz", "IPC",
+        "Core", "CPU", "ActMHz", "Avg_MHz", "Busy%", "Bzy_MHz", "TSC_MHz", "IPC",
         "IRQ", "POLL%", "C1%", "C1E%", "C6%",
         "CoreTmp", "CoreThr", "PkgTmp", "MinP%", "MaxP%",
         "Governor", "EPB",
@@ -599,7 +599,7 @@ def main():
             if valid_delta:
                 if rows_since_header == 0:
                     utc_now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S %Z')
-                    print(f"\n--- {utc_now} --- Interval: {args.interval:.2f}s ---", flush=True)
+                    print(f"\n--- {utc_now} ---", flush=True)
                     print(header_str, flush=True)
 
                 # (Printing loop remains the same, IPC calculation is correct)
