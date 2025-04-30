@@ -9,7 +9,7 @@ DURATION=1800     # iperf3 test duration (seconds) - 30 minutes
 SLEEP_BETWEEN=10 # Sleep between iperf3 tests (seconds)
 IPERF_PORT=5201
 LOG_DIR="/mnt/data/iperf3-tests"
-LOG_BASENAME="iperf3_4tests" # Reverted to original base name
+LOG_BASENAME="iperf3_4tests"
 UDP_UL_RATE="40M"
 UDP_DL_RATE="350M"
 
@@ -37,18 +37,17 @@ log() {
     echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] $1" | tee -a "$IPERF_LOGFILE"
 }
 
-# --- CPU Frequency Control Functions (Silent) ---
+# --- CPU Frequency Control Functions (with stdout debug prints) ---
 parse_cpu_list() {
   local raw="$1"
   local cpus=()
-  local i # Declare loop variable locally
+  local i
 
   if [[ "$raw" == "all" ]]; then
     for ((i=0; i<=MAX_CPU_INDEX; i++)); do
       cpus+=("$i")
     done
   else
-    # Replace commas with spaces for easier processing
     raw="${raw//,/ }"
     for part in $raw; do
       if [[ $part =~ ^([0-9]+)-([0-9]+)$ ]]; then
@@ -64,56 +63,84 @@ parse_cpu_list() {
       fi
     done
   fi
-  # Deduplicate the list
   CPU_LIST=($(printf "%s\n" "${cpus[@]}" | sort -un))
-  # No logging about targeted CPUs
+  # Print targeted CPUs to stdout for verification
+  echo "[DEBUG Downclock] Targeting CPUs: ${CPU_LIST[*]}"
 }
 
 set_selected_cpus_freq() {
   local freq=$1
-  # No logging of frequency changes
-  local cpu_id # Declare local variable
+  local mhz=$((freq / 1000))
+  # Print the attempt to stdout
+  echo "[DEBUG Downclock $(date '+%T')] Attempting to set scaling_max_freq to ${mhz} MHz (${freq} kHz) for CPUs: ${CPU_LIST[*]}"
+
+  local cpu_id
+  local success=0 # Track if any write succeeds
+  local attempted=0 # Track if any write was attempted
   for cpu_id in "${CPU_LIST[@]}"; do
     local freq_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_max_freq"
-    # Check if file exists and is writable before attempting to write
     if [[ -w $freq_file ]]; then
-      # Use sudo to write, redirect stdout and stderr to silence it completely
-      echo "$freq" | sudo tee "$freq_file" > /dev/null 2>&1
+      ((attempted++))
+      # Attempt the write, keep output suppressed unless debugging sudo/tee itself
+      if echo "$freq" | sudo tee "$freq_file" > /dev/null 2>&1; then
+           ((success++))
+      else
+          echo "[DEBUG Downclock ERROR] Failed to write ${freq} to ${freq_file}" >&2 # Print error to stderr
+      fi
+    else
+       # Print warning to stderr if file isn't writable
+       if [[ -e $freq_file ]]; then
+           echo "[DEBUG Downclock WARN] Cannot write to ${freq_file} (CPU ${cpu_id}). Check permissions." >&2
+       else
+           echo "[DEBUG Downclock WARN] File ${freq_file} (CPU ${cpu_id}) does not exist." >&2
+       fi
     fi
-     # Silently check governor (optional but good practice)
-     local gov_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_governor"
-     if [[ -e $gov_file ]]; then
-         local current_gov
-         current_gov=$(cat "$gov_file")
-         if [[ "$current_gov" != "userspace" && "$current_gov" != "performance" ]]; then
-             # If needed, you could attempt to silently set it here:
-             # echo "userspace" | sudo tee "$gov_file" > /dev/null 2>&1
-             : # Do nothing, just acknowledge the check happened
-         fi
-     fi
   done
+
+  # Report outcome to stdout if any attempt was made
+  if [[ $attempted -gt 0 ]]; then
+      if [[ $success -eq ${#CPU_LIST[@]} ]]; then
+          # echo "[DEBUG Downclock $(date '+%T')] Set frequency ${mhz} MHz successfully for all ${#CPU_LIST[@]} targeted CPUs."
+          : # Keep output minimal, the "Attempting" message is the key one
+      elif [[ $success -gt 0 ]]; then
+          echo "[DEBUG Downclock $(date '+%T')] Set frequency ${mhz} MHz for $success / ${#CPU_LIST[@]} targeted CPUs."
+      else
+          echo "[DEBUG Downclock ERROR $(date '+%T')] Failed to set frequency ${mhz} MHz for any targeted CPU." >&2
+      fi
+  # else
+  #     echo "[DEBUG Downclock $(date '+%T')] No writable scaling_max_freq files found for targeted CPUs."
+  fi
+
+
+  # Check governor silently (optional)
+  # ... (governor check code omitted for brevity, can be added back if needed) ...
 }
 
 # Function to run the downclocking loop silently in the background
 run_downclocking_loop() {
-    # No logging about starting
+    echo "[DEBUG Downclock $(date '+%T')] Starting background downclocking loop."
     set_selected_cpus_freq "$START_FREQ" # Ensure start freq before loop
 
     while true; do
       local current_freq=$START_FREQ
 
+      echo "[DEBUG Downclock $(date '+%T')] Starting frequency sweep down from ${START_FREQ} kHz..."
       while (( current_freq >= END_FREQ )); do
         set_selected_cpus_freq "$current_freq"
         sleep "$INTERVAL"
         (( current_freq -= STEP ))
+        # Add a check to see if the background process should exit
+        # This can prevent loops running after the main script tries to kill it
+        # but might add slight overhead. Optional.
+        # kill -0 $$ || { echo "[DEBUG Downclock $(date '+%T')] Parent process gone, exiting loop."; exit 0; }
       done
 
-      # Reached bottom, wait before reset
+      echo "[DEBUG Downclock $(date '+%T')] Reached END_FREQ (${END_FREQ} kHz). Waiting $INTERVAL sec..."
       sleep "$INTERVAL"
 
-      # Reset to start frequency
+      echo "[DEBUG Downclock $(date '+%T')] Resetting frequency to START_FREQ (${START_FREQ} kHz)."
       set_selected_cpus_freq "$START_FREQ"
-      # No logging about reset or cycle start
+      echo "[DEBUG Downclock $(date '+%T')] Starting next cycle wait ($INTERVAL sec)."
       sleep "$INTERVAL" # Wait a bit at the top frequency
     done
 }
@@ -122,20 +149,17 @@ run_downclocking_loop() {
 run_test() {
     local description="$1"
     local command="$2"
-    local output # Declare local variable
+    local output
 
     log "Starting: $description (Duration: ${DURATION}s)"
     log "Command: $command"
 
-    # Run iperf3 and capture output
     if output=$(eval "$command" 2>&1); then
-        # Log SUCCESS to the iperf log file
-        echo -e "\n$output\n" >> "$IPERF_LOGFILE" # Append full iperf3 output
+        echo -e "\n$output\n" >> "$IPERF_LOGFILE"
         log "Finished: $description - SUCCESS"
     else
-        # Log FAILURE to the iperf log file
         log "Finished: $description - FAILURE"
-        echo -e "\nError Output:\n$output\n" >> "$IPERF_LOGFILE" # Append error output
+        echo -e "\nError Output:\n$output\n" >> "$IPERF_LOGFILE"
     fi
 
     log "Sleeping for $SLEEP_BETWEEN seconds..."
@@ -144,32 +168,36 @@ run_test() {
 
 # --- Cleanup Function ---
 cleanup() {
-    log "Cleaning up..." # Log cleanup start
+    log "Cleaning up..." # Logged to iperf log
+
+    echo "[DEBUG Downclock $(date '+%T')] Cleanup initiated. Stopping background process..." # To stdout
 
     if [[ -n "$DOWNCLOCK_PID" ]] && kill -0 "$DOWNCLOCK_PID" 2>/dev/null; then
-        # Silently kill the background process
         kill "$DOWNCLOCK_PID"
         wait "$DOWNCLOCK_PID" 2>/dev/null
-        # No logging about stopping the downclock process
+        echo "[DEBUG Downclock $(date '+%T')] Background process (PID $DOWNCLOCK_PID) stopped." # To stdout
+    else
+         echo "[DEBUG Downclock $(date '+%T')] Background process (PID $DOWNCLOCK_PID) not found or already stopped." # To stdout
     fi
-    DOWNCLOCK_PID="" # Clear the PID regardless
+    DOWNCLOCK_PID=""
 
-    # Reset frequency to START_FREQ silently on exit
-    # Ensure CPU_LIST is populated if cleanup runs early
+    echo "[DEBUG Downclock $(date '+%T')] Attempting final frequency reset to START_FREQ (${START_FREQ} kHz)." # To stdout
     if [[ ${#CPU_LIST[@]} -eq 0 ]]; then
+        # Repopulate if list is empty (e.g., script failed early)
         parse_cpu_list "$TARGET_CPUS"
     fi
-    # Check if CPU_LIST was successfully populated
     if [[ ${#CPU_LIST[@]} -gt 0 ]]; then
          set_selected_cpus_freq "$START_FREQ"
-         # No logging about frequency reset
+    else
+        echo "[DEBUG Downclock ERROR $(date '+%T')] Cannot reset frequency, CPU list empty." >&2 # To stderr
     fi
 
-    log "Killing any remaining iperf3 client processes..."
+    log "Killing any remaining iperf3 client processes..." # Logged to iperf log
     pkill -f "iperf3 -c $SERVER"
 
-    log "Finished." # Log cleanup end
-    exit 0 # Ensure script exits cleanly after trap
+    log "Finished." # Logged to iperf log
+    echo "[DEBUG Downclock $(date '+%T')] Cleanup finished." # To stdout
+    exit 0
 }
 trap cleanup SIGINT SIGTERM EXIT
 
@@ -185,47 +213,47 @@ fi
 # Ensure log directory exists
 mkdir -p "$LOG_DIR" || { echo "Failed to create log directory: $LOG_DIR"; exit 1; }
 
-# Parse the CPU list based on configuration (silently)
+# Parse the CPU list (will print targeted CPUs to stdout)
 parse_cpu_list "$TARGET_CPUS"
 if [[ ${#CPU_LIST[@]} -eq 0 ]]; then
-    # Use standard echo for critical setup error, not the log function
-    echo "Error: No target CPUs found based on TARGET_CPUS='$TARGET_CPUS' and MAX_CPU_INDEX=$MAX_CPU_INDEX. Exiting."
+    echo "Error: No target CPUs found based on TARGET_CPUS='$TARGET_CPUS' and MAX_CPU_INDEX=$MAX_CPU_INDEX. Exiting." >&2
     exit 1
 fi
 
-# Perform initial frequency set silently to check permissions
-# Save current errexit state, disable it, check command, restore state
+# Attempt initial frequency set (will print attempt to stdout)
+echo "[DEBUG Downclock $(date '+%T')] Performing initial frequency set..."
 initial_errexit_state="$-" # Save flags like 'e'
 set +e # Disable exit on error temporarily
 set_selected_cpus_freq "$START_FREQ"
 set_freq_status=$?
-# Restore errexit state if it was set
 if [[ "$initial_errexit_state" == *e* ]]; then set -e; fi
 
-if [[ $set_freq_status -ne 0 ]]; then
-    echo "Error: Failed to set initial CPU frequency. Check sudo permissions or sysfs paths. Exiting."
+# Check the *result* of the set_selected_cpus_freq call implicitly
+# (It prints errors internally now if it fails)
+# We mainly care if *sudo* itself failed, less common if permissions are just wrong
+if [[ $set_freq_status -ne 0 && $set_freq_status -ne 1 ]]; then # Tee might return 1 on write error, sudo might return something else
+    echo "Error: Initial frequency setting failed critically (maybe sudo issue?). Exiting." >&2
     exit 1
 fi
-# No logging about successful initial set
+echo "[DEBUG Downclock $(date '+%T')] Initial frequency set attempted."
+
 
 # Log script start using the iperf3 logger
 log "===== Starting 4-Test iPerf3 Routine (Server: $SERVER) ====="
-# No logging here about downclocking details
 
 
 # --- Begin test loop ---
 for round in $(seq 1 "$ROUNDS"); do
-    log "--- Round $round of $ROUNDS ---"
+    log "--- Round $round of $ROUNDS ---" # Logged to iperf log
 
-    # Start the downclocking loop silently in the background
+    # Start the downclocking loop in background (will print its start msg to stdout)
     run_downclocking_loop &
     DOWNCLOCK_PID=$!
-    # No logging about starting the background process
+    echo "[DEBUG Downclock $(date '+%T')] Background downclocking process started (PID: $DOWNCLOCK_PID)." # To stdout
 
-    # Wait a moment for the first frequency step to potentially apply
     sleep 2
 
-    # Run the iperf3 tests (these will log using the `log` function)
+    # Run the iperf3 tests (logs to iperf log file)
     run_test "UDP Uplink (-R, ${UDP_UL_RATE})" \
         "iperf3 -c $SERVER -p $IPERF_PORT -u -b $UDP_UL_RATE -t $DURATION -J -R"
 
@@ -238,21 +266,24 @@ for round in $(seq 1 "$ROUNDS"); do
     run_test "TCP Downlink (BBR)" \
         "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -C bbr -J"
 
-    # Stop the background downclocking process silently
+    # Stop the background downclocking process
+    echo "[DEBUG Downclock $(date '+%T')] Stopping background process (PID $DOWNCLOCK_PID) for round $round..." # To stdout
     if [[ -n "$DOWNCLOCK_PID" ]] && kill -0 "$DOWNCLOCK_PID" 2>/dev/null; then
         kill "$DOWNCLOCK_PID"
-        wait "$DOWNCLOCK_PID" 2>/dev/null # Wait for termination silently
+        wait "$DOWNCLOCK_PID" 2>/dev/null
+        echo "[DEBUG Downclock $(date '+%T')] Background process stopped." # To stdout
+    else
+         echo "[DEBUG Downclock $(date '+%T')] Background process (PID $DOWNCLOCK_PID) not found or already stopped." # To stdout
     fi
-    DOWNCLOCK_PID="" # Clear the PID
-    # No logging about stopping the background process
+    DOWNCLOCK_PID=""
 
-    # Reset frequency silently after stopping the loop
+    # Reset frequency after stopping the loop (will print attempt to stdout)
+    echo "[DEBUG Downclock $(date '+%T')] Resetting frequency after round $round..." # To stdout
     set_selected_cpus_freq "$START_FREQ"
-    # No logging about frequency reset
 
 done
 
-log "===== All tests completed ====="
+log "===== All tests completed =====" # Logged to iperf log
 
 # Cleanup function will be called automatically on normal exit via trap
 exit 0
