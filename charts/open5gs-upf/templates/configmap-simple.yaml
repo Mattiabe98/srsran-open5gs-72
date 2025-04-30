@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-iperf3-simple
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+data:
+  iperf3-simple.sh: |
+{{ tpl (.Files.Get "resources/iperf3-simple.sh") . | indent 4 }}
