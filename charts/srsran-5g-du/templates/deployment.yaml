@@ -152,9 +152,6 @@ spec:
             - name: monitoring
               mountPath:  /monitoring.py
               subPath: monitoring.py
-            - name: downclock
-              mountPath:  /downclock.sh
-              subPath: downclock.sh
             - name: vpp-config
               mountPath:  /etc/vpp/
             - mountPath: /dev/hugepages
@@ -191,10 +188,6 @@ spec:
         - name: monitoring
           configMap:
             name: {{ include "common.names.fullname" . }}-monitoring
-            defaultMode: 0777
-        - name: downclock
-          configMap:
-            name: {{ include "common.names.fullname" . }}-downclock
             defaultMode: 0777
         - name: vpp-config
           configMap:
