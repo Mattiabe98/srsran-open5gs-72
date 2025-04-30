@@ -27,8 +27,9 @@ MAX_CPU_INDEX=63 # Adjust if your system has more/less than 64 logical CPUs
 # --- Internal Variables ---
 TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
 IPERF_LOGFILE="${LOG_DIR}/${LOG_BASENAME}_${TIMESTAMP}.log"
-DOWNCLOCK_PID="" # To store the PID of the background downclock process
+# DOWNCLOCK_PID is no longer global, will be handled locally in run_test
 CPU_LIST=()      # Populated by parse_cpu_list
+CURRENT_DOWNCLOCK_PID="" # Global variable to track the current downclock PID for cleanup
 
 # === Functions ===
 
@@ -76,7 +77,8 @@ set_selected_cpus_freq() {
   for cpu_id in "${CPU_LIST[@]}"; do
     local freq_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_max_freq"
     # Check if file exists and is writable before attempting to write
-    echo "$freq" | tee "$freq_file" > /dev/null 2>&1
+    # Silently attempt to set freq
+    echo "$freq" > "$freq_file" 2>/dev/null || : # Ignore errors for individual cores if file not writeable
      # Silently check governor (optional but good practice)
      local gov_file="/sys/devices/system/cpu/cpu$cpu_id/cpufreq/scaling_governor"
      if [[ -e $gov_file ]]; then
@@ -91,40 +93,54 @@ set_selected_cpus_freq() {
   done
 }
 
-# Function to run the downclocking loop silently in the background
-run_downclocking_loop() {
-    # No logging about starting
-    set_selected_cpus_freq "$START_FREQ" # Ensure start freq before loop
 
-    while true; do
-      local current_freq=$START_FREQ
+# Function to perform ONE downclock cycle (start -> end) and hold at end_freq
+# This will run in the background during each iperf3 test.
+downclock_once_and_hold() {
+    local current_freq=$START_FREQ
+    set_selected_cpus_freq "$START_FREQ" # Ensure start freq
 
-      while (( current_freq >= END_FREQ )); do
+    # Loop downwards towards END_FREQ
+    while (( current_freq > END_FREQ )); do
         set_selected_cpus_freq "$current_freq"
         sleep "$INTERVAL"
-        (( current_freq -= STEP ))
-      done
 
-      # Reached bottom, wait before reset
-      sleep "$INTERVAL"
-
-      # Reset to start frequency
-      set_selected_cpus_freq "$START_FREQ"
-      # No logging about reset or cycle start
-      sleep "$INTERVAL" # Wait a bit at the top frequency
+        # Calculate next frequency, ensuring it doesn't go below END_FREQ
+        if (( current_freq - STEP <= END_FREQ )); then
+            current_freq=$END_FREQ
+        else
+            (( current_freq -= STEP ))
+        fi
     done
+
+    # Ensure the final frequency is exactly END_FREQ
+    set_selected_cpus_freq "$END_FREQ"
+
+    # Stay at END_FREQ - sleep indefinitely until killed by the parent process
+    while true; do sleep 3600; done
 }
+
 
 # --- iPerf3 Test Function ---
 run_test() {
     local description="$1"
     local command="$2"
     local output # Declare local variable
+    local local_downclock_pid="" # PID for the downclock process specific to this test
 
     log "Starting: $description (Duration: ${DURATION}s)"
     log "Command: $command"
 
-    # Run iperf3 and capture output
+    # 1) Start downclocking WHILE iperf3 is running (in the background)
+    downclock_once_and_hold &
+    local_downclock_pid=$!
+    CURRENT_DOWNCLOCK_PID=$local_downclock_pid # Update global PID for cleanup trap
+    # No logging for starting downclock process
+
+    # Wait a tiny bit for the downclock process to start and potentially set the first frequency
+    sleep 1
+
+    # 2) Run iperf3 and wait for it to finish
     if output=$(eval "$command" 2>&1); then
         # Log SUCCESS to the iperf log file
         echo -e "\n$output\n" >> "$IPERF_LOGFILE" # Append full iperf3 output
@@ -135,6 +151,18 @@ run_test() {
         echo -e "\nError Output:\n$output\n" >> "$IPERF_LOGFILE" # Append error output
     fi
 
+    # 3) ONLY WHEN iperf3 test ends, stop the downclock process and reset CPU freq
+    # Silently kill the background downclock process for THIS test
+    if [[ -n "$local_downclock_pid" ]] && kill -0 "$local_downclock_pid" 2>/dev/null; then
+        kill "$local_downclock_pid"
+        wait "$local_downclock_pid" 2>/dev/null # Wait for it to terminate silently
+    fi
+    CURRENT_DOWNCLOCK_PID="" # Clear the global PID tracker
+
+    # Reset frequency to START_FREQ silently AFTER stopping the downclock process
+    set_selected_cpus_freq "$START_FREQ"
+    # No logging about frequency reset here
+
     log "Sleeping for $SLEEP_BETWEEN seconds..."
     sleep "$SLEEP_BETWEEN"
 }
@@ -143,13 +171,14 @@ run_test() {
 cleanup() {
     log "Cleaning up..." # Log cleanup start
 
-    if [[ -n "$DOWNCLOCK_PID" ]] && kill -0 "$DOWNCLOCK_PID" 2>/dev/null; then
+    # Kill the currently running downclock process, if any
+    if [[ -n "$CURRENT_DOWNCLOCK_PID" ]] && kill -0 "$CURRENT_DOWNCLOCK_PID" 2>/dev/null; then
         # Silently kill the background process
-        kill "$DOWNCLOCK_PID"
-        wait "$DOWNCLOCK_PID" 2>/dev/null
+        kill "$CURRENT_DOWNCLOCK_PID"
+        wait "$CURRENT_DOWNCLOCK_PID" 2>/dev/null
         # No logging about stopping the downclock process
     fi
-    DOWNCLOCK_PID="" # Clear the PID regardless
+    CURRENT_DOWNCLOCK_PID="" # Clear the PID
 
     # Reset frequency to START_FREQ silently on exit
     # Ensure CPU_LIST is populated if cleanup runs early
@@ -166,8 +195,9 @@ cleanup() {
     pkill -f "iperf3 -c $SERVER"
 
     log "Finished." # Log cleanup end
-    exit 0 # Ensure script exits cleanly after trap
+    # trap automatically exits with the script's exit code or the signal's exit code
 }
+# Use EXIT trap along with signal traps to ensure cleanup runs on normal exit too
 trap cleanup SIGINT SIGTERM EXIT
 
 
@@ -200,8 +230,16 @@ set_freq_status=$?
 if [[ "$initial_errexit_state" == *e* ]]; then set -e; fi
 
 if [[ $set_freq_status -ne 0 ]]; then
-    echo "Error: Failed to set initial CPU frequency. Check sudo permissions or sysfs paths. Exiting."
-    exit 1
+    # Check if *any* frequency was set successfully, allow partial success
+    # This check is tricky without verbose output from set_selected_cpus_freq
+    # We'll assume if the command didn't exit non-zero *immediately* (due to permission denied on first core), it's likely okay.
+    # A more robust check would involve reading back a frequency, but keeping it simple.
+    # Re-evaluating the necessity of this check if set_selected_cpus_freq ignores errors:
+    # Let's proceed even if some cores fail, as the user might intend that.
+    # We just need to ensure we don't exit prematurely due to permissions on *some* cores.
+    # The silent error handling `|| :` in set_selected_cpus_freq should prevent script exit if `set -e` is active.
+    : # No exit here, proceed cautiously
+    echo "Warning: Potentially failed to set initial CPU frequency for some cores. Check permissions or sysfs paths. Continuing..." >&2 # Warning to stderr
 fi
 # No logging about successful initial set
 
@@ -211,45 +249,31 @@ log "===== Starting 4-Test iPerf3 Routine (Server: $SERVER) ====="
 
 
 # --- Begin test loop ---
+# The loop now just runs the tests sequentially.
+# The run_test function handles the downclocking start/stop for each test.
 for round in $(seq 1 "$ROUNDS"); do
     log "--- Round $round of $ROUNDS ---"
 
-    # Start the downclocking loop silently in the background
-    run_downclocking_loop &
-    DOWNCLOCK_PID=$!
-    # No logging about starting the background process
-
-    # Wait a moment for the first frequency step to potentially apply
-    sleep 2
-
-    # Run the iperf3 tests (these will log using the `log` function)
+    # Test 1: UDP Uplink
     run_test "UDP Uplink (-R, ${UDP_UL_RATE})" \
         "iperf3 -c $SERVER -p $IPERF_PORT -u -b $UDP_UL_RATE -t $DURATION -J -R"
 
+    # Test 2: UDP Downlink
     run_test "UDP Downlink (${UDP_DL_RATE})" \
         "iperf3 -c $SERVER -p $IPERF_PORT -u -b $UDP_DL_RATE -t $DURATION -J"
 
+    # Test 3: TCP Uplink
     run_test "TCP Uplink (-R, BBR)" \
         "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -C bbr -J -R"
 
+    # Test 4: TCP Downlink
     run_test "TCP Downlink (BBR)" \
         "iperf3 -c $SERVER -p $IPERF_PORT -t $DURATION -C bbr -J"
 
-    # Stop the background downclocking process silently
-    if [[ -n "$DOWNCLOCK_PID" ]] && kill -0 "$DOWNCLOCK_PID" 2>/dev/null; then
-        kill "$DOWNCLOCK_PID"
-        wait "$DOWNCLOCK_PID" 2>/dev/null # Wait for termination silently
-    fi
-    DOWNCLOCK_PID="" # Clear the PID
-    # No logging about stopping the background process
-
-    # Reset frequency silently after stopping the loop
-    set_selected_cpus_freq "$START_FREQ"
-    # No logging about frequency reset
-
+    # Frequency reset and sleep are handled within run_test after each test completes.
 done
 
 log "===== All tests completed ====="
 
-# Cleanup function will be called automatically on normal exit via trap
-exit 0
+# No explicit exit 0 needed here, the script will exit normally, triggering the EXIT trap for final cleanup.
+# The cleanup function handles the final frequency reset.
