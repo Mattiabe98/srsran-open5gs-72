@@ -26,7 +26,7 @@ spec:
       annotations:
         cpu-quota.crio.io: "disable"
         cpu-load-balancing.crio.io: "disable"
-        k8s.v1.cni.cncf.io/networks: sriov-midhaul-du
+        k8s.v1.cni.cncf.io/networks: sriov-midhaul-du1
     spec:
       shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
@@ -131,12 +131,12 @@ spec:
           {{- end }}
           resources:
             requests:
-              hugepages-1Gi: "32Gi"
+              hugepages-1Gi: "8Gi"
               intel.com/intel_sriov_netdevice: "1"
               memory: 16Gi
               cpu: 8
             limits:
-              hugepages-1Gi: "32Gi"
+              hugepages-1Gi: "8Gi"
               intel.com/intel_sriov_netdevice: "1"
               memory: 16Gi
               cpu: 8
