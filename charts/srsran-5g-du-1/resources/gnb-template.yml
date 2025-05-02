@@ -3,19 +3,19 @@
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
 
-gnb_du_id: 1
+gnb_du_id: 2
 
 f1ap:                               # Interface between DU and CU-CP
   cu_cp_addr: 192.168.77.1             # Required TEXT (127.0.10.1). Sets the CU-CP F1-C address to connect to. 
-  bind_addr: 192.168.77.2               # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
+  bind_addr: 192.168.77.3               # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
 
 f1u:
   socket:
     -
-      bind_addr: 192.168.77.2
+      bind_addr: 192.168.77.3
 
 cell_cfg:
-  dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
+  dl_arfcn: 670624                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
@@ -85,14 +85,14 @@ ru_ofh:
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
   iq_scaling: 0.1                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
-    - network_interface: 0000:51:11.0     # Ethernet interface name used to communicate with the RU.
+    - network_interface: 0000:51:11.4     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
-      du_mac_addr: 72:0e:9b:5f:81:df   # DU MAC address.
+      du_mac_addr: 72:0e:9b:5f:81:e1   # DU MAC address.
       vlan_tag_cp: 10                   # VLAN tag value for CP.
       vlan_tag_up: 10                   # VLAN tag value for UP.
-      prach_port_id: [8, 9]            # PRACH eAxC port value.
-      dl_port_id: [0, 1]         # Downlink eAxC port values.
-      ul_port_id: [0, 1]              # Uplink eAxC port values.
+      prach_port_id: [264, 265]            # PRACH eAxC port value.
+      dl_port_id: [256, 257]         # Downlink eAxC port values.
+      ul_port_id: [256, 257]              # Uplink eAxC port values.
 
 
 e2:
@@ -111,7 +111,7 @@ metrics:
   autostart_stdout_metrics: true
 
 hal:
-   eal_args: "--lcores (0-1)@(8) -a 0000:51:11.0"
+   eal_args: "--lcores (0-1)@(8) -a 0000:51:11.4"
 
 expert_execution:
   affinities:
