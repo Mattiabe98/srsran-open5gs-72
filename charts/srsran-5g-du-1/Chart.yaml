@@ -8,7 +8,7 @@ sources:
 maintainers:
 - email: avrodriguez@gradiant.org
   name: avrodriguez
-name: srsran-5g-du
+name: srsran-5g-du-1
 version: 1.0.0
 dependencies:
   - name: common
