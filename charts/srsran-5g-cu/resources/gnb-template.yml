@@ -22,8 +22,8 @@ cu_cp:
                 sst: 1
 
 cu_up: 
-  gtpu_queue_size: 2048                # Optional INT (2048). Sets the GTP-U queue size, in PDUs.
-  gtpu_reordering_timer: 0             # Optional INT (0). Sets the GTP-U RX reordering timer (in milliseconds).
+#  gtpu_queue_size: 2048                # Optional INT (2048). Sets the GTP-U queue size, in PDUs.
+#  gtpu_reordering_timer: 0             # Optional INT (0). Sets the GTP-U RX reordering timer (in milliseconds).
   warn_on_drop: false                  # Optional BOOLEAN (false). Enables the option to log a warning for dropped packets in GTP-U and PDCP due to full queues. Supported: [false, true].
 
   f1u:
@@ -45,7 +45,7 @@ e2:
   port: 36421                       # RIC port
 
 metrics:
-  enable_json_metrics: true       # Enable reporting metrics in JSON format
+  enable_json: true       # Enable reporting metrics in JSON format
   addr: grafana-srsran-metrics-server             # Metrics-server IP
   port: 55555                     # Metrics-server Port  
 
