@@ -152,8 +152,6 @@ spec:
             - name: monitoring
               mountPath:  /monitoring.py
               subPath: monitoring.py
-            - name: vpp-config
-              mountPath:  /etc/vpp/
             - mountPath: /dev/hugepages
               name: hugepage           
             - mountPath: /dev/vfio
@@ -188,10 +186,6 @@ spec:
         - name: monitoring
           configMap:
             name: {{ include "common.names.fullname" . }}-monitoring
-            defaultMode: 0777
-        - name: vpp-config
-          configMap:
-            name: vpp-du-config
             defaultMode: 0777
         - name: memif-socket
           hostPath:
