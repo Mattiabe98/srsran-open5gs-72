@@ -112,7 +112,7 @@ metrics:
     enable_ru: true
 
 hal:
-   eal_args: "--lcores (0-1)@(62) -a 0000:51:11.0"
+   eal_args: "--lcores (0-1)@(62)"
 
 # expert_execution:
 #   affinities:
