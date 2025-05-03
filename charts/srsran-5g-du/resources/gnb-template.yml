@@ -104,8 +104,7 @@ e2:
   port: 36421                       # RIC port
 
 metrics:
-  rlc_report_period: 1000           # Set reporting period to 1s
-  enable_json_metrics: true       # Enable reporting metrics in JSON format
+  enable_json: true       # Enable reporting metrics in JSON format
   addr: grafana-srsran-metrics-server             # Metrics-server IP
   port: 55555                     # Metrics-server Port  
   autostart_stdout_metrics: true
