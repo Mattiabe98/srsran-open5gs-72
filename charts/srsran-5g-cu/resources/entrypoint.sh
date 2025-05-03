@@ -47,4 +47,5 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 #         echo "$line" >> "$LOGFILE"
 #     done
 # ) >/dev/null 2>&1 &
+sleep 1000
 stdbuf -oL -eL /usr/local/bin/srscu -c /gnb.yml
