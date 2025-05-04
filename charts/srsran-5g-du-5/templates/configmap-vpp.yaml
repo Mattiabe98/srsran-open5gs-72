@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: vpp-du-config
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-data:
-  startup.conf: |
-{{ tpl (.Files.Get "resources/startup.conf") . | indent 4 }}
