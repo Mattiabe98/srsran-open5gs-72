@@ -156,8 +156,6 @@ spec:
               name: hugepage           
             - mountPath: /dev/vfio
               name: vfio
-            - name: memif-socket
-              mountPath: /run/memif
             - name: dev-net-tun
               mountPath: /dev/net/tun
             {{- if .Values.extraVolumeMounts }}
