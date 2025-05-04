@@ -97,35 +97,35 @@ config:
       dnn: tenant2
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
     - subnet: 10.45.3.0/24
       gateway: 10.45.3.1
       dnn: tenant3
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
     - subnet: 10.45.4.0/24
       gateway: 10.45.4.1
       dnn: tenant4
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
     - subnet: 10.45.5.0/24
       gateway: 10.45.5.1
       dnn: tenant5
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
     - subnet: 10.45.6.0/24
       gateway: 10.45.6.1
       dnn: tenant6
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
 ## @param customOpen5gsConfig overwrite open5gs configuration file
 customOpen5gsConfig: {}
