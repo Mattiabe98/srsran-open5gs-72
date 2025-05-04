@@ -35,7 +35,7 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 
 # DPDK device bind
-/opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.0
+/opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:09.0
 
 # Start monitoring in the background
 (
