@@ -3,16 +3,16 @@
 # as the RF frontend using split 8. Note in this example an external clock source is not used, so the sync 
 # is not defined and the default is used. 
 
-gnb_du_id: 1
+gnb_du_id: 4
 
 f1ap:                               # Interface between DU and CU-CP
   cu_cp_addr: 192.168.77.1             # Required TEXT (127.0.10.1). Sets the CU-CP F1-C address to connect to. 
-  bind_addr: 192.168.77.2               # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
+  bind_addr: 192.168.77.6               # Required TEXT (127.0.10.2). Sets the DU F1-C bind address. If left empty, implicit bind is performed. 
 
 f1u:
   socket:
     -
-      bind_addr: 192.168.77.2
+      bind_addr: 192.168.77.6
 
 cell_cfg:
   dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
@@ -21,6 +21,7 @@ cell_cfg:
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: "00101"                   # PLMN broadcasted by the gNB.
   tac: 1                            # Tracking area code (needs to match the core configuration).
+  pci: 4
   nof_antennas_dl: 2                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
   nof_antennas_ul: 2                    # Optional UINT (1). Sets the number of antennas for uplink transmission. Supported: [1, 2, 4].  
   prach:
