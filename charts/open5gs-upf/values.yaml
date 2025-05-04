@@ -85,11 +85,46 @@ config:
       dev: ""
       advertise: ""
   subnetList:
-    - subnet: 10.45.0.0/16
-      gateway: 10.45.0.1
-      dnn: oai
+    - subnet: 10.45.1.0/24
+      gateway: 10.45.1.1
+      dnn: tenant1
       dev: ogstun
-      mask: 16
+      mask: 24
+      createDev: true
+      enableNAT: true
+    - subnet: 10.45.2.0/24
+      gateway: 10.45.2.1
+      dnn: tenant2
+      dev: ogstun
+      mask: 24
+      createDev: true
+      enableNAT: true
+    - subnet: 10.45.3.0/24
+      gateway: 10.45.3.1
+      dnn: tenant3
+      dev: ogstun
+      mask: 24
+      createDev: true
+      enableNAT: true
+    - subnet: 10.45.4.0/24
+      gateway: 10.45.4.1
+      dnn: tenant4
+      dev: ogstun
+      mask: 24
+      createDev: true
+      enableNAT: true
+    - subnet: 10.45.5.0/24
+      gateway: 10.45.5.1
+      dnn: tenant5
+      dev: ogstun
+      mask: 24
+      createDev: true
+      enableNAT: true
+    - subnet: 10.45.6.0/24
+      gateway: 10.45.6.1
+      dnn: tenant6
+      dev: ogstun
+      mask: 24
       createDev: true
       enableNAT: true
 ## @param customOpen5gsConfig overwrite open5gs configuration file
