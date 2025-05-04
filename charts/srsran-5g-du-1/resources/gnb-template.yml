@@ -112,8 +112,8 @@ metrics:
   layers:
     enable_ru: true
 
-# hal:
-#    eal_args: "--lcores (0-1)@(62)"
+hal:
+   eal_args: "-a 0000:51:11.4"
 
 # expert_execution:
 #   affinities:
