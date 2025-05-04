@@ -37,14 +37,5 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # DPDK device bind
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:09.2
 
-# Start monitoring in the background
-(
-    echo "Starting monitoring..."
-    TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S")
-    LOGFILE="/mnt/data/monitoring/monitoring_$TIMESTAMP.txt"
-
-    python3 /monitoring.py -N 1 -c 0-63 >> "$LOGFILE" 2>&1
-) &
-
 # Launch srsDU in the foreground
 stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
