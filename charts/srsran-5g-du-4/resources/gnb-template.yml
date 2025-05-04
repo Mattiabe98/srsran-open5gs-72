@@ -86,14 +86,14 @@ ru_ofh:
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
   iq_scaling: 0.1                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
-    - network_interface: 0000:51:11.0     # Ethernet interface name used to communicate with the RU.
+    - network_interface: 0000:51:09.2     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
-      du_mac_addr: 72:0e:9b:5f:81:df   # DU MAC address.
-      vlan_tag_cp: 10                   # VLAN tag value for CP.
-      vlan_tag_up: 10                   # VLAN tag value for UP.
-      prach_port_id: [8, 9]            # PRACH eAxC port value.
-      dl_port_id: [0, 1]         # Downlink eAxC port values.
-      ul_port_id: [0, 1]              # Uplink eAxC port values.
+      du_mac_addr: 72:0e:9b:5f:81:e4   # DU MAC address.
+      vlan_tag_cp: 14                   # VLAN tag value for CP.
+      vlan_tag_up: 14                   # VLAN tag value for UP.
+      prach_port_id: [264, 265]            # PRACH eAxC port value.
+      dl_port_id: [256, 257]         # Downlink eAxC port values.
+      ul_port_id: [256, 257]              # Uplink eAxC port values.
 
 
 e2:
@@ -111,7 +111,7 @@ metrics:
   autostart_stdout_metrics: true
 
 # hal:
-#    eal_args: "--lcores (0-1)@(8) -a 0000:51:11.0"
+#    eal_args: "--lcores (0-1)@(8) -a 0000:51:09.2"
 
 # expert_execution:
 #   affinities:
