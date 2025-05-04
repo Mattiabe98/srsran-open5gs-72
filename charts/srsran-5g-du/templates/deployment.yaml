@@ -152,14 +152,10 @@ spec:
             - name: monitoring
               mountPath:  /monitoring.py
               subPath: monitoring.py
-            - name: vpp-config
-              mountPath:  /etc/vpp/
             - mountPath: /dev/hugepages
               name: hugepage           
             - mountPath: /dev/vfio
               name: vfio
-            - name: memif-socket
-              mountPath: /run/memif
             - name: dev-net-tun
               mountPath: /dev/net/tun
             {{- if .Values.extraVolumeMounts }}
@@ -189,14 +185,6 @@ spec:
           configMap:
             name: {{ include "common.names.fullname" . }}-monitoring
             defaultMode: 0777
-        - name: vpp-config
-          configMap:
-            name: vpp-du-config
-            defaultMode: 0777
-        - name: memif-socket
-          hostPath:
-            path: /var/run/memif
-            type: DirectoryOrCreate
         - emptyDir:
             medium: HugePages
           name: hugepage        
