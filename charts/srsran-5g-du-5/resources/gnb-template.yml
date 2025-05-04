@@ -110,8 +110,8 @@ metrics:
   port: 55555                     # Metrics-server Port  
   autostart_stdout_metrics: true
 
-# hal:
-#    eal_args: "--lcores (0-1)@(8) -a 0000:51:09.4"
+hal:
+   eal_args: "-a 0000:51:09.4"
 
 # expert_execution:
 #   affinities:
