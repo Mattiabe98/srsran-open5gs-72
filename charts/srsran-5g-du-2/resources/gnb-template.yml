@@ -91,9 +91,9 @@ ru_ofh:
       du_mac_addr: 72:0e:9b:5f:81:e2   # DU MAC address.
       vlan_tag_cp: 12                   # VLAN tag value for CP.
       vlan_tag_up: 12                   # VLAN tag value for UP.
-      prach_port_id: [520, 521]            # PRACH eAxC port value.
-      dl_port_id: [512, 513]         # Downlink eAxC port values.
-      ul_port_id: [512, 513]              # Uplink eAxC port values.
+      ru_prach_port_id: [520, 521]            # PRACH eAxC port value.
+      ru_dl_port_id: [512, 513]         # Downlink eAxC port values.
+      ru_ul_port_id: [512, 513]              # Uplink eAxC port values.
 
 
 e2:
