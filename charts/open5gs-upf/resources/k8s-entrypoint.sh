@@ -25,7 +25,7 @@ echo "Executing k8s customized entrypoint.sh"
 {{- /* Now proceed only if a TUN device name was determined */}}
 {{- if $TUN_DEV }}
   echo "Ensuring net device {{ $TUN_DEV }} exists and is up"
-  if ! grep "{{ $TUN_DEV }}" /proc/net/dev > /dev/null; then
+  if ! grep -w "{{ $TUN_DEV }}" /proc/net/dev > /dev/null; then # Use -w for whole word match
       echo "Creating net device {{ $TUN_DEV }}"
       ip tuntap add name {{ $TUN_DEV }} mode tun
       ip link set {{ $TUN_DEV }} up
@@ -42,10 +42,10 @@ echo "Executing k8s customized entrypoint.sh"
     {{- if eq .dev $TUN_DEV }}
       echo "Setting IP {{ .gateway }}/{{ .mask }} for subnet {{ .subnet }} on device {{ .dev }}"
       # Check if IP already exists before adding (optional, but good practice)
-      if ! ip addr show {{ .dev }} | grep -q "inet {{ .gateway }}/"; then
+      if ! ip addr show {{ .dev }} | grep -q -w "inet {{ .gateway }}/{{ .mask }}"; then # Match full IP/mask
          ip addr add {{ .gateway }}/{{ .mask }} dev {{ .dev }}
       else
-         echo "IP {{ .gateway }} already configured on {{ .dev }}"
+         echo "IP {{ .gateway }}/{{ .mask }} already configured on {{ .dev }}"
       fi
 
       {{- if .enableNAT }}
@@ -57,10 +57,8 @@ echo "Executing k8s customized entrypoint.sh"
            echo "NAT rule for {{ .subnet }} already exists."
         fi
       {{- end }}
-    {{- else }}
-      # This log might be confusing if multiple dev names are used intentionally, adjust if needed
-      # echo "Skipping IP/NAT setup for subnet {{ .subnet }} - device {{ .dev }} does not match primary TUN device {{ $TUN_DEV }}"
-    {{- end }}
+    {{- /* Remove the confusing 'else' branch for cleaner logs */}}
+    {{- end }} {{- /* End if eq .dev $TUN_DEV */}}
   {{- end }} {{- /* End of range loop for IPs/NAT */}}
 {{- else }}
   echo "Warning: No TUN device specified or determined from subnetList in values.yaml."
