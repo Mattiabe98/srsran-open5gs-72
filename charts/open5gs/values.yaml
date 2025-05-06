@@ -66,6 +66,7 @@ smf:
   mtu: 1400
 upf:
   enabled: true
+  logLevel: info
   gtpu:
     dev: ""
     advertise: ""
