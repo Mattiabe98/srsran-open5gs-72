@@ -64,64 +64,65 @@ smf:
       gateway: 10.45.6.1
       dnn: tenant6
   mtu: 1400
-upf:
+upf:                   # <-- Top-level key for the UPF sub-chart
   enabled: true
-  config:
-    logLevel: info
-    upf:
-      gtpu:
-        dev: ""
+  config:              # <-- .Values.config
+    logLevel: info     # <-- .Values.config.logLevel (Needed by template)
+    upf:               # <-- .Values.config.upf (Needed for gtpu path)
+      gtpu:            # <-- .Values.config.upf.gtpu
+        dev: ""        # <-- .Values.config.upf.gtpu.dev (Matches template)
         advertise: ""
-      subnetList:
-        - subnet: 10.45.0.0/24
-          gateway: 10.45.0.1
-          dnn: oai
-          dev: ogstun
-          mask: 24
-          createDev: true
-          enableNAT: true
-        - subnet: 10.45.1.0/24
-          gateway: 10.45.1.1
-          dnn: tenant1
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
-        - subnet: 10.45.2.0/24
-          gateway: 10.45.2.1
-          dnn: tenant2
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
-        - subnet: 10.45.3.0/24
-          gateway: 10.45.3.1
-          dnn: tenant3
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
-        - subnet: 10.45.4.0/24
-          gateway: 10.45.4.1
-          dnn: tenant4
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
-        - subnet: 10.45.5.0/24
-          gateway: 10.45.5.1
-          dnn: tenant5
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
-        - subnet: 10.45.6.0/24
-          gateway: 10.45.6.1
-          dnn: tenant6
-          dev: ogstun
-          mask: 24
-          createDev: false
-          enableNAT: true
+    # Note: subnetList is NOT under config.upf anymore
+    subnetList:        # <-- Move subnetList directly under config: .Values.config.subnetList (Matches template)
+      - subnet: 10.45.0.0/24
+        gateway: 10.45.0.1
+        dnn: oai
+        dev: ogstun
+        mask: 24
+        createDev: true
+        enableNAT: true
+      - subnet: 10.45.1.0/24
+        gateway: 10.45.1.1
+        dnn: tenant1
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.2.0/24
+        gateway: 10.45.2.1
+        dnn: tenant2
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.3.0/24
+        gateway: 10.45.3.1
+        dnn: tenant3
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.4.0/24
+        gateway: 10.45.4.1
+        dnn: tenant4
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.5.0/24
+        gateway: 10.45.5.1
+        dnn: tenant5
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.6.0/24
+        gateway: 10.45.6.1
+        dnn: tenant6
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
 webui:
   ingress:
     hostname: open5gs.sno.oran.lab
