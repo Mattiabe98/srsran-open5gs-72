@@ -79,6 +79,7 @@ amf:
           mnc: "01"
         s_nssai:
           - sst: 1
+          - sst: 1
             sd: "0x000001"   # Tenant 1
           - sst: 1
             sd: "0x000002"   # Tenant 2
