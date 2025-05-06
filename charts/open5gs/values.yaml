@@ -79,17 +79,17 @@ amf:
           mnc: "01"
         s_nssai:
           - sst: 1
-            sd: 0x000001   # Tenant 1
+            sd: "0x000001"   # Tenant 1
           - sst: 1
-            sd: 0x000002   # Tenant 2
+            sd: "0x000002"   # Tenant 2
           - sst: 1
-            sd: 0x000003   # Tenant 3
+            sd: "0x000003"   # Tenant 3
           - sst: 1
-            sd: 0x000004   # Tenant 4
+            sd: "0x000004"   # Tenant 4
           - sst: 1
-            sd: 0x000005   # Tenant 5
+            sd: "0x000005"   # Tenant 5
           - sst: 1
-            sd: 0x000006   # Tenant 6
+            sd: "0x000006"   # Tenant 6
 
 ausf:
   enabled: true
