@@ -85,12 +85,19 @@ config:
       dev: ""
       advertise: ""
   subnetList:
+    - subnet: 10.45.0.0/24
+      gateway: 10.45.0.1
+      dnn: oai
+      dev: ogstun
+      mask: 24
+      createDev: true
+      enableNAT: true
     - subnet: 10.45.1.0/24
       gateway: 10.45.1.1
       dnn: tenant1
       dev: ogstun
       mask: 24
-      createDev: true
+      createDev: false
       enableNAT: true
     - subnet: 10.45.2.0/24
       gateway: 10.45.2.1
