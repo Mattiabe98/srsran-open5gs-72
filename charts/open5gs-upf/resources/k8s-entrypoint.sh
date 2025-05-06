@@ -4,42 +4,29 @@ set -e
 echo "Executing k8s customized entrypoint.sh"
 
 # --- Modification Start ---
-# Use Scratch to store the TUN device name across scopes
-{{- $_ := $.Scratch.Set "tunDev" "" }} {{/* Initialize scratch variable */}}
+# Retrieve the pre-determined TUN device name from the context
+# Note: We use .determinedTunDev here because the context passed to tpl had this key
+TUN_DEV="{{ .determinedTunDev }}"
 
-# Determine the device name from the first entry that creates it
-{{- range $index, $subnet := .Values.config.subnetList }}
-  {{- if and (not ($.Scratch.Get "tunDev")) .createDev }}
-    {{- $_ := $.Scratch.Set "tunDev" .dev }} {{/* Set scratch variable if found */}}
-  {{- end }}
-{{- end }}
-
-# Fallback if no entry explicitly creates it, but list is not empty
-{{- if and (not ($.Scratch.Get "tunDev")) (gt (len .Values.config.subnetList) 0) }}
-  {{- $_ := $.Scratch.Set "tunDev" (first .Values.config.subnetList).dev }} {{/* Set scratch variable from first entry */}}
-{{- end }}
-
-# Retrieve the determined TUN device name from Scratch
-{{- $TUN_DEV := $.Scratch.Get "tunDev" }}
-
-{{- /* Now proceed only if a TUN device name was determined */}}
-{{- if $TUN_DEV }}
-  echo "Ensuring net device {{ $TUN_DEV }} exists and is up"
-  if ! grep -w "{{ $TUN_DEV }}" /proc/net/dev > /dev/null; then # Use -w for whole word match
-      echo "Creating net device {{ $TUN_DEV }}"
-      ip tuntap add name {{ $TUN_DEV }} mode tun
-      ip link set {{ $TUN_DEV }} up
+# Now proceed only if a TUN device name was determined
+if [ -n "$TUN_DEV" ]; then
+  echo "Ensuring net device $TUN_DEV exists and is up"
+  if ! grep -w "$TUN_DEV" /proc/net/dev > /dev/null; then # Use -w for whole word match
+      echo "Creating net device $TUN_DEV"
+      ip tuntap add name $TUN_DEV mode tun
+      ip link set $TUN_DEV up
   else
-      echo "Net device {{ $TUN_DEV }} already exists."
-      ip link set {{ $TUN_DEV }} up # Ensure it's up
+      echo "Net device $TUN_DEV already exists."
+      ip link set $TUN_DEV up # Ensure it's up
   fi
 
   sysctl -w net.ipv4.ip_forward=1
 
   # Assign IPs and Add NAT rules for ALL subnets using the determined device
+  # We still need access to .Values here, which is why we included it in $tplContext
   {{- range .Values.config.subnetList }}
     {{- /* Check if the current subnet's device matches the one we determined */}}
-    {{- if eq .dev $TUN_DEV }}
+    {{- if eq .dev $.determinedTunDev }} # Accessing the determinedTunDev from the top context passed in
       echo "Setting IP {{ .gateway }}/{{ .mask }} for subnet {{ .subnet }} on device {{ .dev }}"
       # Check if IP already exists before adding (optional, but good practice)
       if ! ip addr show {{ .dev }} | grep -q -w "inet {{ .gateway }}/{{ .mask }}"; then # Match full IP/mask
@@ -57,12 +44,11 @@ echo "Executing k8s customized entrypoint.sh"
            echo "NAT rule for {{ .subnet }} already exists."
         fi
       {{- end }}
-    {{- /* Remove the confusing 'else' branch for cleaner logs */}}
-    {{- end }} {{- /* End if eq .dev $TUN_DEV */}}
+    {{- end }} {{- /* End if eq .dev $.determinedTunDev */}}
   {{- end }} {{- /* End of range loop for IPs/NAT */}}
-{{- else }}
+else
   echo "Warning: No TUN device specified or determined from subnetList in values.yaml."
-{{- end }} {{- /* End of if $TUN_DEV */}}
+fi {{- /* End of if [ -n "$TUN_DEV" ] */}}
 # --- Modification End ---
 
 
