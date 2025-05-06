@@ -23,14 +23,36 @@ nssf:
       - uri: {{ default (printf "http://%s-scp-sbi:7777" $open5gsName) .Values.config.sbi.client.scp.uri }}
       {{- end }}
       nsi:
-      {{- range .Values.config.nsiList }}
       - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
         s_nssai:
-          sst: {{ .sst | quote }}
-          {{- if .sd }}
-          sd: {{ .sd | quote }}
-          {{- end }}
-      {{- end }}
+          sst: 1
+          sd: 000001
+      
+      - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
+        s_nssai:
+          sst: 1
+          sd: 000002
+      
+      - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
+        s_nssai:
+          sst: 1
+          sd: 000003
+      
+      - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
+        s_nssai:
+          sst: 1
+          sd: 000004
+      
+      - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
+        s_nssai:
+          sst: 1
+          sd: 000005
+      
+      - uri: {{ default (printf "http://%s-nrf-sbi:7777" $open5gsName) .uri }}
+        s_nssai:
+          sst: 1
+          sd: 000006
+
 ################################################################################
 # SBI Server
 ################################################################################
