@@ -77,63 +77,6 @@ image:
   ##
   debug: false
 
-config:
-  logLevel: info
-  # advertise: Provide custom UPF GTP-U address to be advertised inside NGAP messages
-  upf:
-    gtpu:
-      dev: ""
-      advertise: ""
-  subnetList:
-    - subnet: 10.45.0.0/24
-      gateway: 10.45.0.1
-      dnn: oai
-      dev: ogstun
-      mask: 24
-      createDev: true
-      enableNAT: true
-    - subnet: 10.45.1.0/24
-      gateway: 10.45.1.1
-      dnn: tenant1
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
-    - subnet: 10.45.2.0/24
-      gateway: 10.45.2.1
-      dnn: tenant2
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
-    - subnet: 10.45.3.0/24
-      gateway: 10.45.3.1
-      dnn: tenant3
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
-    - subnet: 10.45.4.0/24
-      gateway: 10.45.4.1
-      dnn: tenant4
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
-    - subnet: 10.45.5.0/24
-      gateway: 10.45.5.1
-      dnn: tenant5
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
-    - subnet: 10.45.6.0/24
-      gateway: 10.45.6.1
-      dnn: tenant6
-      dev: ogstun
-      mask: 24
-      createDev: false
-      enableNAT: true
 ## @param customOpen5gsConfig overwrite open5gs configuration file
 customOpen5gsConfig: {}
 
@@ -272,9 +215,6 @@ resources:
 podSecurityContext:
   enabled: true
   fsGroup: 1001
-  sysctls:
-    - name: net.ipv4.ip_forward
-      value: "1"  
 ## Configure Container Security Context (only main container)
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @param containerSecurityContext.enabled Enable open5gs-upf containers' Security Context
@@ -287,9 +227,6 @@ containerSecurityContext:
   privileged: true
   capabilities:
     add: ["NET_ADMIN"]
-  sysctls:
-    - name: net.ipv4.ip_forward
-      value: "1"
 #######################################
 ## Only Custom Probes available for UPF
 #######################################
@@ -398,7 +335,7 @@ services:
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP: None
+    clusterIP: ""
     ## @param service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
     ##
     extraPorts: []
@@ -447,7 +384,7 @@ services:
     ## e.g.:
     ## clusterIP: None
     ##
-    clusterIP: None
+    clusterIP: ""
     ## @param service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
     ##
     extraPorts: []
