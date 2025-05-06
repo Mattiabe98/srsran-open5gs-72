@@ -110,7 +110,7 @@ config:
 
   slicing:
   - sst: 1
-    sd: 0x111111
+    sd: 0x000005
 
 
 ## @param replicaCount Number of srsran Pods to run (requires ReadWriteMany PVC support)
