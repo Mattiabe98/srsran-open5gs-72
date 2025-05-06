@@ -5,17 +5,5 @@ metadata:
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 data:
   k8s-entrypoint.sh: |
-    {{- /* Determine the TUN device name HERE */ -}}
-    {{- $_ := $.Scratch.Set "tunDev" "" }}
-    {{- range $index, $subnet := .Values.config.subnetList }}
-      {{- if and (not ($.Scratch.Get "tunDev")) .createDev }}
-        {{- $_ := $.Scratch.Set "tunDev" .dev }}
-      {{- end }}
-    {{- end }}
-    {{- if and (not ($.Scratch.Get "tunDev")) (gt (len .Values.config.subnetList) 0) }}
-      {{- $_ := $.Scratch.Set "tunDev" (first .Values.config.subnetList).dev }}
-    {{- end }}
-    {{- /* Create a context map containing the values AND the determined TUN device */ -}}
-    {{- $tplContext := dict "Values" .Values "Release" .Release "Chart" .Chart "Files" .Files "Capabilities" .Capabilities "determinedTunDev" ($.Scratch.Get "tunDev") }}
-    {{- /* Process the script file using the new context */ -}}
-    {{- tpl (.Files.Get "resources/k8s-entrypoint.sh") $tplContext | nindent 4 }}
+    {{- /* Process the script, passing the top-level context '$' */ -}}
+    {{- tpl (.Files.Get "resources/k8s-entrypoint.sh") $ | nindent 4 }}
