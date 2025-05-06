@@ -20,6 +20,8 @@ cu_cp:
             tai_slice_support_list:
               -
                 sst: 1
+              -
+                sst: 1
                 sd: 0x000001
               -
                 sst: 1
