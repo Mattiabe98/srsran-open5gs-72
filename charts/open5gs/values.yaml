@@ -65,6 +65,26 @@ smf:
         gateway: 10.45.6.1
         dnn: tenant6
     mtu: 1400
+    info:           # <--- ADD THIS BLOCK
+      - s_nssai:      # Info block for Slice 1 / DNNs
+          - sst: 1
+            sd: "000001"
+            dnn: [ tenant1 ] # List DNNs supported by this SMF for this slice
+          - sst: 1
+            sd: "000002"
+            dnn: [ tenant2 ]
+          - sst: 1
+            sd: "000003"
+            dnn: [ tenant3 ]
+          - sst: 1
+            sd: "000004"
+            dnn: [ tenant4 ]
+          - sst: 1
+            sd: "000005"
+            dnn: [ tenant5 ] # Explicitly list tenant5 here
+          - sst: 1
+            sd: "000006"
+            dnn: [ tenant6 ]
 upf:                   # <-- Top-level key for the UPF sub-chart
   enabled: true
   config:              # <-- .Values.config
