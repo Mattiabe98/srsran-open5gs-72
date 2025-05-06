@@ -15,6 +15,7 @@ f1u:
       bind_addr: 192.168.77.4
 
 cell_cfg:
+  sector_id: 2
   dl_arfcn: 664266                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
