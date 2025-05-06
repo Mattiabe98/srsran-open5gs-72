@@ -4,19 +4,25 @@ set -e
 echo "Executing k8s customized entrypoint.sh"
 
 # --- Modification Start ---
-# Determine the device name from the first entry that creates it (or use a fixed default if needed)
-TUN_DEV=""
+# Use Scratch to store the TUN device name across scopes
+{{- $_ := $.Scratch.Set "tunDev" "" }} {{/* Initialize scratch variable */}}
+
+# Determine the device name from the first entry that creates it
 {{- range $index, $subnet := .Values.config.subnetList }}
-{{- if and (not $TUN_DEV) .createDev }}
-{{- $TUN_DEV = .dev }}
+  {{- if and (not ($.Scratch.Get "tunDev")) .createDev }}
+    {{- $_ := $.Scratch.Set "tunDev" .dev }} {{/* Set scratch variable if found */}}
+  {{- end }}
 {{- end }}
-{{- end }}
+
 # Fallback if no entry explicitly creates it, but list is not empty
-{{- if and (not $TUN_DEV) (gt (len .Values.config.subnetList) 0) }}
-{{- $TUN_DEV = (first .Values.config.subnetList).dev }}
+{{- if and (not ($.Scratch.Get "tunDev")) (gt (len .Values.config.subnetList) 0) }}
+  {{- $_ := $.Scratch.Set "tunDev" (first .Values.config.subnetList).dev }} {{/* Set scratch variable from first entry */}}
 {{- end }}
 
+# Retrieve the determined TUN device name from Scratch
+{{- $TUN_DEV := $.Scratch.Get "tunDev" }}
 
+{{- /* Now proceed only if a TUN device name was determined */}}
 {{- if $TUN_DEV }}
   echo "Ensuring net device {{ $TUN_DEV }} exists and is up"
   if ! grep "{{ $TUN_DEV }}" /proc/net/dev > /dev/null; then
@@ -30,9 +36,10 @@ TUN_DEV=""
 
   sysctl -w net.ipv4.ip_forward=1
 
-  # Assign IPs and Add NAT rules for ALL subnets using the same device
+  # Assign IPs and Add NAT rules for ALL subnets using the determined device
   {{- range .Values.config.subnetList }}
-    {{- if eq .dev $TUN_DEV }} # Process only entries for the chosen TUN device
+    {{- /* Check if the current subnet's device matches the one we determined */}}
+    {{- if eq .dev $TUN_DEV }}
       echo "Setting IP {{ .gateway }}/{{ .mask }} for subnet {{ .subnet }} on device {{ .dev }}"
       # Check if IP already exists before adding (optional, but good practice)
       if ! ip addr show {{ .dev }} | grep -q "inet {{ .gateway }}/"; then
@@ -51,17 +58,20 @@ TUN_DEV=""
         fi
       {{- end }}
     {{- else }}
-      echo "Skipping IP/NAT setup for subnet {{ .subnet }} - device {{ .dev }} does not match primary TUN device {{ $TUN_DEV }}"
+      # This log might be confusing if multiple dev names are used intentionally, adjust if needed
+      # echo "Skipping IP/NAT setup for subnet {{ .subnet }} - device {{ .dev }} does not match primary TUN device {{ $TUN_DEV }}"
     {{- end }}
-  {{- end }}
+  {{- end }} {{- /* End of range loop for IPs/NAT */}}
 {{- else }}
-  echo "No TUN device specified or created in subnetList."
-{{- end }}
+  echo "Warning: No TUN device specified or determined from subnetList in values.yaml."
+{{- end }} {{- /* End of if $TUN_DEV */}}
 # --- Modification End ---
 
 
 echo "Updating iPerf3.."
+# Consider making iperf3 download optional based on a value if needed
 curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3
+chmod +x /usr/bin/iperf3 # Ensure it's executable
 
-# Execute the original command passed to the container
+# Execute the original command passed to the container (e.g., open5gs-upfd)
 $@
