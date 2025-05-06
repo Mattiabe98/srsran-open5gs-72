@@ -14,7 +14,19 @@ resolve_ip() {
 if [[ -n "$AMF_HOSTNAME" ]]; then
     export AMF_ADDR="$(resolve_ip "$AMF_HOSTNAME")"
 fi
-# ... (rest of your variable setup) ...
+
+if [[ -z "${AMF_BIND_ADDR}" ]] ; then
+    export AMF_BIND_ADDR=$(hostname -I | awk '{print $1}')
+fi
+
+if [[ ! -z "$GNB_HOSTNAME" ]] ; then 
+    export GNB_ADDRESS="$(resolve_ip "$GNB_HOSTNAME")"
+fi
+
+if [[ ! -z "$UE_HOSTNAME" ]] ; then 
+    export UE_ADDRESS="$(resolve_ip "$UE_HOSTNAME")"
+fi
+
 export E2_ADDR=$(resolve_ip "$E2_HOSTNAME")
 
 # Generate config
