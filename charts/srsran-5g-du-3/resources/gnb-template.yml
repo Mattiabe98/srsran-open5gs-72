@@ -15,7 +15,7 @@ f1u:
       bind_addr: 192.168.77.5
 
 cell_cfg:
-  dl_arfcn: 666624                  # ARFCN of the downlink carrier (center frequency).
+  dl_arfcn: 669064                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
