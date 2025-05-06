@@ -28,7 +28,6 @@ spec:
         cpu-load-balancing.crio.io: "disable"
         k8s.v1.cni.cncf.io/networks: sriov-midhaul-du2
     spec:
-      shareProcessNamespace: true      
       {{- include "srsran.imagePullSecrets" . | nindent 6 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
