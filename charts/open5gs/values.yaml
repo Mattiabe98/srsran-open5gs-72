@@ -66,60 +66,61 @@ smf:
   mtu: 1400
 upf:
   enabled: true
-  logLevel: info
-  gtpu:
-    dev: ""
-    advertise: ""
-subnetList:
-  - subnet: 10.45.0.0/24
-    gateway: 10.45.0.1
-    dnn: oai
-    dev: ogstun
-    mask: 24
-    createDev: true
-    enableNAT: true
-  - subnet: 10.45.1.0/24
-    gateway: 10.45.1.1
-    dnn: tenant1
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
-  - subnet: 10.45.2.0/24
-    gateway: 10.45.2.1
-    dnn: tenant2
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
-  - subnet: 10.45.3.0/24
-    gateway: 10.45.3.1
-    dnn: tenant3
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
-  - subnet: 10.45.4.0/24
-    gateway: 10.45.4.1
-    dnn: tenant4
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
-  - subnet: 10.45.5.0/24
-    gateway: 10.45.5.1
-    dnn: tenant5
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
-  - subnet: 10.45.6.0/24
-    gateway: 10.45.6.1
-    dnn: tenant6
-    dev: ogstun
-    mask: 24
-    createDev: false
-    enableNAT: true
+  config:
+    logLevel: info
+    gtpu:
+      dev: ""
+      advertise: ""
+    subnetList:
+      - subnet: 10.45.0.0/24
+        gateway: 10.45.0.1
+        dnn: oai
+        dev: ogstun
+        mask: 24
+        createDev: true
+        enableNAT: true
+      - subnet: 10.45.1.0/24
+        gateway: 10.45.1.1
+        dnn: tenant1
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.2.0/24
+        gateway: 10.45.2.1
+        dnn: tenant2
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.3.0/24
+        gateway: 10.45.3.1
+        dnn: tenant3
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.4.0/24
+        gateway: 10.45.4.1
+        dnn: tenant4
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.5.0/24
+        gateway: 10.45.5.1
+        dnn: tenant5
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
+      - subnet: 10.45.6.0/24
+        gateway: 10.45.6.1
+        dnn: tenant6
+        dev: ogstun
+        mask: 24
+        createDev: false
+        enableNAT: true
 webui:
   ingress:
     hostname: open5gs.sno.oran.lab
