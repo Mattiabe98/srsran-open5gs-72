@@ -37,4 +37,4 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # DPDK device bind
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.4
 # Launch srsDU in the foreground
-stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
+exec stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
