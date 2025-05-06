@@ -1,31 +1,27 @@
 #!/bin/bash
 set -e
 
-echo "Executing k8s customized entrypoint.sh v3"
+echo "Executing k8s customized entrypoint.sh v4"
 
-# --- Simplified Logic ---
-# Assume a single consistent device name will be used, get it from the first entry if available
-FIRST_DEV=""
+# --- Ultra-Simplified Logic ---
+# Assume a single device name from the first subnet entry (or default)
+{{- $TUN_DEV_NAME := "ogstun" }} # Default
 {{- if .Values.config.subnetList }}
   {{- $firstSubnet := first .Values.config.subnetList }}
   {{- if $firstSubnet.dev }}
-    {{- $FIRST_DEV = $firstSubnet.dev }}
-  {{- else }}
-    {{- $FIRST_DEV = "ogstun" }} # Fallback default if not specified
+    {{- $TUN_DEV_NAME = $firstSubnet.dev }}
   {{- end }}
-{{- else }}
-  {{- $FIRST_DEV = "ogstun" }} # Fallback default if list is empty
 {{- end }}
 
 # Ensure the primary TUN device exists and is up
-echo "Ensuring net device {{ $FIRST_DEV }} exists and is up"
-if ! ip link show {{ $FIRST_DEV }} > /dev/null 2>&1; then
-    echo "Creating net device {{ $FIRST_DEV }}"
-    ip tuntap add name {{ $FIRST_DEV }} mode tun
-    ip link set {{ $FIRST_DEV }} up
+echo "Ensuring net device {{ $TUN_DEV_NAME }} exists and is up"
+if ! ip link show {{ $TUN_DEV_NAME }} > /dev/null 2>&1; then
+    echo "Creating net device {{ $TUN_DEV_NAME }}"
+    ip tuntap add name {{ $TUN_DEV_NAME }} mode tun
+    ip link set {{ $TUN_DEV_NAME }} up
 else
-    echo "Net device {{ $FIRST_DEV }} already exists."
-    ip link set {{ $FIRST_DEV }} up # Ensure it's up
+    echo "Net device {{ $TUN_DEV_NAME }} already exists."
+    ip link set {{ $TUN_DEV_NAME }} up # Ensure it's up
 fi
 
 # Enable IP forwarding
@@ -34,18 +30,18 @@ sysctl -w net.ipv4.ip_forward=1
 # Loop through subnets and configure IPs and NAT
 {{- range .Values.config.subnetList }}
   # Assign IP address to the primary TUN device
-  echo "Setting IP {{ .gateway }}/{{ .mask }} for subnet {{ .subnet }} on device {{ $FIRST_DEV }}"
-  if ! ip addr show {{ $FIRST_DEV }} | grep -q -w "inet {{ .gateway }}/{{ .mask }}"; then
-     ip addr add {{ .gateway }}/{{ .mask }} dev {{ $FIRST_DEV }}
+  echo "Setting IP {{ .gateway }}/{{ .mask }} for subnet {{ .subnet }} on device {{ $TUN_DEV_NAME }}"
+  if ! ip addr show {{ $TUN_DEV_NAME }} | grep -q -w "inet {{ .gateway }}/{{ .mask }}"; then
+     ip addr add {{ .gateway }}/{{ .mask }} dev {{ $TUN_DEV_NAME }}
   else
-     echo "IP {{ .gateway }}/{{ .mask }} already configured on {{ $FIRST_DEV }}"
+     echo "IP {{ .gateway }}/{{ .mask }} already configured on {{ $TUN_DEV_NAME }}"
   fi
 
   # Add NAT rule if enabled for this subnet
   {{- if .enableNAT }}
-    echo "Enable NAT for {{ .subnet }} via device {{ $FIRST_DEV }}"
-    if ! iptables -t nat -C POSTROUTING -s {{ .subnet }} ! -o {{ $FIRST_DEV }} -j MASQUERADE > /dev/null 2>&1; then
-       iptables -t nat -A POSTROUTING -s {{ .subnet }} ! -o {{ $FIRST_DEV }} -j MASQUERADE
+    echo "Enable NAT for {{ .subnet }} via device {{ $TUN_DEV_NAME }}"
+    if ! iptables -t nat -C POSTROUTING -s {{ .subnet }} ! -o {{ $TUN_DEV_NAME }} -j MASQUERADE > /dev/null 2>&1; then
+       iptables -t nat -A POSTROUTING -s {{ .subnet }} ! -o {{ $TUN_DEV_NAME }} -j MASQUERADE
     else
        echo "NAT rule for {{ .subnet }} already exists."
     fi
