@@ -29,6 +29,7 @@ mongodb:
 smf:
   enabled: true
   config:
+    logLevel: info
     scp:
       enabled: true
     pcrf:
