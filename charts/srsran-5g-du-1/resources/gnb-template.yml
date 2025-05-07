@@ -146,7 +146,7 @@ expert_execution:
 
 log:
   filename: stdout         # Path of the log file.
-  all_level: info                   # Logging level applied to all layers.
+  all_level: warning                   # Logging level applied to all layers.
 
 pcap:
   mac_enable: false                 # Set to true to enable MAC-layer PCAPs.
