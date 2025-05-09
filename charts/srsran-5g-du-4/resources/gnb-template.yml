@@ -162,7 +162,7 @@ log:
   broadcast_enabled: false              # Optional BOOLEAN (false). Enables logging in the PHY and MAC layer of broadcast messages and all PRACH opportunities. Supported: [false, true].
   phy_rx_symbols_prach: false           # Optional BOOLEAN (false). Set to true to dump the IQ symbols from all the PRACH ports. Only works if "phy_rx_symbols_filename" is set. Supported: [false, true].
   hex_max_size: 0                       # Optional UINT (0). Sets maximum number of bytes to print for hex messages. Supported: [0 - 1024]
-  ofh_level: info                    # Optional TEXT (debug). Sets Open Fronthaul log level.
+  ofh_level: warning                    # Optional TEXT (debug). Sets Open Fronthaul log level.
   radio_level: debug                     # Optional TEXT (info). Sets radio log level.
   phy_level: debug                    # Optional TEXT (debug). Sets PHY log level.
 
