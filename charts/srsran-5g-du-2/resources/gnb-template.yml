@@ -75,7 +75,8 @@ ru_ofh:
   t1a_min_up: 294
   ta4_max: 331
   ta4_min: 50
-  ignore_ecpri_payload_size: false
+  ignore_ecpri_payload_size: true
+  ignore_ecpri_seq_id: true
   is_prach_cp_enabled: true           # Configures if Control-Plane messages should be used to receive PRACH messages.
   compr_method_ul: bfp                 # Uplink compression method.
   compr_bitwidth_ul: 9                 # Uplink IQ samples bitwidth after compression.
