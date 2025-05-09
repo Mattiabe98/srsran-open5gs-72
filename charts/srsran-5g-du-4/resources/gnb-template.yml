@@ -58,10 +58,10 @@ cell_cfg:
   ul_common:
     p_max: 23
 
-  slicing:
-  {{- range .Values.config.slicing }}
-    - {{- toYaml . | nindent 6 }}
-    {{- end }}
+  slicing:                              # Optional TEXT. Configure network slicing options. This can only be set via the configuration file.
+    -                                     # Configure Slice 1
+      sst: 1                                  # Optional UINT (1). Sets the Slice Service Type. Supported: [0 - 255].
+      sd: 5                                   # Optional UINT (0). Sets the Service Differentiator. Supported: [0-16777215].
 
 
 ru_ofh:
@@ -87,10 +87,10 @@ ru_ofh:
   iq_scaling: 0.1                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
     - network_interface: 0000:51:09.2     # Ethernet interface name used to communicate with the RU.
-      ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
-      du_mac_addr: 72:0e:9b:5f:81:e4   # DU MAC address.
-      vlan_tag_cp: 14                   # VLAN tag value for CP.
-      vlan_tag_up: 14                   # VLAN tag value for UP.
+      ru_mac_addr: 1c:a0:ef:87:68:b9   # RU MAC address.
+      du_mac_addr: 72:0e:9b:5f:81:e1   # DU MAC address.
+      vlan_tag_cp: 11                   # VLAN tag value for CP.
+      vlan_tag_up: 11                   # VLAN tag value for UP.
       prach_port_id: [264, 265]            # PRACH eAxC port value.
       dl_port_id: [256, 257]         # Downlink eAxC port values.
       ul_port_id: [256, 257]              # Uplink eAxC port values.
