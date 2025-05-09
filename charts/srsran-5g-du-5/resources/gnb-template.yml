@@ -155,7 +155,7 @@ log:
   du_level: debug                     # Optional TEXT (debug). Sets the DU log level.
   f1ap_json_enabled: false              # Optional BOOLEAN (false). Enables the JSON logging of F1AP PDUs. Supported: [false, true].
   high_latency_diagnostics_enabled: false # Optional BOOLEAN (false). Enables logging of performance diagnostics when high computational latencies are detected. Supported: [false, true].
-  fapi_level: debug                   # Optional TEXT (debug). Sets FAPI log level.
+  fapi_level: info                   # Optional TEXT (debug). Sets FAPI log level.
   hal_level: debug                    # Optional TEXT (debug). Sets the HAL log level.
   broadcast_enabled: false              # Optional BOOLEAN (false). Enables logging in the PHY and MAC layer of broadcast messages and all PRACH opportunities. Supported: [false, true].
   phy_rx_symbols_prach: false           # Optional BOOLEAN (false). Set to true to dump the IQ symbols from all the PRACH ports. Only works if "phy_rx_symbols_filename" is set. Supported: [false, true].
