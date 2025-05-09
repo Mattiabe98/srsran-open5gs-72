@@ -17,27 +17,25 @@ cu_cp:
         plmn_list:
           -
             plmn: "00101"
-            tai_slice_support_list:
-              -
-                sst: 1
-              -
-                sst: 1
-                sd: 0x000001
-              -
-                sst: 1
-                sd: 0x000002
-              -
-                sst: 1
-                sd: 0x000003
-              -
-                sst: 1
-                sd: 0x000004
-              -
-                sst: 1
-                sd: 0x000005
-              -
-                sst: 1
-                sd: 0x000006
+            tai_slice_support_list:               # Required TEXT. Sets the list of TAI slices for this PLMN item.
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 1                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 2                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 3                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 4                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 5                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
+              -                                     # Supported TAI Slice(s) for PLMN
+                sst: 1                                # Optional UINT. Sets the Slice Service Type. Supported: [0 - 255].
+                sd: 6                                  # Optional UINT. Sets the Service Differentiator. Supported: [0-16777215]. 
 
 cu_up: 
 #  gtpu_queue_size: 2048                # Optional INT (2048). Sets the GTP-U queue size, in PDUs.
