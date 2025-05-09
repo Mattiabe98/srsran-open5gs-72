@@ -59,10 +59,10 @@ cell_cfg:
   ul_common:
     p_max: 23
 
-  slicing:
-  {{- range .Values.config.slicing }}
-    - {{- toYaml . | nindent 6 }}
-    {{- end }}
+  slicing:                              # Optional TEXT. Configure network slicing options. This can only be set via the configuration file.
+    -                                     # Configure Slice 1
+      sst: 1                                  # Optional UINT (1). Sets the Slice Service Type. Supported: [0 - 255].
+      sd: 1                                   # Optional UINT (0). Sets the Service Differentiator. Supported: [0-16777215].
 
 
 ru_ofh:
