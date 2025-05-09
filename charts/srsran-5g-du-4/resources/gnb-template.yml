@@ -111,20 +111,20 @@ metrics:
   autostart_stdout_metrics: true
 
 hal:
-   eal_args: "-a 0000:51:09.2"
+   eal_args: "--lcores (0-1)@(24) -a 0000:51:09.2"
 
-# expert_execution:
-#   affinities:
-#     low_priority_cpus: 10
-#     ru_timing_cpu: 11        # TRY TWO cores again for timing (8 was idle, 14 was free)
-#     ofh:
-#       - ru_txrx_cpus: 40  # Thread 1 runs on core 19
-#   cell_affinities:
-#     -
-#        l1_dl_cpus: 41         # Unchanged (were idle)
-#        l1_ul_cpus: 42        # Unchanged (were idle)
-#        l2_cell_cpus: 43         # REVERT to single core (18 was idle)
-#        ru_cpus: 10            # REVERT to single core (15 was idle)
+expert_execution:
+  affinities:
+    low_priority_cpus: 25
+    ru_timing_cpu: 26        # TRY TWO cores again for timing (8 was idle, 14 was free)
+    ofh:
+      - ru_txrx_cpus: 27  # Thread 1 runs on core 19
+  cell_affinities:
+    -
+       l1_dl_cpus: 56         # Unchanged (were idle)
+       l1_ul_cpus: 57        # Unchanged (were idle)
+       l2_cell_cpus: 58         # REVERT to single core (18 was idle)
+       ru_cpus: 59            # REVERT to single core (15 was idle)
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
