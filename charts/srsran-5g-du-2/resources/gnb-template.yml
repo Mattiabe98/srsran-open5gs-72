@@ -75,7 +75,6 @@ ru_ofh:
   t1a_min_up: 294
   ta4_max: 331
   ta4_min: 50
-  is_dl_broadcast_enabled: true        # Optional BOOLEAN (false). Sets downlink broadcast enabled flag. Supported: [false, true].
   ignore_prach_start_symbol: true      # Optional BOOLEAN (false). Sets whether or not to ignore PRACH start symbol in PRAACH U-Plane Packets. Supported [false, true].
   ignore_ecpri_payload_size: true
   ignore_ecpri_seq_id: true
