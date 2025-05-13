@@ -8,17 +8,13 @@ populate:
     tag: 0.10.3
     pullPolicy: IfNotPresent
   initCommands: 
-  - open5gs-dbctl add_ue_with_slice 001010000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant1 1 000001
-  - open5gs-dbctl add_ue_with_slice 001010000000002 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant1 1 000001
-  - open5gs-dbctl add_ue_with_slice 001010000000003 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant2 1 000002
-  - open5gs-dbctl add_ue_with_slice 001010000000004 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant2 1 000002
-  - open5gs-dbctl add_ue_with_slice 001010000000005 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant3 1 000003
-  - open5gs-dbctl add_ue_with_slice 001010000000006 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant3 1 000003
-  - open5gs-dbctl add_ue_with_slice 001010000000007 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant4 1 000004
-  - open5gs-dbctl add_ue_with_slice 001010000000008 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant4 1 000004
-  - open5gs-dbctl add_ue_with_slice 001010000000009 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant5 1 000005
-  - open5gs-dbctl add_ue_with_slice 001010000000010 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant5 1 000005
-  - open5gs-dbctl add_ue_with_slice 001010000000011 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant6 1 000006
+  - open5gs-dbctl add_ue_with_apn 999991000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant1
+  - open5gs-dbctl add_ue_with_apn 999991000000002 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant2
+  - open5gs-dbctl add_ue_with_apn 999991000000003 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant3
+  - open5gs-dbctl add_ue_with_apn 999991000000004 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant4
+  - open5gs-dbctl add_ue_with_apn 999991000000005 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant5
+  - open5gs-dbctl add_ue_with_apn 999991000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant6
+
 # Common
 mongodb:
   enabled: true
@@ -68,23 +64,7 @@ smf:
     info:           # <--- ADD THIS BLOCK
       - s_nssai:      # Info block for Slice 1 / DNNs
           - sst: 1
-            sd: "000001"
-            dnn: [ tenant1 ] # List DNNs supported by this SMF for this slice
-          - sst: 1
-            sd: "000002"
-            dnn: [ tenant2 ]
-          - sst: 1
-            sd: "000003"
-            dnn: [ tenant3 ]
-          - sst: 1
-            sd: "000004"
-            dnn: [ tenant4 ]
-          - sst: 1
-            sd: "000005"
-            dnn: [ tenant5 ] # Explicitly list tenant5 here
-          - sst: 1
-            sd: "000006"
-            dnn: [ tenant6 ]
+            dnn: [ tenant1, tenant2, tenant3, tenant4, tenant5, tenant6 ] # List DNNs supported by this SMF for this slice
 upf:                   # <-- Top-level key for the UPF sub-chart
   enabled: true
   config:              # <-- .Values.config
@@ -172,33 +152,87 @@ amf:
   config:
     guamiList:
       - plmn_id:
-          mcc: "001"
-          mnc: "01"
+          mcc: "999"
+          mnc: "91"
+        amf_id:
+          region: 2
+          set: 1
+      - plmn_id:
+          mcc: "999"
+          mnc: "92"
+        amf_id:
+          region: 2
+          set: 1
+      - plmn_id:
+          mcc: "999"
+          mnc: "93"
+        amf_id:
+          region: 2
+          set: 1
+      - plmn_id:
+          mcc: "999"
+          mnc: "94"
+        amf_id:
+          region: 2
+          set: 1
+      - plmn_id:
+          mcc: "999"
+          mnc: "95"
+        amf_id:
+          region: 2
+          set: 1
+      - plmn_id:
+          mcc: "999"
+          mnc: "96"
         amf_id:
           region: 2
           set: 1
     taiList:
       - plmn_id:
-          mcc: "001"
-          mnc: "01"
+          mcc: "999"
+          mnc: "91"
+        tac: [1]
+      - plmn_id:
+          mcc: "999"
+          mnc: "92"
+        tac: [1]
+      - plmn_id:
+          mcc: "999"
+          mnc: "93"
+        tac: [1]
+      - plmn_id:
+          mcc: "999"
+          mnc: "94"
+        tac: [1]
+      - plmn_id:
+          mcc: "999"
+          mnc: "95"
+        tac: [1]
+      - plmn_id:
+          mcc: "999"
+          mnc: "96"
         tac: [1]
     plmnList:
       - plmn_id:
-          mcc: "001"
-          mnc: "01"
+          mcc: "999"
+          mnc: "91"
+      - plmn_id:
+          mcc: "999"
+          mnc: "92"
+      - plmn_id:
+          mcc: "999"
+          mnc: "93"
+      - plmn_id:
+          mcc: "999"
+          mnc: "94"
+      - plmn_id:
+          mcc: "999"
+          mnc: "95"
+      - plmn_id:
+          mcc: "999"
+          mnc: "96"
         s_nssai:
           - sst: 1
-            sd: "0x000001"   # Tenant 1
-          - sst: 1
-            sd: "0x000002"   # Tenant 2
-          - sst: 1
-            sd: "0x000003"   # Tenant 3
-          - sst: 1
-            sd: "0x000004"   # Tenant 4
-          - sst: 1
-            sd: "0x000005"   # Tenant 5
-          - sst: 1
-            sd: "0x000006"   # Tenant 6
   networkName: Gradiant
 
 ausf:
@@ -210,8 +244,23 @@ nrf:
   config:
     servingList:
       - plmn_id:
-          mcc: 001
-          mnc: 01
+          mcc: 999
+          mnc: 91
+      - plmn_id:
+          mcc: 999
+          mnc: 92
+      - plmn_id:
+          mcc: 999
+          mnc: 93
+      - plmn_id:
+          mcc: 999
+          mnc: 94
+      - plmn_id:
+          mcc: 999
+          mnc: 95
+      - plmn_id:
+          mcc: 999
+          mnc: 96
 nssf:
   enabled: true
   config:
@@ -220,32 +269,6 @@ nssf:
           hostname: "open5gs-nrf-sbi"  # Default if empty
           port: 7777
         sst: 1
-        sd: "0x000001"   # Tenant 1
-      - nrf:
-          hostname: "open5gs-nrf-sbi"  # Default if empty
-          port: 7777
-        sst: 1
-        sd: "0x000002"   # Tenant 2
-      - nrf:
-          hostname: "open5gs-nrf-sbi"  # Default if empty
-          port: 7777
-        sst: 1
-        sd: "0x000003"   # Tenant 3
-      - nrf:
-          hostname: "open5gs-nrf-sbi"  # Default if empty
-          port: 7777
-        sst: 1
-        sd: "0x000004"   # Tenant 4
-      - nrf:
-          hostname: "open5gs-nrf-sbi"  # Default if empty
-          port: 7777
-        sst: 1
-        sd: "0x000005"   # Tenant 5
-      - nrf:
-          hostname: "open5gs-nrf-sbi"  # Default if empty
-          port: 7777
-        sst: 1
-        sd: "0x000006"   # Tenant 6
 
 pcf:
   enabled: true
