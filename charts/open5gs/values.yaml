@@ -216,18 +216,28 @@ amf:
       - plmn_id:
           mcc: "999"
           mnc: "91"
+        s_nssai:
+          - sst: 1
       - plmn_id:
           mcc: "999"
           mnc: "92"
+        s_nssai:
+          - sst: 1
       - plmn_id:
           mcc: "999"
           mnc: "93"
+        s_nssai:
+          - sst: 1
       - plmn_id:
           mcc: "999"
           mnc: "94"
+        s_nssai:
+          - sst: 1
       - plmn_id:
           mcc: "999"
           mnc: "95"
+        s_nssai:
+          - sst: 1
       - plmn_id:
           mcc: "999"
           mnc: "96"
