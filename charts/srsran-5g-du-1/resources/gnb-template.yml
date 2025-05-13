@@ -20,7 +20,7 @@ cell_cfg:
   band: 77                           # The NR band.
   channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
-  plmn: "00101"                   # PLMN broadcasted by the gNB.
+  plmn: "99992"                   # PLMN broadcasted by the gNB.
   tac: 1                            # Tracking area code (needs to match the core configuration).
   pci: 1
   nof_antennas_dl: 2                    # Optional UINT (1). Sets the number of antennas for downlink transmission. Supported: [1, 2, 4].
@@ -62,7 +62,6 @@ cell_cfg:
   slicing:                              # Optional TEXT. Configure network slicing options. This can only be set via the configuration file.
     -                                     # Configure Slice 1
       sst: 1                                  # Optional UINT (1). Sets the Slice Service Type. Supported: [0 - 255].
-      sd: 2                                   # Optional UINT (0). Sets the Service Differentiator. Supported: [0-16777215].
 
 
 ru_ofh:
