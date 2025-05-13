@@ -14,18 +14,18 @@ populate:
   - open5gs-dbctl add_ue_with_apn 999940000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 internet
   - open5gs-dbctl add_ue_with_apn 999950000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 internet
   - open5gs-dbctl add_ue_with_apn 999960000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 internet
-  - open5gs-dbctl update_apn 999910000000001 oai 1
-  - open5gs-dbctl update_apn 999920000000001 oai 1
-  - open5gs-dbctl update_apn 999930000000001 oai 1
-  - open5gs-dbctl update_apn 999940000000001 oai 1
-  - open5gs-dbctl update_apn 999950000000001 oai 1
-  - open5gs-dbctl update_apn 999960000000001 oai 1
-  - open5gs-dbctl update_apn 999910000000001 tenant1 1
-  - open5gs-dbctl update_apn 999920000000001 tenant2 1
-  - open5gs-dbctl update_apn 999930000000001 tenant3 1
-  - open5gs-dbctl update_apn 999940000000001 tenant4 1
-  - open5gs-dbctl update_apn 999950000000001 tenant5 1
-  - open5gs-dbctl update_apn 999960000000001 tenant6 1  
+  - open5gs-dbctl update_apn 999910000000001 oai 0
+  - open5gs-dbctl update_apn 999920000000001 oai 0
+  - open5gs-dbctl update_apn 999930000000001 oai 0
+  - open5gs-dbctl update_apn 999940000000001 oai 0
+  - open5gs-dbctl update_apn 999950000000001 oai 0
+  - open5gs-dbctl update_apn 999960000000001 oai 0
+  - open5gs-dbctl update_apn 999910000000001 tenant1 0
+  - open5gs-dbctl update_apn 999920000000001 tenant2 0
+  - open5gs-dbctl update_apn 999930000000001 tenant3 0
+  - open5gs-dbctl update_apn 999940000000001 tenant4 0
+  - open5gs-dbctl update_apn 999950000000001 tenant5 0
+  - open5gs-dbctl update_apn 999960000000001 tenant6 0
 
 # Common
 mongodb:
