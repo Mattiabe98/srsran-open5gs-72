@@ -110,6 +110,7 @@ metrics:
   addr: grafana-srsran-metrics-server             # Metrics-server IP
   port: 55555                     # Metrics-server Port  
   autostart_stdout_metrics: true
+  rlc_report_period: 1000
 
 hal:
    eal_args: "--lcores (0-1)@(20) -a 0000:51:09.0"
