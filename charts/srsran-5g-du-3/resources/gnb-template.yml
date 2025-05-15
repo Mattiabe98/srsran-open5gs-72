@@ -112,9 +112,9 @@ metrics:
   autostart_stdout_metrics: true
   layers:
     enable_rlc: true
-    enable_du_low: true
-    enable_mac: true
-    enable_executor: true
+    enable_du_low: false
+    enable_mac: false
+    enable_executor: false
   periodicity:
     du_report_period: 1000
 
