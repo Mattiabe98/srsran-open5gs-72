@@ -18,7 +18,7 @@ cell_cfg:
   sector_id: 2
   dl_arfcn: 664266                  # ARFCN of the downlink carrier (center frequency).
   band: 77                           # The NR band.
-  channel_bandwidth_MHz: 100          # Bandwith in MHz. Number of PRBs will be automatically derived.
+  channel_bandwidth_MHz: 40          # Bandwith in MHz. Number of PRBs will be automatically derived.
   common_scs: 30                   # Subcarrier spacing in kHz used for data.
   plmn: "99993"                   # PLMN broadcasted by the gNB.
   tac: 1                            # Tracking area code (needs to match the core configuration).
@@ -65,7 +65,7 @@ cell_cfg:
 
 
 ru_ofh:
-  ru_bandwidth_MHz: 100
+  ru_bandwidth_MHz: 40
   t1a_max_cp_dl: 336
   t1a_min_cp_dl: 285
   t1a_max_cp_ul: 211
