@@ -111,8 +111,12 @@ metrics:
   port: 55555                     # Metrics-server Port  
   autostart_stdout_metrics: true
   layers:
-    enable_ru: true
-
+    enable_rlc: true
+    enable_du_low: false
+    enable_mac: false
+    enable_executor: false
+  periodicity:
+    du_report_period: 1000
 
 hal:
    eal_args: "--lcores (0-1)@(12) -a 0000:51:11.4"
