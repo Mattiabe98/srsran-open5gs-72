@@ -90,7 +90,7 @@ expert_execution:
 
 log:
   filename: stdout         # Path of the log file.
-  all_level: info                   # Logging level applied to all layers.
+  all_level: warning                   # Logging level applied to all layers.
 
 pcap: 
   ngap_filename: /mnt/data/pcap-cu/ngap-cu0.pcap     # Optional TEXT (/tmp/gnb_ngap.pcap). Path for NGAP PCAPs. 
