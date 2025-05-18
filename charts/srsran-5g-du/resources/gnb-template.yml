@@ -146,7 +146,14 @@ expert_execution:
   #     nof_ul_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess uplink.
   #     nof_dl_threads: 4                       # Optional UINT (1). Sets the number of upprt PHY threads to proccess downlink.
 
-
+test_mode:
+  test_ue:
+    rnti: 0x44
+    ri: 2 # Set to 2 or 4 for 2 layer or 4 layer MIMO operation
+    cqi: 15
+    nof_ues: 1
+    pusch_active: true
+    pdsch_active: true
 
 log:
   filename: stdout         # Path of the log file.
