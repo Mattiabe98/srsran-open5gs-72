@@ -124,6 +124,7 @@ expert_execution:
   affinities:
     low_priority_cpus: 17
     ru_timing_cpu: 18        # TRY TWO cores again for timing (8 was idle, 14 was free)
+    ofh: 19
   cell_affinities:
     -
        l1_dl_cpus: 48         # Unchanged (were idle)
