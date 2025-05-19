@@ -126,7 +126,7 @@ expert_execution:
     low_priority_cpus: 17
     ru_timing_cpu: 18        # TRY TWO cores again for timing (8 was idle, 14 was free)
     ofh:
-      - ru_txrx_cpus: 16  # Thread 1 runs on core 19
+      - ru_txrx_cpus: 19  # Thread 1 runs on core 19
   cell_affinities:
     -
        l1_dl_cpus: 48         # Unchanged (were idle)
