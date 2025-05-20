@@ -152,6 +152,7 @@ log:
   filename: stdout         # Path of the log file.
   all_level: info                   # Logging level applied to all layers.
   e2ap_level: debug
+  ofh_level: warning                    # Optional TEXT (warning). Sets Open Fronthaul log level.
 
 pcap:
   e2ap_du_filename: /mnt/data/pcap/e2ap-du1.pcap  # Optional TEXT (/tmp/du_e2ap.pcap). Path for E2AP DU PCAPs.
