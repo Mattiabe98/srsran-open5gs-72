@@ -177,8 +177,25 @@ spec:
             - |
               stdbuf -o0 iperf3 -s &
               pid=$!  # Get the PID of the iperf3 process
+              taskset -pc 30 $pid  # Lock iperf3 to core 31
+              wait $pid  # Wait for the iperf3 process to finish
+            - |
+              stdbuf -o0 iperf3 -s -p 5202 &
+              pid=$!  # Get the PID of the iperf3 process
               taskset -pc 31 $pid  # Lock iperf3 to core 31
               wait $pid  # Wait for the iperf3 process to finish
+            - |
+              stdbuf -o0 iperf3 -s -p 5203 &
+              pid=$!  # Get the PID of the iperf3 process
+              taskset -pc 62 $pid  # Lock iperf3 to core 31
+              wait $pid  # Wait for the iperf3 process to finish
+            - |
+              stdbuf -o0 iperf3 -s -p 5204 &
+              pid=$!  # Get the PID of the iperf3 process
+              taskset -pc 63 $pid  # Lock iperf3 to core 31
+              wait $pid  # Wait for the iperf3 process to finish
+            - |
+              stdbuf -o0 iperf3 -s -p 5205
           {{- else }}
           command:
             - /bin/sleep
