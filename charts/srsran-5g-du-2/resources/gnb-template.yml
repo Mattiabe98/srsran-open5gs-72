@@ -119,20 +119,20 @@ metrics:
     du_report_period: 1000
 
 hal:
-   eal_args: "--lcores (0-1)@(16) -a 0000:51:11.6"
+   eal_args: "--lcores (0-1)@(14) -a 0000:51:11.6"
 
 expert_execution:
   affinities:
-    low_priority_cpus: 17
-    ru_timing_cpu: 18        # TRY TWO cores again for timing (8 was idle, 14 was free)
+    low_priority_cpus: 34     # On LC34 (PC2 SMT of OS core)
+    ru_timing_cpu: 13         # On LC13 (PC13 dedicated, LC45 unused)
     ofh:
-      - ru_txrx_cpus: 19  # Thread 1 runs on core 19
+      - ru_txrx_cpus: 46      # SMT of DPDK
   cell_affinities:
     -
-       l1_dl_cpus: 48         # Unchanged (were idle)
-       l1_ul_cpus: 49        # Unchanged (were idle)
-       l2_cell_cpus: 50         # REVERT to single core (18 was idle)
-       ru_cpus: 51            # REVERT to single core (15 was idle)
+       l1_dl_cpus: 15
+       l1_ul_cpus: 16
+       l2_cell_cpus: 47          # SMT of L1_DL
+       ru_cpus: 48             # SMT of L1_UL
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
