@@ -158,11 +158,11 @@ pcap:
   f1ap_filename: /mnt/data/pcap/f1ap-du2.pcap     # Optional TEXT (/tmp/gnb_f1ap.pcap). Path for F1AP PCAPs.
   f1ap_enable: true                    # Optional BOOLEAN (false). Enable/disable F1AP packet capture. Supported: [false, true].
 
-# test_mode:
-#   test_ue:
-#     rnti: 0x44
-#     ri: 1 # Set to 2 or 4 for 2 layer or 4 layer MIMO operation
-#     cqi: 15
-#     nof_ues: 1
-#     pusch_active: true
-#     pdsch_active: true
+test_mode:
+  test_ue:
+    rnti: 0x44
+    ri: 1 # Set to 2 or 4 for 2 layer or 4 layer MIMO operation
+    cqi: 15
+    nof_ues: 1
+    pusch_active: true
+    pdsch_active: true
