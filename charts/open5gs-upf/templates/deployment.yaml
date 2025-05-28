@@ -96,9 +96,9 @@ spec:
             - /bin/sh
             - -c
             - |
-              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &
-              curl -kL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -o /usr/bin/jq &
-              chmod +x /usr/bin/jq &
+              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &&
+              curl -kL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -o /usr/bin/jq &&
+              chmod +x /usr/bin/jq &&
               open5gs-upfd
           {{- end }}
           {{- if .Values.args }}
