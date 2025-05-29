@@ -1,5 +1,8 @@
 # srsRAN 7.2 + Open5Gs multi-tenant deployment
+This repository will help you in deploying a single core, multi-tenant, CU/DU split, neutral host O-RAN compliant setup for 4 tenants.
+
 ## How to use the repository:
+First of all, since this is a 7.2 split deployment, PTP synchronization is needed. The linuxptp chart can help you get started, but it needs to be edited with your PTP configuration.
 
 The repository contains some simple yet useful Bash scripts that help you get up and running quickly. The scripts are especially useful when debugging issues that require a whole setup reboot.
 The script redeploy.sh does the following:
@@ -15,12 +18,17 @@ Once the script is done, everything is ready, except the RAN.
 The next script to run is ran-redeploy-all.sh, which does the following:
 -  Pulls the latest version of this repository
 -  Uninstalls any previous RAN deployments of this repo (CU and DUs)
--  Installs one srsRAN CU and 4 srsRAN DUs
+-  Installs:
+  - one srsRAN CU
+  - 4 srsRAN DUs
 
 ## How to edit this repository:
-The most crucial files in this repository are the Open5GS values.yaml file, which contains the whole core setup (subnets, APNs, slices) and subscriber infos (IMSI and APNs), and the srsRAN CU/DUs gnb-template.yaml files, which contain the configuration of CU and DUs. Those files need to match the configuration of the core, especially regarding PLMNs and IPs.
+The most crucial files in this repository are the Open5GS values.yaml file, which contains the whole core setup (subnets, APNs, slices) and subscriber infos (IMSI and APNs), and the srsRAN CU/DUs gnb-template.yaml files, which contain the configuration of CU, DUs and O-RUs. Those files need to match the configuration of the core, especially regarding PLMNs and IPs. The DU gnb-template.yaml files also need to match the O-RU configuration or the fronthaul will NOT work. MAC addresses, VLANs, eAxc IDs, DPDK PCI addresses are especially important.
 
-A great starting point is srsRAN configuration reference: https://docs.srsran.com/projects/project/en/latest/user_manuals/source/config_ref.html
+Some resources to help you get started
+srsRAN configuration (gnb-template.yaml) reference: https://docs.srsran.com/projects/project/en/latest/user_manuals/source/config_ref.html
+srsRAN O-RAN 7.2 RU guide: https://docs.srsran.com/projects/project/en/latest/tutorials/source/oranRU/source/index.html
+srsRAN DPDK tutorial: https://docs.srsran.com/projects/project/en/latest/tutorials/source/dpdk/source/index.html
 
 # Gradiant 5G Charts
 
