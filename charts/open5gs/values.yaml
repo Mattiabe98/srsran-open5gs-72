@@ -9,11 +9,10 @@ populate:
     pullPolicy: IfNotPresent
   initCommands: 
   - open5gs-dbctl add_ue_with_apn 999910000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant1
+  - open5gs-dbctl add_ue_with_apn 999910000000002 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant1
   - open5gs-dbctl add_ue_with_apn 999920000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant2
-  - open5gs-dbctl add_ue_with_apn 999930000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant3
   - open5gs-dbctl add_ue_with_apn 999940000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant4
   - open5gs-dbctl add_ue_with_apn 999950000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant5
-  - open5gs-dbctl add_ue_with_apn 999960000000001 fec86ba6eb707ed08905757b1bb44b8f C42449363BBAD02B66D16BC975D77CC1 tenant6
 
 # Common
 mongodb:
