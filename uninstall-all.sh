@@ -4,4 +4,5 @@ helm uninstall srsran-5g
 helm uninstall linuxptp
 helm uninstall influxdb2
 helm uninstall grafana-srsran
+./uninstall-ran.sh
 git pull
