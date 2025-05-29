@@ -42,7 +42,7 @@ srsRAN DPDK tutorial: https://docs.srsran.com/projects/project/en/latest/tutoria
 By default, the DU0 (srsran-5g-du) will also run a turbostat-like monitoring Python script that gathers metrics on all CPU cores and the whole CPU package; this can be very useful to see which threads are the most constrained and how to best allocate the srsRAN threads. The script saves its results to /mnt/data/monitoring, so be sure to create a PV/PVC mountpoint if you want the script to work.
 Example output:
 
---- 2025-05-29 17:41:11 UTC ---
+```--- 2025-05-29 17:41:11 UTC ---
 Core    CPU      ActMHz Avg_MHz Busy%   Bzy_MHz TSC_MHz        IRQ      POLL%     C1%    C1E%     C6%   CoreTmp CoreThr  PkgTmp MinMHz  MaxMHz     Governor     EPB     PkgWatt RAMWatt
 0       0        2900.0  1058.4 36.41    2907.2  2192.5      98419       0.02    0.53   63.57    0.82        50       N      52  800    3500    performance       0      100.94    9.60
 1       1        2843.0  1006.0 35.57    2828.3  2188.9      95681       0.02    0.58   63.37    1.50        50       N      52  800    3500    performance       0      100.94    9.60
@@ -108,7 +108,7 @@ Core    CPU      ActMHz Avg_MHz Busy%   Bzy_MHz TSC_MHz        IRQ      POLL%   
 29      61       2500.0     2.3  0.10    2367.7  1939.0        426       0.00    0.00    0.23   87.77        43       N      52  800    3500    performance       0      100.94    9.60
 30      62       2900.0     1.7  0.07    2364.2  1932.8         78       0.00    0.00    0.34   87.85        44       N      52  800    3500    performance       0      100.94    9.60
 31      63       2900.3     1.9  0.08    2264.6  1937.2        185       0.00    0.00    0.33   88.09        43       N      52  800    3500    performance       0      100.94    9.60
-
+```
 On the UPF there are also some benchmarking scripts, useful to test the throughput in a multi-tenant scenario, with multiple UEs:
 
   -  iperf3-test.sh: runs an array of multiple iPerf3 tests, such as: UDP/TCP, single/parallel streams, uncapped/capped, constant/burst, uplink/downlink/bidirectional.
