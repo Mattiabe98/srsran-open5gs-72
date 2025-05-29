@@ -22,6 +22,10 @@ The next script to run is ran-redeploy-all.sh, which does the following:
   - one srsRAN CU
   - 4 srsRAN DUs
 
+Two other scripts are present, to uninstall partially or completely the deployment:
+- uninstall-ran.sh: as the name says, uninstalls CU/DUs.
+- uninstall-all.sh: uninstalls the whole deployment of this repository.
+
 ## How to edit this repository:
 The most crucial files in this repository are the Open5GS values.yaml file, which contains the whole core setup (subnets, APNs, slices) and subscriber infos (IMSI and APNs), and the srsRAN CU/DUs gnb-template.yaml files, which contain the configuration of CU, DUs and O-RUs. Those files need to match the configuration of the core, especially regarding PLMNs and IPs. The DU gnb-template.yaml files also need to match the O-RU configuration or the fronthaul will NOT work. MAC addresses, VLANs, eAxc IDs, DPDK PCI addresses are especially important.
 
