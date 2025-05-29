@@ -26,9 +26,13 @@ The next script to run is ran-redeploy-all.sh, which does the following:
 The most crucial files in this repository are the Open5GS values.yaml file, which contains the whole core setup (subnets, APNs, slices) and subscriber infos (IMSI and APNs), and the srsRAN CU/DUs gnb-template.yaml files, which contain the configuration of CU, DUs and O-RUs. Those files need to match the configuration of the core, especially regarding PLMNs and IPs. The DU gnb-template.yaml files also need to match the O-RU configuration or the fronthaul will NOT work. MAC addresses, VLANs, eAxc IDs, DPDK PCI addresses are especially important.
 
 Some resources to help you get started
+
 srsRAN configuration (gnb-template.yaml) reference: https://docs.srsran.com/projects/project/en/latest/user_manuals/source/config_ref.html
+
 srsRAN O-RAN 7.2 RU guide: https://docs.srsran.com/projects/project/en/latest/tutorials/source/oranRU/source/index.html
+
 srsRAN DPDK tutorial: https://docs.srsran.com/projects/project/en/latest/tutorials/source/dpdk/source/index.html
+
 
 # Gradiant 5G Charts
 
