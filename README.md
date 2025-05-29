@@ -38,9 +38,11 @@ srsRAN DPDK tutorial: https://docs.srsran.com/projects/project/en/latest/tutoria
 -  By default, the DU0 (srsran-5g-du) will also run a monitoring Python script that gathers metrics on all CPU cores and the whole CPU package; this can be very useful to see which threads are the most constrained and how to best allocate the srsRAN threads. The script saves its results to /mnt/data/monitoring, so be sure to create a PV/PVC mountpoint if you want the script to work.
 -  On the UPF there are also some benchmarking scripts, useful to test the throughput in a multi-tenant scenario, with multiple UEs:
   -  iperf3-test.sh: runs an array of multiple iPerf3 tests, such as: UDP/TCP, single/parallel streams, uncapped/capped, constant/burst, uplink/downlink/bidirectional.
-    -  To use the script, on the UPF run /iperf3-test.sh <list of IPs:port iPerf3 servers> <number of runs>
+
+To use the script, on the UPF run /iperf3-test.sh <list of IPs:port iPerf3 servers> <number of runs>
   -  iperf3-latency.sh: runs a continious ping in different scenarios, such as: idle, iPerf3 on one UE, iPerf3 on all UEs, iPerf3 on all UEs except one, and more.
-    -  To use the script, on the UPF run /iperf3-latency.sh <list of IPs:port iPerf3 servers>
+
+To use the script, on the UPF run /iperf3-latency.sh <list of IPs:port iPerf3 servers>
 
 
 # Gradiant 5G Charts
