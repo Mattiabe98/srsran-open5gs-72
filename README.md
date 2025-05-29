@@ -10,6 +10,7 @@ The script redeploy.sh does the following:
   - Open5Gs
   - InfluxDB
   - Grafana srsRAN monitoring stack
+
 Once the script is done, everything is ready, except the RAN.
 The next script to run is ran-redeploy-all.sh, which does the following:
 -  Pulls the latest version of this repository
