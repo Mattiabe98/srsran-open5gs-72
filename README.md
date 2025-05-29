@@ -1,5 +1,5 @@
 # srsRAN 7.2 + Open5Gs multi-tenant deployment
-This repository will help you in deploying a single core, multi-tenant, CU/DU split, neutral host O-RAN compliant setup for 4 tenants.
+This repository will help you in deploying a **single core, multi-tenant, CU/DU split, neutral host O-RAN compliant** setup for 4 tenants.
 
 ## How to use the repository:
 First of all, since this is a 7.2 split deployment, PTP synchronization is needed. The linuxptp chart can help you get started, but it needs to be edited with your PTP configuration.
