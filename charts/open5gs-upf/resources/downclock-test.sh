@@ -25,7 +25,7 @@ IPERF_SUMMARY_CSV="${LOG_DIR}/iperf_summary_${MAIN_TIMESTAMP}.csv"
 LATENCY_SUMMARY_CSV="${LOG_DIR}/latency_summary_${MAIN_TIMESTAMP}.csv" # NEW
 
 DEFAULT_IPERF_PORT="5201"
-IPERF_DURATION=60 # Duration for sustained iperf3 tests
+IPERF_DURATION=30 # Duration for sustained iperf3 tests
 IPERF_CONG_ALG="bbr" # TCP Congestion Control
 
 # Bursty traffic config
