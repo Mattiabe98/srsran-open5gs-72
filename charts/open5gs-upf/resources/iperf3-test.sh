@@ -16,7 +16,7 @@ if [ -z "$SERVERS_CSV" ] || [ -z "$ROUNDS" ]; then
 fi
 
 DEFAULT_IPERF_PORT="5201"
-LOG_DIR="/mnt/data/downclock-test-multi-ue"
+LOG_DIR="/mnt/data/iperf3-tests"
 MAIN_LOG_BASENAME="iperf3_multi_ue_controller"
 SUMMARY_CSV_BASENAME="iperf3_multi_ue_summary"
 DURATION=60
