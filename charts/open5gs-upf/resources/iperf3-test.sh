@@ -104,7 +104,7 @@ run_single_test_instance() {
 
     local energy_start
     if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ]; then
-        energy_start=$(get_energy_uj)
+        energy_start=$(cat "$ENERGY_UJ_FILE")
     fi
 
     local output; local exit_status
@@ -126,7 +126,7 @@ run_single_test_instance() {
     local efficiency_mb_per_j="N/A"
     if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then
         local energy_end
-        energy_end=$(get_energy_uj)
+        energy_end=$(cat "$ENERGY_UJ_FILE")
         if [ -n "$energy_end" ]; then
             consumed_energy_uj=$(( energy_end - energy_start ))
             # Handle counter overflow
