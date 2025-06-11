@@ -16,7 +16,7 @@ if [ -z "$SERVERS_CSV" ] || [ -z "$ROUNDS" ]; then
 fi
 
 DEFAULT_IPERF_PORT="5201"
-LOG_DIR="/mnt/data/iperf3-tests"
+LOG_DIR="/mnt/data/downclock-test-multi-ue"
 MAIN_LOG_BASENAME="iperf3_multi_ue_controller"
 SUMMARY_CSV_BASENAME="iperf3_multi_ue_summary"
 DURATION=60
@@ -34,11 +34,10 @@ SMALL_MSS=576
 PARALLEL_STREAMS_SUSTAINED=10
 PARALLEL_STREAMS_BURST=5
 
-# --- NEW: Energy Monitoring Configuration ---
+# --- Energy Monitoring Configuration ---
 RAPL_BASE_PATH="/sys/class/powercap/intel-rapl:0"
 ENERGY_UJ_FILE="${RAPL_BASE_PATH}/energy_uj"
 MAX_ENERGY_UJ_FILE="${RAPL_BASE_PATH}/max_energy_range_uj"
-# Fallback for max energy range, equivalent to (2^60 - 1), a common RAPL value.
 RAPL_MAX_ENERGY_UJ_FALLBACK="1152921504606846975"
 ENERGY_MONITORING_ENABLED=0
 
@@ -50,7 +49,7 @@ SUMMARY_CSV_FILE="${LOG_DIR}/${SUMMARY_CSV_BASENAME}_${MAIN_TIMESTAMP}.csv"
 declare -A UE_SERVER_IPS
 declare -A UE_SERVER_PORTS
 declare -A UE_LOGFILES
-declare -A ACTIVE_SYNC_STEP_PIDS # Stores PIDs for the current synchronized step
+declare -A ACTIVE_SYNC_STEP_PIDS
 SCRIPT_INTERRUPTED_FLAG=0
 CORE_CLEANUP_COMPLETED_FLAG=0
 
@@ -61,26 +60,21 @@ append_to_summary() {
     local cmd_direction="$5"; local cmd_rate_target="$6"; local cmd_duration="$7"; local status="$8"
     local avg_mbps="$9"; local total_mb="${10}"; local udp_lost_packets="${11}"
     local udp_lost_percent="${12}"; local udp_jitter_ms="${13}"; local tcp_retransmits="${14}"
-    # NEW: Energy and Efficiency metrics
     local consumed_energy_uj="${15}"; local efficiency_mb_per_j="${16}"
-    
     echo "\"$MAIN_TIMESTAMP\",\"$ue_ip\",\"$ue_port\",\"$test_desc\",\"$cmd_protocol\",\"$cmd_direction\",\"$cmd_rate_target\",\"$cmd_duration\",\"$status\",\"$avg_mbps\",\"$total_mb\",\"$udp_lost_packets\",\"$udp_lost_percent\",\"$udp_jitter_ms\",\"$tcp_retransmits\",\"$consumed_energy_uj\",\"$efficiency_mb_per_j\"" >> "$SUMMARY_CSV_FILE"
 }
 
-# --- NEW: Energy Helper Functions ---
+# --- Energy Helper Functions ---
 get_energy_uj() {
-    if [ -r "$ENERGY_UJ_FILE" ]; then
-        cat "$ENERGY_UJ_FILE"
-    else
-        echo "" # Return empty if not readable
-    fi
+    # Attempt to read, return empty string on failure
+    cat "$ENERGY_UJ_FILE" 2>/dev/null
 }
 
 get_max_energy_range_uj() {
     if [ -r "$MAX_ENERGY_UJ_FILE" ]; then
         local max_val
-        max_val=$(cat "$MAX_ENERGY_UJ_FILE")
-        if [[ "$max_val" -gt 0 ]]; then
+        max_val=$(cat "$MAX_ENERGY_UJ_FILE" 2>/dev/null)
+        if [[ -n "$max_val" && "$max_val" -gt 0 ]]; then
             echo "$max_val"
             return
         fi
@@ -88,10 +82,13 @@ get_max_energy_range_uj() {
     echo "$RAPL_MAX_ENERGY_UJ_FALLBACK"
 }
 
-# --- run_single_test_instance (MODIFIED for energy measurement) ---
+# --- run_single_test_instance (MODIFIED for simplified logging) ---
 run_single_test_instance() {
-    local server_ip=$1; local server_port=$2; local ue_main_logfile=$3 
-    local description_base=$4; local full_command_template=$5
+    local server_ip=$1; local server_port=$2; local description_base=$3; local full_command_template=$4
+
+    # --- MODIFIED: Simplified logging, as output is now redirected at launch ---
+    local log_prefix="[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port]"
+    
     local description="$description_base (UE: $server_ip:$server_port)"
     local full_command=$(echo "$full_command_template" | sed "s/%SERVER%/$server_ip/g" | sed "s/%PORT%/$server_port/g")
     local cmd_protocol="TCP"; if echo "$full_command" | grep -q -- "-u"; then cmd_protocol="UDP"; fi
@@ -99,37 +96,35 @@ run_single_test_instance() {
     local cmd_rate_target=$(echo "$full_command" | grep -o -- '-b [^ ]*' | cut -d' ' -f2); if [ -z "$cmd_rate_target" ]; then cmd_rate_target="Uncapped"; fi
     local cmd_duration=$(echo "$full_command" | grep -o -- '-t [0-9]\+' | grep -o '[0-9]\+'); if [[ -z "$cmd_duration" ]]; then cmd_duration="?"; fi
     
-    echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port] Starting: $description (Duration: ${cmd_duration}s)" | tee -a "$ue_main_logfile"
-    echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port] Command: ${full_command}" | tee -a "$ue_main_logfile"
+    echo "$log_prefix Starting: $description (Duration: ${cmd_duration}s)"
+    echo "$log_prefix Command: ${full_command}"
 
     local energy_start
     if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ]; then
-        energy_start=$(cat "$ENERGY_UJ_FILE")
+        energy_start=$(get_energy_uj)
     fi
 
     local output; local exit_status
     sub_instance_cleanup() {
-        echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] Sub-instance cleanup for $server_ip:$server_port, test: $description_base" | tee -a "$ue_main_logfile"
+        echo "$log_prefix Sub-instance cleanup for test: $description_base"
         pkill -KILL -P $$ 2>/dev/null
         pkill -KILL -f "iperf3 -c $server_ip -p $server_port" 2>/dev/null
     }
     trap 'sub_instance_cleanup; exit 130;' SIGINT SIGTERM
     
     if output=$(eval "$full_command" 2>&1); then
-        exit_status=0 # Success
+        exit_status=0
     else
-        exit_status=$? # Failure
+        exit_status=$?
     fi
     
-    # --- NEW: Calculate energy consumed, regardless of test success/failure ---
     local consumed_energy_uj="N/A"
     local efficiency_mb_per_j="N/A"
     if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then
         local energy_end
-        energy_end=$(cat "$ENERGY_UJ_FILE")
+        energy_end=$(get_energy_uj)
         if [ -n "$energy_end" ]; then
             consumed_energy_uj=$(( energy_end - energy_start ))
-            # Handle counter overflow
             if (( consumed_energy_uj < 0 )); then
                 local max_energy_range
                 max_energy_range=$(get_max_energy_range_uj)
@@ -138,24 +133,24 @@ run_single_test_instance() {
         fi
     fi
 
-    # --- Process results ---
     if [ "$exit_status" -eq 0 ]; then
-        echo "" >> "$ue_main_logfile"; echo "$output" >> "$ue_main_logfile"; echo "" >> "$ue_main_logfile"
-        echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port] Finished: $description - SUCCESS" | tee -a "$ue_main_logfile"
+        echo ""
+        echo "$output"
+        echo ""
+        echo "$log_prefix Finished: $description - SUCCESS"
         
-        # Calculate efficiency if energy was measured
         calculate_efficiency() {
             local total_mb_for_calc=$1
             local energy_uj_for_calc=$2
             if [[ "$energy_uj_for_calc" != "N/A" ]] && (( energy_uj_for_calc > 0 )); then
-                local total_mb_int=${total_mb_for_calc%%.*} # Use integer part of MB
-                # Efficiency = (MB * 1,000,000) / uJ  -> gives MB/Joule
+                local total_mb_int=${total_mb_for_calc%%.*}
                 echo "$(( (total_mb_int * 1000000) / energy_uj_for_calc ))"
             else
                 echo "N/A"
             fi
         }
 
+        # NOTE: `append_to_summary` is a global function, it must still be available
         if [[ "$cmd_direction" == "Bidir" ]]; then
             local avg_mbps_ul=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000'); local total_mb_ul=$(echo "$output" | jq -r '(.end.sum_sent.bytes // 0) / (1024*1024)'); local retrans_ul=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"')
             local avg_mbps_dl=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000'); local total_mb_dl=$(echo "$output" | jq -r '(.end.sum_received.bytes // 0) / (1024*1024)')
@@ -177,14 +172,16 @@ run_single_test_instance() {
         fi
         exit 0 
     else
-        echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port] Finished: $description - FAILURE (Exit Code: $exit_status)" | tee -a "$ue_main_logfile"
-        echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port] Error Output/Details:" | tee -a "$ue_main_logfile"; echo "$output" | sed 's/^/  /' >> "$ue_main_logfile"
+        echo "$log_prefix Finished: $description - FAILURE (Exit Code: $exit_status)"
+        echo "$log_prefix Error Output/Details:"
+        echo "$output" | sed 's/^/  /'
         append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "FAILURE" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "N/A"
         exit 1
     fi
 }
 
 # --- Main Cleanup Routines (remain the same) ---
+# ... (No changes needed in this section) ...
 perform_core_cleanup() {
     if [ "$CORE_CLEANUP_COMPLETED_FLAG" -eq 1 ]; then main_log "CORE_CLEANUP: Already performed."; return; fi
     CORE_CLEANUP_COMPLETED_FLAG=1; main_log "CORE_CLEANUP: Initiating..."
@@ -228,6 +225,7 @@ handle_main_exit() {
 trap 'handle_main_exit' EXIT
 
 # --- Test Definitions (remain the same) ---
+# ... (No changes needed in this section) ...
 TEST_DEFINITIONS=(
     "TCP Uplink (Single Stream, Uncapped)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $DURATION -J -R"
     "TCP Downlink (Single Stream, Uncapped)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $DURATION -J"
@@ -252,23 +250,22 @@ TEST_DEFINITIONS+=("UDP Bursty Uplink (${BURSTY_UPLINK_RATE} for ${BURST_DURATIO
 TEST_DEFINITIONS+=("UDP Bursty Downlink (${BURSTY_DOWNLINK_RATE} for ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -u -b $BURSTY_DOWNLINK_RATE -t $BURST_DURATION -J")
 TEST_DEFINITIONS+=("TCP Bursty Uplink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J -R")
 TEST_DEFINITIONS+=("TCP Bursty Downlink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J")
-
 # --- Main Script Logic ---
 mkdir -p "$LOG_DIR"; if [ ! -d "$LOG_DIR" ]; then echo "[ERROR] Log dir '$LOG_DIR' failed." >&2; exit 1; fi
 
-# Update CSV Header
 echo "\"RunTimestamp\",\"UE_IP\",\"UE_Port\",\"Test_Description\",\"Cmd_Protocol\",\"Cmd_Direction\",\"Cmd_Rate_Target_Mbps\",\"Cmd_Duration_s\",\"Status\",\"Avg_Mbps\",\"Total_MB_Transferred\",\"UDP_Lost_Packets\",\"UDP_Lost_Percent\",\"UDP_Jitter_ms\",\"TCP_Retransmits\",\"Consumed_Energy_uJ\",\"Efficiency_MB_per_J\"" > "$SUMMARY_CSV_FILE"
 
 main_log "===== Starting Synchronized Multi-UE iPerf3 Traffic Simulation (PID: $$) ====="
 main_log "Target Servers: $SERVERS_CSV"; main_log "Rounds per UE: $ROUNDS"
 
-# Check for energy monitoring capability
-if [ -r "$ENERGY_UJ_FILE" ]; then
+# --- MODIFIED: More robust check for energy monitoring capability ---
+energy_test_val=$(get_energy_uj)
+if [[ -n "$energy_test_val" && "$energy_test_val" =~ ^[0-9]+$ ]]; then
     ENERGY_MONITORING_ENABLED=1
-    main_log "Energy monitoring ENABLED (RAPL file found: $ENERGY_UJ_FILE)."
+    main_log "Energy monitoring ENABLED (Successfully read from RAPL file: $ENERGY_UJ_FILE)."
 else
     ENERGY_MONITORING_ENABLED=0
-    main_log "WARN: Energy monitoring DISABLED (Cannot read RAPL file: $ENERGY_UJ_FILE)."
+    main_log "WARN: Energy monitoring DISABLED (Could not read a valid number from RAPL file: $ENERGY_UJ_FILE)."
 fi
 
 IFS=',' read -ra SERVERS_ARRAY_CONFIG <<< "$SERVERS_CSV"
@@ -282,12 +279,13 @@ for server_entry in "${SERVERS_ARRAY_CONFIG[@]}"; do
     UE_SERVER_PORTS["$ue_key"]="$server_port"
     ue_id_for_log=$(echo "$server_ip" | tr '.' '_')_"$server_port"
     UE_LOGFILES["$ue_key"]="${LOG_DIR}/iperf3_traffic_UE_${ue_id_for_log}_${MAIN_TIMESTAMP}.log"
+    # The individual log files now serve as the primary log for each test instance
+    main_log "UE $ue_key will log detailed output to: ${UE_LOGFILES["$ue_key"]}"
     echo "===== iPerf3 Test Log for UE $ue_key (Run Timestamp: $MAIN_TIMESTAMP) =====" > "${UE_LOGFILES["$ue_key"]}"
-    echo "Logging individual test JSON outputs and details here." >> "${UE_LOGFILES["$ue_key"]}"
-    echo "========================================================================" >> "${UE_LOGFILES["$ue_key"]}"
 done
 
 main_log "Performing initial reachability checks..."
+# ... (rest of the script is the same, but now the logging and energy check will work correctly) ...
 ALL_UES_REACHABLE=true
 for ue_key in "${UE_KEYS[@]}"; do
     server_ip=${UE_SERVER_IPS["$ue_key"]}; server_port=${UE_SERVER_PORTS["$ue_key"]}
@@ -318,10 +316,13 @@ for r in $(seq 1 "$ROUNDS"); do
             server_port=${UE_SERVER_PORTS["$ue_key"]}
             ue_main_logfile=${UE_LOGFILES["$ue_key"]}
 
+            # --- MODIFIED: Redirect subshell output to logfile to prevent console interleaving ---
+            # Also, pass parameters directly to run_single_test_instance
             (
-                run_single_test_instance "$server_ip" "$server_port" "$ue_main_logfile" "$description_base" "$command_template"
-                exit $? 
-            ) &
+                # Functions defined in the parent script are available to the subshell
+                run_single_test_instance "$server_ip" "$server_port" "$description_base" "$command_template"
+            ) >> "$ue_main_logfile" 2>&1 &
+            
             test_pid=$! 
             ACTIVE_SYNC_STEP_PIDS["$ue_key"]=$test_pid
             main_log "Round $r, Step $test_num: Launched '$description_base' for $ue_key (PID: $test_pid)"
