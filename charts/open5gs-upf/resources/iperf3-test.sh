@@ -3,6 +3,7 @@
 set -m # IMPORTANT: Enable Job Control for process group management
 
 # --- Configuration ---
+# ... (all config remains the same) ...
 SERVERS_CSV="$1"
 ROUNDS="$2"
 
@@ -22,7 +23,7 @@ SUMMARY_CSV_BASENAME="iperf3_multi_ue_summary"
 DURATION=60
 BURST_DURATION=10
 SLEEP_BETWEEN_SYNC_STEPS=7
-UPLINK_RATES=("10M" "20M" "35M")
+UPLINK_RATES=("10M" "20M""35M")
 UPLINK_MAX_ATTEMPT_RATE="40M"
 DOWNLINK_RATES=("10M" "50M" "100M" "200M" "300M")
 BURSTY_UPLINK_RATE="50M"
@@ -60,13 +61,12 @@ append_to_summary() {
     local cmd_direction="$5"; local cmd_rate_target="$6"; local cmd_duration="$7"; local status="$8"
     local avg_mbps="$9"; local total_mb="${10}"; local udp_lost_packets="${11}"
     local udp_lost_percent="${12}"; local udp_jitter_ms="${13}"; local tcp_retransmits="${14}"
-    local consumed_energy_uj="${15}"; local efficiency_mb_per_j="${16}"
-    echo "\"$MAIN_TIMESTAMP\",\"$ue_ip\",\"$ue_port\",\"$test_desc\",\"$cmd_protocol\",\"$cmd_direction\",\"$cmd_rate_target\",\"$cmd_duration\",\"$status\",\"$avg_mbps\",\"$total_mb\",\"$udp_lost_packets\",\"$udp_lost_percent\",\"$udp_jitter_ms\",\"$tcp_retransmits\",\"$consumed_energy_uj\",\"$efficiency_mb_per_j\"" >> "$SUMMARY_CSV_FILE"
+    local consumed_energy_uj="${15}"; local efficiency_bits_per_uj="${16}"
+    echo "\"$MAIN_TIMESTAMP\",\"$ue_ip\",\"$ue_port\",\"$test_desc\",\"$cmd_protocol\",\"$cmd_direction\",\"$cmd_rate_target\",\"$cmd_duration\",\"$status\",\"$avg_mbps\",\"$total_mb\",\"$udp_lost_packets\",\"$udp_lost_percent\",\"$udp_jitter_ms\",\"$tcp_retransmits\",\"$consumed_energy_uj\",\"$efficiency_bits_per_uj\"" >> "$SUMMARY_CSV_FILE"
 }
 
 # --- Energy Helper Functions ---
 get_energy_uj() {
-    # Attempt to read, return empty string on failure
     cat "$ENERGY_UJ_FILE" 2>/dev/null
 }
 
@@ -82,11 +82,10 @@ get_max_energy_range_uj() {
     echo "$RAPL_MAX_ENERGY_UJ_FALLBACK"
 }
 
-# --- run_single_test_instance (MODIFIED for simplified logging) ---
+# --- run_single_test_instance (MODIFIED to use awk) ---
 run_single_test_instance() {
     local server_ip=$1; local server_port=$2; local description_base=$3; local full_command_template=$4
 
-    # --- MODIFIED: Simplified logging, as output is now redirected at launch ---
     local log_prefix="[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port]"
     
     local description="$description_base (UE: $server_ip:$server_port)"
@@ -119,7 +118,7 @@ run_single_test_instance() {
     fi
     
     local consumed_energy_uj="N/A"
-    local efficiency_mb_per_j="N/A"
+    local efficiency_bits_per_uj="N/A"
     if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then
         local energy_end
         energy_end=$(get_energy_uj)
@@ -139,36 +138,64 @@ run_single_test_instance() {
         echo ""
         echo "$log_prefix Finished: $description - SUCCESS"
         
+        # --- MODIFIED: calculate_efficiency now uses awk for bits/uJ ---
         calculate_efficiency() {
-            local total_mb_for_calc=$1
+            local total_bytes_for_calc=$1
             local energy_uj_for_calc=$2
-            if [[ "$energy_uj_for_calc" != "N/A" ]] && (( energy_uj_for_calc > 0 )); then
-                local total_mb_int=${total_mb_for_calc%%.*}
-                echo "$(( (total_mb_int * 1000000) / energy_uj_for_calc ))"
-            else
+            
+            # Guard against invalid inputs
+            if [[ "$energy_uj_for_calc" == "N/A" || ! "$energy_uj_for_calc" =~ ^[0-9]+$ || "$energy_uj_for_calc" -le 0 ]]; then
                 echo "N/A"
+                return
             fi
+            if [[ "$total_bytes_for_calc" == "N/A" || ! "$total_bytes_for_calc" =~ ^[0-9]+$ ]]; then
+                echo "N/A"
+                return
+            fi
+            
+            # Use awk for floating point calculation: (bytes * 8) / uJ
+            awk -v bytes="$total_bytes_for_calc" -v uj="$energy_uj_for_calc" 'BEGIN { printf "%.4f", (bytes * 8) / uj }'
         }
 
-        # NOTE: `append_to_summary` is a global function, it must still be available
         if [[ "$cmd_direction" == "Bidir" ]]; then
-            local avg_mbps_ul=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000'); local total_mb_ul=$(echo "$output" | jq -r '(.end.sum_sent.bytes // 0) / (1024*1024)'); local retrans_ul=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"')
-            local avg_mbps_dl=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000'); local total_mb_dl=$(echo "$output" | jq -r '(.end.sum_received.bytes // 0) / (1024*1024)')
-            local total_bidir_mb=$(echo "$total_mb_ul + $total_mb_dl" | awk '{print $1+$2}')
-            efficiency_mb_per_j=$(calculate_efficiency "$total_bidir_mb" "$consumed_energy_uj")
-            append_to_summary "$server_ip" "$server_port" "$description (Uplink part)" "$cmd_protocol" "Bidir-Uplink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_ul" "$total_mb_ul" "N/A" "N/A" "N/A" "$retrans_ul" "$consumed_energy_uj" "$efficiency_mb_per_j"
-            append_to_summary "$server_ip" "$server_port" "$description (Downlink part)" "$cmd_protocol" "Bidir-Downlink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_dl" "$total_mb_dl" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "$efficiency_mb_per_j"
+            local avg_mbps_ul=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000')
+            local total_bytes_ul=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0')
+            local total_mb_ul=$(echo "$total_bytes_ul" | awk '{printf "%.3f", $1 / (1024*1024)}')
+            local retrans_ul=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"')
+            
+            local avg_mbps_dl=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000')
+            local total_bytes_dl=$(echo "$output" | jq -r '.end.sum_received.bytes // 0')
+            local total_mb_dl=$(echo "$total_bytes_dl" | awk '{printf "%.3f", $1 / (1024*1024)}')
+            
+            local total_bidir_bytes
+            total_bidir_bytes=$(awk -v ul="$total_bytes_ul" -v dl="$total_bytes_dl" 'BEGIN { print ul + dl }')
+            
+            efficiency_bits_per_uj=$(calculate_efficiency "$total_bidir_bytes" "$consumed_energy_uj")
+            append_to_summary "$server_ip" "$server_port" "$description (Uplink part)" "$cmd_protocol" "Bidir-Uplink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_ul" "$total_mb_ul" "N/A" "N/A" "N/A" "$retrans_ul" "$consumed_energy_uj" "$efficiency_bits_per_uj"
+            append_to_summary "$server_ip" "$server_port" "$description (Downlink part)" "$cmd_protocol" "Bidir-Downlink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_dl" "$total_mb_dl" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "$efficiency_bits_per_uj"
         elif [[ "$cmd_protocol" == "TCP" ]]; then
-            local avg_mbps; local tcp_retrans; local total_mb
-            if [[ "$cmd_direction" == "Uplink" ]]; then avg_mbps=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000'); total_mb=$(echo "$output" | jq -r '(.end.sum_sent.bytes // 0) / (1024*1024)'); tcp_retrans=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"')
-            else avg_mbps=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000'); total_mb=$(echo "$output" | jq -r '(.end.sum_received.bytes // 0) / (1024*1024)'); tcp_retrans="N/A"; fi
-            efficiency_mb_per_j=$(calculate_efficiency "$total_mb" "$consumed_energy_uj")
-            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "N/A" "N/A" "N/A" "$tcp_retrans" "$consumed_energy_uj" "$efficiency_mb_per_j"
+            local avg_mbps; local tcp_retrans; local total_bytes; local total_mb
+            if [[ "$cmd_direction" == "Uplink" ]]; then
+                avg_mbps=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000')
+                total_bytes=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0')
+                tcp_retrans=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"')
+            else # Downlink
+                avg_mbps=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000')
+                total_bytes=$(echo "$output" | jq -r '.end.sum_received.bytes // 0')
+                tcp_retrans="N/A"
+            fi
+            total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}')
+            efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj")
+            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "N/A" "N/A" "N/A" "$tcp_retrans" "$consumed_energy_uj" "$efficiency_bits_per_uj"
         elif [[ "$cmd_protocol" == "UDP" ]]; then
-            local avg_mbps=$(echo "$output" | jq -r '(.end.sum.bits_per_second // 0) / 1000000'); local total_mb=$(echo "$output" | jq -r '(.end.sum.bytes // 0) / (1024*1024)')
-            local lost_packets=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"'); local lost_percent=$(echo "$output" | jq -r '.end.sum.lost_percent // "N/A"'); local jitter_ms=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"')
-            efficiency_mb_per_j=$(calculate_efficiency "$total_mb" "$consumed_energy_uj")
-            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "$lost_packets" "$lost_percent" "$jitter_ms" "N/A" "$consumed_energy_uj" "$efficiency_mb_per_j"
+            local avg_mbps=$(echo "$output" | jq -r '(.end.sum.bits_per_second // 0) / 1000000')
+            local total_bytes=$(echo "$output" | jq -r '.end.sum.bytes // 0')
+            local total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}')
+            local lost_packets=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"')
+            local lost_percent=$(echo "$output" | jq -r '.end.sum.lost_percent // "N/A"')
+            local jitter_ms=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"')
+            efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj")
+            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "$lost_packets" "$lost_percent" "$jitter_ms" "N/A" "$consumed_energy_uj" "$efficiency_bits_per_uj"
         fi
         exit 0 
     else
@@ -180,8 +207,9 @@ run_single_test_instance() {
     fi
 }
 
-# --- Main Cleanup Routines (remain the same) ---
-# ... (No changes needed in this section) ...
+
+# --- Main Logic ---
+# ... (no changes in cleanup or test definitions) ...
 perform_core_cleanup() {
     if [ "$CORE_CLEANUP_COMPLETED_FLAG" -eq 1 ]; then main_log "CORE_CLEANUP: Already performed."; return; fi
     CORE_CLEANUP_COMPLETED_FLAG=1; main_log "CORE_CLEANUP: Initiating..."
@@ -224,8 +252,6 @@ handle_main_exit() {
 }
 trap 'handle_main_exit' EXIT
 
-# --- Test Definitions (remain the same) ---
-# ... (No changes needed in this section) ...
 TEST_DEFINITIONS=(
     "TCP Uplink (Single Stream, Uncapped)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $DURATION -J -R"
     "TCP Downlink (Single Stream, Uncapped)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $DURATION -J"
@@ -250,15 +276,15 @@ TEST_DEFINITIONS+=("UDP Bursty Uplink (${BURSTY_UPLINK_RATE} for ${BURST_DURATIO
 TEST_DEFINITIONS+=("UDP Bursty Downlink (${BURSTY_DOWNLINK_RATE} for ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -u -b $BURSTY_DOWNLINK_RATE -t $BURST_DURATION -J")
 TEST_DEFINITIONS+=("TCP Bursty Uplink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J -R")
 TEST_DEFINITIONS+=("TCP Bursty Downlink ($PARALLEL_STREAMS_BURST parallel, ${BURST_DURATION}s)|iperf3 -c %SERVER% -p %PORT% -C bbr -t $BURST_DURATION -P $PARALLEL_STREAMS_BURST -J")
-# --- Main Script Logic ---
+
 mkdir -p "$LOG_DIR"; if [ ! -d "$LOG_DIR" ]; then echo "[ERROR] Log dir '$LOG_DIR' failed." >&2; exit 1; fi
 
-echo "\"RunTimestamp\",\"UE_IP\",\"UE_Port\",\"Test_Description\",\"Cmd_Protocol\",\"Cmd_Direction\",\"Cmd_Rate_Target_Mbps\",\"Cmd_Duration_s\",\"Status\",\"Avg_Mbps\",\"Total_MB_Transferred\",\"UDP_Lost_Packets\",\"UDP_Lost_Percent\",\"UDP_Jitter_ms\",\"TCP_Retransmits\",\"Consumed_Energy_uJ\",\"Efficiency_MB_per_J\"" > "$SUMMARY_CSV_FILE"
+# --- MODIFIED: Updated CSV header for the new efficiency metric ---
+echo "\"RunTimestamp\",\"UE_IP\",\"UE_Port\",\"Test_Description\",\"Cmd_Protocol\",\"Cmd_Direction\",\"Cmd_Rate_Target_Mbps\",\"Cmd_Duration_s\",\"Status\",\"Avg_Mbps\",\"Total_MB_Transferred\",\"UDP_Lost_Packets\",\"UDP_Lost_Percent\",\"UDP_Jitter_ms\",\"TCP_Retransmits\",\"Consumed_Energy_uJ\",\"Efficiency_bits_per_uJ\"" > "$SUMMARY_CSV_FILE"
 
 main_log "===== Starting Synchronized Multi-UE iPerf3 Traffic Simulation (PID: $$) ====="
 main_log "Target Servers: $SERVERS_CSV"; main_log "Rounds per UE: $ROUNDS"
 
-# --- MODIFIED: More robust check for energy monitoring capability ---
 energy_test_val=$(get_energy_uj)
 if [[ -n "$energy_test_val" && "$energy_test_val" =~ ^[0-9]+$ ]]; then
     ENERGY_MONITORING_ENABLED=1
@@ -279,13 +305,11 @@ for server_entry in "${SERVERS_ARRAY_CONFIG[@]}"; do
     UE_SERVER_PORTS["$ue_key"]="$server_port"
     ue_id_for_log=$(echo "$server_ip" | tr '.' '_')_"$server_port"
     UE_LOGFILES["$ue_key"]="${LOG_DIR}/iperf3_traffic_UE_${ue_id_for_log}_${MAIN_TIMESTAMP}.log"
-    # The individual log files now serve as the primary log for each test instance
     main_log "UE $ue_key will log detailed output to: ${UE_LOGFILES["$ue_key"]}"
     echo "===== iPerf3 Test Log for UE $ue_key (Run Timestamp: $MAIN_TIMESTAMP) =====" > "${UE_LOGFILES["$ue_key"]}"
 done
 
 main_log "Performing initial reachability checks..."
-# ... (rest of the script is the same, but now the logging and energy check will work correctly) ...
 ALL_UES_REACHABLE=true
 for ue_key in "${UE_KEYS[@]}"; do
     server_ip=${UE_SERVER_IPS["$ue_key"]}; server_port=${UE_SERVER_PORTS["$ue_key"]}
@@ -316,10 +340,7 @@ for r in $(seq 1 "$ROUNDS"); do
             server_port=${UE_SERVER_PORTS["$ue_key"]}
             ue_main_logfile=${UE_LOGFILES["$ue_key"]}
 
-            # --- MODIFIED: Redirect subshell output to logfile to prevent console interleaving ---
-            # Also, pass parameters directly to run_single_test_instance
             (
-                # Functions defined in the parent script are available to the subshell
                 run_single_test_instance "$server_ip" "$server_port" "$description_base" "$command_template"
             ) >> "$ue_main_logfile" 2>&1 &
             
