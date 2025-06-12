@@ -3,26 +3,37 @@
 set -m # IMPORTANT: Enable Job Control for process group management
 
 # --- Configuration ---
-# ... (all config is unchanged) ...
 SERVERS_CSV="$1"
 ROUNDS="$2"
+
 if ! command -v jq &> /dev/null; then echo "ERROR: jq is not installed."; exit 1; fi
 if [ -z "$SERVERS_CSV" ] || [ -z "$ROUNDS" ]; then
   echo "Usage: $0 <server_ip1[:port1],server_ip2[:port2],...> <number of rounds>"
   exit 1
 fi
+
 DEFAULT_IPERF_PORT="5201"
 LOG_DIR="/mnt/data/iperf3-tests"
 MAIN_LOG_BASENAME="iperf3_multi_ue_controller"
 SUMMARY_CSV_BASENAME="iperf3_multi_ue_summary"
 POWER_LOG_BASENAME="iperf3_multi_ue_powerlog"
-LONG_DURATION=300; DURATION=60; BURST_DURATION=10
-SLEEP_BETWEEN_SYNC_STEPS=7; MONITOR_INTERVAL=5
-UPLINK_RATES=("10M" "20M"); UPLINK_MAX_ATTEMPT_RATE="40M"
+
+# Durations
+LONG_DURATION=300
+DURATION=60
+BURST_DURATION=10
+SLEEP_BETWEEN_SYNC_STEPS=7
+# MODIFIED: Increased sampling frequency for power monitoring
+MONITOR_INTERVAL=2
+
+UPLINK_RATES=("10M" "20M")
+UPLINK_MAX_ATTEMPT_RATE="40M"
 DOWNLINK_RATES=("10M" "50M" "100M" "200M" "300M")
 BURSTY_UPLINK_RATE="50M"; BURSTY_DOWNLINK_RATE="300M"; BIDIR_UDP_RATE="30M"
 SMALL_PACKET_LEN=200; SMALL_PACKET_RATE="5M"; SMALL_MSS=576
 PARALLEL_STREAMS_SUSTAINED=10; PARALLEL_STREAMS_BURST=5
+
+# --- Energy Monitoring Configuration ---
 RAPL_BASE_PATH="/sys/class/powercap/intel-rapl:0"
 ENERGY_UJ_FILE="${RAPL_BASE_PATH}/energy_uj"
 TDP_UW_FILE="${RAPL_BASE_PATH}/constraint_0_power_limit_uw"
@@ -42,7 +53,7 @@ declare -A UE_SERVER_IPS; declare -A UE_SERVER_PORTS; declare -A UE_LOGFILES; de
 SCRIPT_INTERRUPTED_FLAG=0; CORE_CLEANUP_COMPLETED_FLAG=0; POWER_MONITOR_PID=""
 
 # --- Logging, Summary, and Helper Functions ---
-# ... (These functions are unchanged) ...
+# ... (These functions are correct and unchanged) ...
 main_log() { echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [CONTROLLER PID:$$] $1" | tee -a "$MAIN_LOGFILE"; }
 append_to_summary() { local ue_ip="$1"; local ue_port="$2"; local test_desc="$3"; local cmd_protocol="$4"; local cmd_direction="$5"; local cmd_rate_target="$6"; local cmd_duration="$7"; local status="$8"; local avg_mbps="$9"; local total_mb="${10}"; local udp_lost_packets="${11}"; local udp_lost_percent="${12}"; local udp_jitter_ms="${13}"; local tcp_retransmits="${14}"; local consumed_energy_uj="${15}"; local efficiency_bits_per_uj="${16}"; local num_ues="${17}"; echo "\"$MAIN_TIMESTAMP\",\"$ue_ip\",\"$ue_port\",\"$num_ues\",\"$test_desc\",\"$cmd_protocol\",\"$cmd_direction\",\"$cmd_rate_target\",\"$cmd_duration\",\"$status\",\"$avg_mbps\",\"$total_mb\",\"$udp_lost_packets\",\"$udp_lost_percent\",\"$udp_jitter_ms\",\"$tcp_retransmits\",\"$consumed_energy_uj\",\"$efficiency_bits_per_uj\"" >> "$SUMMARY_CSV_FILE"; }
 append_to_summary_aggregate() { local test_desc="$1"; local num_ues="$2"; local total_mbps="$3"; local total_mb="$4"; local total_energy_uj="$5"; local total_efficiency="$6"; local duration="$7"; append_to_summary "AGGREGATE" "N/A" "$test_desc" "N/A" "N/A" "N/A" "$duration" "SYSTEM_TOTAL" "$total_mbps" "$total_mb" "N/A" "N/A" "N/A" "N/A" "$total_energy_uj" "$total_efficiency" "$num_ues"; }
@@ -51,7 +62,8 @@ get_tdp_w() { if [ -r "$TDP_UW_FILE" ]; then local tdp_uw; tdp_uw=$(cat "$TDP_UW
 get_max_energy_range_uj() { if [ -r "$MAX_ENERGY_UJ_FILE" ]; then local max_val; max_val=$(cat "$MAX_ENERGY_UJ_FILE" 2>/dev/null); if [[ -n "$max_val" && "$max_val" -gt 0 ]]; then echo "$max_val"; return; fi; fi; echo "$RAPL_MAX_ENERGY_UJ_FALLBACK"; }
 
 # --- Test Instance & Power Monitor Functions ---
-run_single_test_instance() { # ... (This function is unchanged)
+run_single_test_instance() {
+    # ... (This function is correct and unchanged) ...
     local server_ip=$1; local server_port=$2; local description_base=$3; local full_command_template=$4; local log_prefix="[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port]"; local description="$description_base (UE: $server_ip:$server_port)"; local full_command=$(echo "$full_command_template" | sed "s/%SERVER%/$server_ip/g" | sed "s/%PORT%/$server_port/g"); local cmd_protocol="TCP"; if echo "$full_command" | grep -q -- "-u"; then cmd_protocol="UDP"; fi; local cmd_direction="Downlink"; if echo "$full_command" | grep -q -- "--bidir"; then cmd_direction="Bidir"; elif echo "$full_command" | grep -q -- "-R"; then cmd_direction="Uplink"; fi; local cmd_rate_target=$(echo "$full_command" | grep -o -- '-b [^ ]*' | cut -d' ' -f2); if [ -z "$cmd_rate_target" ]; then cmd_rate_target="Uncapped"; fi; local cmd_duration=$(echo "$full_command" | grep -o -- '-t [0-9]\+' | grep -o '[0-9]\+'); if [[ -z "$cmd_duration" ]]; then cmd_duration="?"; fi; echo "$log_prefix Starting: $description (Duration: ${cmd_duration}s)"; echo "$log_prefix Command: ${full_command}"; local energy_start; if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ]; then energy_start=$(get_energy_uj); fi; local output; local exit_status; sub_instance_cleanup() { echo "$log_prefix Sub-instance cleanup for test: $description_base"; pkill -KILL -P $$ 2>/dev/null; pkill -KILL -f "iperf3 -c $server_ip -p $server_port" 2>/dev/null; }; trap 'sub_instance_cleanup; exit 130;' SIGINT SIGTERM; if output=$(eval "$full_command" 2>&1); then exit_status=0; else exit_status=$?; fi; local consumed_energy_uj="N/A"; if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then local energy_end; energy_end=$(get_energy_uj); if [ -n "$energy_end" ]; then consumed_energy_uj=$(( energy_end - energy_start )); if (( consumed_energy_uj < 0 )); then local max_energy_range; max_energy_range=$(get_max_energy_range_uj); consumed_energy_uj=$(( consumed_energy_uj + max_energy_range )); fi; fi; fi
     if [ "$exit_status" -eq 0 ]; then
         echo -e "\n$output\n"; echo "$log_prefix Finished: $description - SUCCESS"; calculate_efficiency() { local total_bytes_for_calc=$1; local energy_uj_for_calc=$2; if [[ "$energy_uj_for_calc" == "N/A" || ! "$energy_uj_for_calc" =~ ^[0-9]+$ || "$energy_uj_for_calc" -le 0 || "$total_bytes_for_calc" == "N/A" || ! "$total_bytes_for_calc" =~ ^[0-9]+$ ]]; then echo "N/A"; return; fi; awk -v bytes="$total_bytes_for_calc" -v uj="$energy_uj_for_calc" 'BEGIN { printf "%.4f", (bytes * 8) / uj }'; };
@@ -62,48 +74,30 @@ run_single_test_instance() { # ... (This function is unchanged)
     else echo "$log_prefix Finished: $description - FAILURE (Exit Code: $exit_status)"; echo "$log_prefix Error Output/Details:"; echo "$output" | sed 's/^/  /'; append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "FAILURE" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "N/A" "1"; exit 1; fi
 }
 
-# --- MODIFIED: Background power monitoring function with correct timing ---
 monitor_power_in_background() {
     local main_pid=$1
     echo "\"Timestamp\",\"TDP_Limit_W\",\"Package_Power_W\"" > "$POWER_LOG_FILE"
-
-    # Initialize state variables BEFORE the loop starts
     local last_energy; last_energy=$(get_energy_uj)
     local last_time; last_time=$(date +%s.%N)
     local last_tdp_w; last_tdp_w=$(get_tdp_w)
-    
-    # Loop as long as the main script is running
     while ps -p "$main_pid" > /dev/null; do
         sleep "$MONITOR_INTERVAL"
-
-        # 1. Read current state at the END of the interval
         local current_energy; current_energy=$(get_energy_uj)
         local current_time; current_time=$(date +%s.%N)
         local current_tdp_w; current_tdp_w=$(get_tdp_w)
-
         if [ -n "$last_energy" ] && [ -n "$current_energy" ]; then
-            # 2. Calculate power consumption for the interval that just ended
             local delta_energy=$(( current_energy - last_energy ))
-            if (( delta_energy < 0 )); then
-                local max_e; max_e=$(get_max_energy_range_uj); delta_energy=$(( delta_energy + max_e ))
-            fi
-            
+            if (( delta_energy < 0 )); then local max_e; max_e=$(get_max_energy_range_uj); delta_energy=$(( delta_energy + max_e )); fi
             local pkg_watt; pkg_watt=$(awk -v de="$delta_energy" -v t1="$last_time" -v t2="$current_time" 'BEGIN { dt = t2 - t1; if (dt > 0) { printf "%.2f", (de/1000000)/dt } else { print "N/A" } }')
-            
-            # 3. Log the calculated power with the TDP from the START of the interval
             echo "\"$(date -u +"%Y-%m-%d %H:%M:%S")\",\"$last_tdp_w\",\"$pkg_watt\"" >> "$POWER_LOG_FILE"
         fi
-        
-        # 4. Update state variables for the NEXT interval
-        last_energy=$current_energy
-        last_time=$current_time
-        last_tdp_w=$current_tdp_w
+        last_energy=$current_energy; last_time=$current_time; last_tdp_w=$current_tdp_w
     done
     main_log "Power monitor detected main script exit. Shutting down."
 }
 
 # --- Main Cleanup, Test Definitions, and Main Logic ---
-# ... (The rest of the script is unchanged and correct) ...
+# ... (No changes below this point, they are all correct) ...
 perform_core_cleanup() { if [ "$CORE_CLEANUP_COMPLETED_FLAG" -eq 1 ]; then return; fi; CORE_CLEANUP_COMPLETED_FLAG=1; main_log "CORE_CLEANUP: Initiating..."; if [ -n "$POWER_MONITOR_PID" ] && ps -p "$POWER_MONITOR_PID" > /dev/null; then kill "$POWER_MONITOR_PID" 2>/dev/null; main_log "CORE_CLEANUP: Stopped power monitor (PID: $POWER_MONITOR_PID)."; fi; main_log "CORE_CLEANUP: Terminating PIDs for current sync step: ${!ACTIVE_SYNC_STEP_PIDS[@]}"; for ue_key in "${!ACTIVE_SYNC_STEP_PIDS[@]}"; do local pid="${ACTIVE_SYNC_STEP_PIDS[$ue_key]}"; if ps -p "$pid" >/dev/null; then kill -TERM -- "-$pid" 2>/dev/null; fi; done; main_log "CORE_CLEANUP: Waiting up to 3s..."; sleep 3; for ue_key in "${!ACTIVE_SYNC_STEP_PIDS[@]}"; do local pid="${ACTIVE_SYNC_STEP_PIDS[$ue_key]}"; local ip="${UE_SERVER_IPS[$ue_key]}"; local port="${UE_SERVER_PORTS[$ue_key]}"; if ps -p "$pid" >/dev/null; then kill -KILL -- "-$pid" 2>/dev/null; fi; pkill -KILL -f "iperf3 -c $ip -p $port" 2>/dev/null; done; main_log "CORE_CLEANUP: Finished."; }
 handle_main_interrupt() { if [ "$SCRIPT_INTERRUPTED_FLAG" -eq 1 ]; then return; fi; SCRIPT_INTERRUPTED_FLAG=1; main_log "INTERRUPT_HANDLER: SIGINT/SIGTERM received. Cleaning up..."; trap -- SIGINT SIGTERM; perform_core_cleanup; main_log "INTERRUPT_HANDLER: Cleanup complete. Exiting script (130)."; exit 130; }
 trap 'handle_main_interrupt' SIGINT SIGTERM
@@ -157,7 +151,8 @@ for r in $(seq 1 "$ROUNDS"); do
             local step_duration; step_duration=$(echo "$command_template" | grep -o -- '-t [0-9]\+' | grep -o '[0-9]\+'); if echo "$command_template" | grep -q -- "-t $LONG_DURATION"; then step_duration=$LONG_DURATION; elif [[ -z "$step_duration" ]]; then step_duration=$DURATION; fi
             local total_mb=$(awk -v b="$step_total_bytes" 'BEGIN {printf "%.3f", b/(1024*1024)}'); local total_mbps=$(awk -v b="$step_total_bytes" -v d="$step_duration" 'BEGIN { if (d>0) {printf "%.4f", (b*8)/(d*1000000)} else {print "N/A"} }'); local aggregate_efficiency=$(calculate_efficiency "$step_total_bytes" "$step_consumed_energy_uj")
             main_log "AGGREGATE [${description_base}]: UEs: ${num_successful_ues}, Total_MB: ${total_mb}, Total_Mbps: ${total_mbps}, Energy_uJ: ${step_consumed_energy_uj}, Efficiency_b/uJ: ${aggregate_efficiency}"
-            append_to_summary_aggregate "$description_base" "$num_successful_ues" "$total_mbps" "$total_mb" "$total_energy_uj" "$aggregate_efficiency" "$step_duration"
+            # BUG FIX: Use the correct energy variable for the aggregate step
+            append_to_summary_aggregate "$description_base" "$num_successful_ues" "$total_mbps" "$total_mb" "$step_consumed_energy_uj" "$aggregate_efficiency" "$step_duration"
         fi
         main_log "--- Finished Test $test_num/$TOTAL_TEST_DEFINITIONS: '$description_base'. Failures: $current_step_failures ---"; if [ "$SCRIPT_INTERRUPTED_FLAG" -eq 1 ]; then main_log "Interrupt detected, aborting."; break; fi
         main_log "Sleeping for ${SLEEP_BETWEEN_SYNC_STEPS}s..."; sleep "$SLEEP_BETWEEN_SYNC_STEPS"
