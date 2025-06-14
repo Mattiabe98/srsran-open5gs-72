@@ -2,19 +2,19 @@
 
 set -m # IMPORTANT: Enable Job Control for process group management
 
-# --- Pre-flight Checks (TOP LEVEL) ---
+# --- Configuration ---
+SERVERS_CSV="$1"
+ROUNDS="$2"
+
+# --- Pre-flight Checks ---
 if ! command -v jq &> /dev/null; then
     echo "ERROR: jq is not installed. Please install it to continue."
     exit 1
 fi
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ -z "$SERVERS_CSV" ] || [ -z "$ROUNDS" ]; then
     echo "Usage: $0 <server_ip1[:port1],server_ip2[:port2],...> <number of rounds>"
     exit 1
 fi
-
-# --- Configuration (TOP LEVEL) ---
-SERVERS_CSV="$1"
-ROUNDS="$2"
 
 # --- Script Parameters ---
 LOG_DIR="/mnt/data/iperf3-tests"
@@ -44,6 +44,7 @@ SMALL_MSS=576
 PARALLEL_STREAMS_SUSTAINED=10
 PARALLEL_STREAMS_BURST=5
 
+# --- RAPL/Power Configuration ---
 RAPL_BASE_PATH="/sys/class/powercap/intel-rapl:0"
 ENERGY_UJ_FILE="${RAPL_BASE_PATH}/energy_uj"
 TDP_UW_FILE="${RAPL_BASE_PATH}/constraint_0_power_limit_uw"
@@ -73,7 +74,6 @@ POWER_MONITOR_PID=""
 CPU_MONITOR_PID=""
 
 # --- All Functions Defined Globally ---
-
 main_log() {
     echo "[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [CONTROLLER PID:$$] $1" | tee -a "$MAIN_LOGFILE"
 }
@@ -97,95 +97,44 @@ append_to_summary_aggregate() {
     append_to_summary "AGGREGATE" "N/A" "$test_desc" "N/A" "N/A" "N/A" "$duration" "SYSTEM_TOTAL" "$total_mbps" "$total_mb" "N/A" "N/A" "N/A" "N/A" "$total_energy_uj" "$total_efficiency" "$num_ues"
 }
 
+get_energy_uj() {
+    cat "$ENERGY_UJ_FILE" 2>/dev/null
+}
+
+get_tdp_w() {
+    if [ -r "$TDP_UW_FILE" ]; then
+        local tdp_uw
+        tdp_uw=$(cat "$TDP_UW_FILE" 2>/dev/null)
+        awk -v uw="$tdp_uw" 'BEGIN { printf "%.1f", uw / 1000000 }'
+    else
+        echo "N/A"
+    fi
+}
+
+get_max_energy_range_uj() {
+    if [ -r "$MAX_ENERGY_UJ_FILE" ]; then
+        local max_val
+        max_val=$(cat "$MAX_ENERGY_UJ_FILE" 2>/dev/null)
+        if [[ -n "$max_val" && "$max_val" -gt 0 ]]; then
+            echo "$max_val"
+            return
+        fi
+    fi
+    echo "$RAPL_MAX_ENERGY_UJ_FALLBACK"
+}
+
 run_single_test_instance() {
-    local server_ip=$1; local server_port=$2; local description_base=$3; local full_command_template=$4
-    local log_prefix="[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port]"
-    local description="$description_base (UE: $server_ip:$server_port)"
-    local full_command
-    full_command=$(echo "$full_command_template" | sed "s/%SERVER%/$server_ip/g" | sed "s/%PORT%/$server_port/g")
-    local cmd_protocol="TCP"; if echo "$full_command" | grep -q -- "-u"; then cmd_protocol="UDP"; fi
-    local cmd_direction="Downlink"; if echo "$full_command" | grep -q -- "--bidir"; then cmd_direction="Bidir"; elif echo "$full_command" | grep -q -- "-R"; then cmd_direction="Uplink"; fi
-    local cmd_rate_target=$(echo "$full_command" | grep -o -- '-b [^ ]*' | cut -d' ' -f2); if [ -z "$cmd_rate_target" ]; then cmd_rate_target="Uncapped"; fi
-    local cmd_duration=$(echo "$full_command" | grep -o -- '-t [0-9]\+' | grep -o '[0-9]\+'); if [[ -z "$cmd_duration" ]]; then cmd_duration="?"; fi
-
-    echo "$log_prefix Starting: $description (Duration: ${cmd_duration}s)"
-    echo "$log_prefix Command: ${full_command}"
-    
-    local energy_start
-    if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ]; then
-        energy_start=$(cat "$ENERGY_UJ_FILE" 2>/dev/null)
-    fi
-    
-    local output
-    local exit_status
-    sub_instance_cleanup() {
-        echo "$log_prefix Sub-instance cleanup for test: $description_base"
-        pkill -KILL -P $$ 2>/dev/null
-        pkill -KILL -f "iperf3 -c $server_ip -p $server_port" 2>/dev/null
-    }
-    trap 'sub_instance_cleanup; exit 130;' SIGINT SIGTERM
-    
-    if output=$(eval "$full_command" 2>&1); then
-        exit_status=0
-    else
-        exit_status=$?
-    fi
-    
-    local consumed_energy_uj="N/A"
-    if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then
-        local energy_end
-        energy_end=$(cat "$ENERGY_UJ_FILE" 2>/dev/null)
-        if [ -n "$energy_end" ]; then
-            consumed_energy_uj=$(( energy_end - energy_start ))
-            if (( consumed_energy_uj < 0 )); then
-                local max_energy_range
-                max_energy_range=$(cat "$MAX_ENERGY_UJ_FILE" 2>/dev/null || echo "$RAPL_MAX_ENERGY_UJ_FALLBACK")
-                consumed_energy_uj=$(( consumed_energy_uj + max_energy_range ))
-            fi
-        fi
-    fi
-
+    local server_ip=$1; local server_port=$2; local description_base=$3; local full_command_template=$4; local log_prefix="[$(date -u '+%Y-%m-%d %H:%M:%S') UTC] [UE_TEST_PID:$$] [TARGET: $server_ip:$server_port]"; local description="$description_base (UE: $server_ip:$server_port)"; local full_command=$(echo "$full_command_template" | sed "s/%SERVER%/$server_ip/g" | sed "s/%PORT%/$server_port/g"); local cmd_protocol="TCP"; if echo "$full_command" | grep -q -- "-u"; then cmd_protocol="UDP"; fi; local cmd_direction="Downlink"; if echo "$full_command" | grep -q -- "--bidir"; then cmd_direction="Bidir"; elif echo "$full_command" | grep -q -- "-R"; then cmd_direction="Uplink"; fi; local cmd_rate_target=$(echo "$full_command" | grep -o -- '-b [^ ]*' | cut -d' ' -f2); if [ -z "$cmd_rate_target" ]; then cmd_rate_target="Uncapped"; fi; local cmd_duration=$(echo "$full_command" | grep -o -- '-t [0-9]\+' | grep -o '[0-9]\+'); if [[ -z "$cmd_duration" ]]; then cmd_duration="?"; fi; echo "$log_prefix Starting: $description (Duration: ${cmd_duration}s)"; echo "$log_prefix Command: ${full_command}"; local energy_start; if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ]; then energy_start=$(get_energy_uj); fi; local output; local exit_status; sub_instance_cleanup() { echo "$log_prefix Sub-instance cleanup for test: $description_base"; pkill -KILL -P $$ 2>/dev/null; pkill -KILL -f "iperf3 -c $server_ip -p $server_port" 2>/dev/null; }; trap 'sub_instance_cleanup; exit 130;' SIGINT SIGTERM; if output=$(eval "$full_command" 2>&1); then exit_status=0; else exit_status=$?; fi; local consumed_energy_uj="N/A"; if [ "$ENERGY_MONITORING_ENABLED" -eq 1 ] && [ -n "$energy_start" ]; then local energy_end; energy_end=$(get_energy_uj); if [ -n "$energy_end" ]; then consumed_energy_uj=$(( energy_end - energy_start )); if (( consumed_energy_uj < 0 )); then local max_energy_range; max_energy_range=$(get_max_energy_range_uj); consumed_energy_uj=$(( consumed_energy_uj + max_energy_range )); fi; fi; fi
     if [ "$exit_status" -eq 0 ]; then
-        echo -e "\n$output\n"
-        echo "$log_prefix Finished: $description - SUCCESS"
-        
-        calculate_efficiency() {
-            local total_bytes_for_calc=$1
-            local energy_uj_for_calc=$2
-            if [[ "$energy_uj_for_calc" == "N/A" || ! "$energy_uj_for_calc" =~ ^[0-9]+$ || "$energy_uj_for_calc" -le 0 || "$total_bytes_for_calc" == "N/A" || ! "$total_bytes_for_calc" =~ ^[0-9]+$ ]]; then
-                echo "N/A"
-                return
-            fi
-            awk -v bytes="$total_bytes_for_calc" -v uj="$energy_uj_for_calc" 'BEGIN { printf "%.4f", (bytes * 8) / uj }'
-        }
-
-        if [[ "$cmd_protocol" == "UDP" && "$cmd_direction" == "Downlink" ]]; then
-            local sender_bps=$(echo "$output" | jq -r '(.end.sum.bits_per_second // 0)'); local lost_percent=$(echo "$output" | jq -r '(.end.sum.lost_percent // 0)'); local lost_packets=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"'); local jitter_ms=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"')
-            local actual_mbps=$(awk -v bps="$sender_bps" -v loss="$lost_percent" 'BEGIN { printf "%.4f", (bps * (1 - (loss/100))) / 1000000 }'); local total_bytes=$(awk -v mbps="$actual_mbps" -v dur="$cmd_duration" 'BEGIN { printf "%d", (mbps * 1000000 * dur) / 8 }'); local total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}');
-            echo "$total_bytes" > "$TMP_DIR/$$.bytes"; local efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj")
-            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$actual_mbps" "$total_mb" "$lost_packets" "$lost_percent" "$jitter_ms" "N/A" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1"
-        elif [[ "$cmd_direction" == "Bidir" ]]; then
-            local total_bytes_ul=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0'); local total_bytes_dl=$(echo "$output" | jq -r '.end.sum_received.bytes // 0'); local total_bidir_bytes=$(awk -v ul="$total_bytes_ul" -v dl="$total_bytes_dl" 'BEGIN { print ul + dl }');
-            echo "$total_bidir_bytes" > "$TMP_DIR/$$.bytes"; local avg_mbps_ul=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000'); local total_mb_ul=$(echo "$total_bytes_ul" | awk '{printf "%.3f", $1 / (1024*1024)}'); local retrans_ul=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"'); local avg_mbps_dl=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000'); local total_mb_dl=$(echo "$total_bytes_dl" | awk '{printf "%.3f", $1 / (1024*1024)}'); local efficiency_bits_per_uj=$(calculate_efficiency "$total_bidir_bytes" "$consumed_energy_uj")
-            append_to_summary "$server_ip" "$server_port" "$description (Uplink part)" "TCP" "Bidir-Uplink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_ul" "$total_mb_ul" "N/A" "N/A" "N/A" "$retrans_ul" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1"; append_to_summary "$server_ip" "$server_port" "$description (Downlink part)" "TCP" "Bidir-Downlink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_dl" "$total_mb_dl" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "1"
-        else
-            local total_bytes; if [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Uplink" ]]; then total_bytes=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0'); elif [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Downlink" ]]; then total_bytes=$(echo "$output" | jq -r '.end.sum_received.bytes // 0'); else total_bytes=$(echo "$output" | jq -r '.end.sum.bytes // 0'); fi
-            echo "$total_bytes" > "$TMP_DIR/$$.bytes"; local efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj"); local total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}'); local avg_mbps; avg_mbps=$(echo "$total_bytes" | awk -v d="$cmd_duration" '{ if (d>0) {printf "%.4f", ($1*8)/(d*1000000)} else {print "N/A"} }'); local retrans="N/A"; if [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Uplink" ]]; then retrans=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"'); fi; local lost_p="N/A"; local lost_pct="N/A"; local jitter="N/A"; if [[ "$cmd_protocol" == "UDP" ]]; then lost_p=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"'); lost_pct=$(echo "$output" | jq -r '.end.sum.lost_percent // "N/A"'); jitter=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"'); fi
-            append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "$lost_p" "$lost_pct" "$jitter" "$retrans" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1"
-        fi
-        exit 0
-    else
-        echo "$log_prefix Finished: $description - FAILURE (Exit Code: $exit_status)"; echo "$log_prefix Error Output/Details:"; echo "$output" | sed 's/^/  /'; append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "FAILURE" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "N/A" "1"; exit 1
-    fi
+        echo -e "\n$output\n"; echo "$log_prefix Finished: $description - SUCCESS"; calculate_efficiency() { local total_bytes_for_calc=$1; local energy_uj_for_calc=$2; if [[ "$energy_uj_for_calc" == "N/A" || ! "$energy_uj_for_calc" =~ ^[0-9]+$ || "$energy_uj_for_calc" -le 0 || "$total_bytes_for_calc" == "N/A" || ! "$total_bytes_for_calc" =~ ^[0-9]+$ ]]; then echo "N/A"; return; fi; awk -v bytes="$total_bytes_for_calc" -v uj="$energy_uj_for_calc" 'BEGIN { printf "%.4f", (bytes * 8) / uj }'; };
+        if [[ "$cmd_protocol" == "UDP" && "$cmd_direction" == "Downlink" ]]; then local sender_bps=$(echo "$output" | jq -r '(.end.sum.bits_per_second // 0)'); local lost_percent=$(echo "$output" | jq -r '(.end.sum.lost_percent // 0)'); local lost_packets=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"'); local jitter_ms=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"'); local actual_mbps=$(awk -v bps="$sender_bps" -v loss="$lost_percent" 'BEGIN { printf "%.4f", (bps * (1 - (loss/100))) / 1000000 }'); local total_bytes=$(awk -v mbps="$actual_mbps" -v dur="$cmd_duration" 'BEGIN { printf "%d", (mbps * 1000000 * dur) / 8 }'); local total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}'); echo "$total_bytes" > "$TMP_DIR/$$.bytes"; local efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj"); append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$actual_mbps" "$total_mb" "$lost_packets" "$lost_percent" "$jitter_ms" "N/A" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1";
+        elif [[ "$cmd_direction" == "Bidir" ]]; then local total_bytes_ul=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0'); local total_bytes_dl=$(echo "$output" | jq -r '.end.sum_received.bytes // 0'); local total_bidir_bytes=$(awk -v ul="$total_bytes_ul" -v dl="$total_bytes_dl" 'BEGIN { print ul + dl }'); echo "$total_bidir_bytes" > "$TMP_DIR/$$.bytes"; local avg_mbps_ul=$(echo "$output" | jq -r '(.end.sum_sent.bits_per_second // 0) / 1000000'); local total_mb_ul=$(echo "$total_bytes_ul" | awk '{printf "%.3f", $1 / (1024*1024)}'); local retrans_ul=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"'); local avg_mbps_dl=$(echo "$output" | jq -r '(.end.sum_received.bits_per_second // 0) / 1000000'); local total_mb_dl=$(echo "$total_bytes_dl" | awk '{printf "%.3f", $1 / (1024*1024)}'); local efficiency_bits_per_uj=$(calculate_efficiency "$total_bidir_bytes" "$consumed_energy_uj"); append_to_summary "$server_ip" "$server_port" "$description (Uplink part)" "TCP" "Bidir-Uplink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_ul" "$total_mb_ul" "N/A" "N/A" "N/A" "$retrans_ul" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1"; append_to_summary "$server_ip" "$server_port" "$description (Downlink part)" "TCP" "Bidir-Downlink" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps_dl" "$total_mb_dl" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "1";
+        else local total_bytes; if [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Uplink" ]]; then total_bytes=$(echo "$output" | jq -r '.end.sum_sent.bytes // 0'); elif [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Downlink" ]]; then total_bytes=$(echo "$output" | jq -r '.end.sum_received.bytes // 0'); else total_bytes=$(echo "$output" | jq -r '.end.sum.bytes // 0'); fi; echo "$total_bytes" > "$TMP_DIR/$$.bytes"; local efficiency_bits_per_uj=$(calculate_efficiency "$total_bytes" "$consumed_energy_uj"); local total_mb=$(echo "$total_bytes" | awk '{printf "%.3f", $1 / (1024*1024)}'); local avg_mbps; avg_mbps=$(echo "$total_bytes" | awk -v d="$cmd_duration" '{ if (d>0) {printf "%.4f", ($1*8)/(d*1000000)} else {print "N/A"} }'); local retrans="N/A"; if [[ "$cmd_protocol" == "TCP" && "$cmd_direction" == "Uplink" ]]; then retrans=$(echo "$output" | jq -r '.end.sum_sent.retransmits // "N/A"'); fi; local lost_p="N/A"; local lost_pct="N/A"; local jitter="N/A"; if [[ "$cmd_protocol" == "UDP" ]]; then lost_p=$(echo "$output" | jq -r '.end.sum.lost_packets // "N/A"'); lost_pct=$(echo "$output" | jq -r '.end.sum.lost_percent // "N/A"'); jitter=$(echo "$output" | jq -r '.end.sum.jitter_ms // "N/A"'); fi; append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "SUCCESS" "$avg_mbps" "$total_mb" "$lost_p" "$lost_pct" "$jitter" "$retrans" "$consumed_energy_uj" "$efficiency_bits_per_uj" "1";
+        fi; exit 0; 
+    else echo "$log_prefix Finished: $description - FAILURE (Exit Code: $exit_status)"; echo "$log_prefix Error Output/Details:"; echo "$output" | sed 's/^/  /'; append_to_summary "$server_ip" "$server_port" "$description" "$cmd_protocol" "$cmd_direction" "$cmd_rate_target" "$cmd_duration" "FAILURE" "N/A" "N/A" "N/A" "N/A" "N/A" "N/A" "$consumed_energy_uj" "N/A" "1"; exit 1; fi
 }
-monitor_power_in_background() {
-    local main_pid=$1; echo "\"Timestamp\",\"TDP_Limit_W\",\"Package_Power_W\"" > "$POWER_LOG_FILE"; local last_energy; last_energy=$(cat "$ENERGY_UJ_FILE" 2>/dev/null); local last_time; last_time=$(date +%s.%N); local last_tdp_w; last_tdp_w=$( (cat "$TDP_UW_FILE" 2>/dev/null || echo 0) | awk '{printf "%.1f", $1/1000000}'); while ps -p "$main_pid" > /dev/null; do sleep "$MONITOR_INTERVAL"; local current_energy; current_energy=$(cat "$ENERGY_UJ_FILE" 2>/dev/null); local current_time; current_time=$(date +%s.%N); local current_tdp_w; current_tdp_w=$( (cat "$TDP_UW_FILE" 2>/dev/null || echo 0) | awk '{printf "%.1f", $1/1000000}'); if [ -n "$last_energy" ] && [ -n "$current_energy" ]; then local delta_energy=$((current_energy - last_energy)); if ((delta_energy < 0)); then local max_e; max_e=$(cat "$MAX_ENERGY_UJ_FILE" 2>/dev/null || echo "$RAPL_MAX_ENERGY_UJ_FALLBACK"); delta_energy=$((delta_energy + max_e)); fi; local pkg_watt; pkg_watt=$(awk -v de="$delta_energy" -v t1="$last_time" -v t2="$current_time" 'BEGIN{dt=t2-t1; if(dt>0){printf "%.2f", (de/1000000)/dt} else {print "N/A"}}'); echo "\"$(date -u +"%Y-%m-%d %H:%M:%S")\",\"$last_tdp_w\",\"$pkg_watt\"" >> "$POWER_LOG_FILE"; fi; last_energy=$current_energy; last_time=$current_time; last_tdp_w=$current_tdp_w; done; main_log "Power monitor detected main script exit. Shutting down.";
-}
-monitor_pings_in_background() {
-    local main_pid=$1; local target_ip=$2; local ping_log_file=$3; local ping_interval=$4
-    main_log "Starting ping monitor for $target_ip (Interval: ${ping_interval}s). Log: $ping_log_file"
-    ping -D -i "$ping_interval" "$target_ip" > "$ping_log_file" 2>&1
-}
+monitor_power_in_background() { local main_pid=$1; echo "\"Timestamp\",\"TDP_Limit_W\",\"Package_Power_W\"" > "$POWER_LOG_FILE"; local last_energy; last_energy=$(get_energy_uj); local last_time; last_time=$(date +%s.%N); local last_tdp_w; last_tdp_w=$(get_tdp_w); while ps -p "$main_pid" > /dev/null; do sleep "$MONITOR_INTERVAL"; local current_energy; current_energy=$(get_energy_uj); local current_time; current_time=$(date +%s.%N); local current_tdp_w; current_tdp_w=$(get_tdp_w); if [ -n "$last_energy" ] && [ -n "$current_energy" ]; then local delta_energy=$((current_energy - last_energy)); if ((delta_energy < 0)); then local max_e; max_e=$(get_max_energy_range_uj); delta_energy=$((delta_energy + max_e)); fi; local pkg_watt; pkg_watt=$(awk -v de="$delta_energy" -v t1="$last_time" -v t2="$current_time" 'BEGIN{dt=t2-t1; if(dt>0){printf "%.2f", (de/1000000)/dt} else {print "N/A"}}'); echo "\"$(date -u +"%Y-%m-%d %H:%M:%S")\",\"$last_tdp_w\",\"$pkg_watt\"" >> "$POWER_LOG_FILE"; fi; last_energy=$current_energy; last_time=$current_time; last_tdp_w=$current_tdp_w; done; main_log "Power monitor detected main script exit. Shutting down."; }
+monitor_pings_in_background() { local main_pid=$1; local target_ip=$2; local ping_log_file=$3; local ping_interval=$4; main_log "Starting ping monitor for $target_ip (Interval: ${ping_interval}s). Log: $ping_log_file"; ping -D -i "$ping_interval" "$target_ip" > "$ping_log_file" 2>&1; }
 monitor_cpu_in_background() {
     local main_pid=$1; local cpu_count; cpu_count=$(grep -c ^cpu[0-9] /proc/stat); local header="\"Timestamp\""; for i in $(seq 0 $((cpu_count - 1))); do header+=",\"CPU${i}_Freq_MHz\",\"CPU${i}_Util_Pct\",\"CPU${i}_User_Pct\",\"CPU${i}_Sys_Pct\""; done; echo "$header" > "$CPU_STATS_LOG_FILE"; local last_stats; last_stats=$(grep '^cpu' /proc/stat)
     while ps -p "$main_pid" > /dev/null; do
@@ -227,7 +176,7 @@ TOTAL_TEST_DEFINITIONS=${#TEST_DEFINITIONS[@]}
 # --- Main Script Execution ---
 clear; mkdir -p "$LOG_DIR"; main_log "===== Starting Synchronized Multi-UE iPerf3 Traffic Simulation (PID: $$) ====="; main_log "--- Configuration Summary ---"; main_log "Log Directory: $LOG_DIR"; main_log "Target Servers: $SERVERS_CSV"; main_log "Rounds per UE: $ROUNDS"; main_log "Durations: Long=${LONG_DURATION}s, Standard=${DURATION}s, Burst=${BURST_DURATION}s"; main_log "Monitor Intervals: Power/CPU=${MONITOR_INTERVAL}s, Ping=${PING_INTERVAL}s"; main_log "------------------------------"
 echo "\"RunTimestamp\",\"UE_IP\",\"UE_Port\",\"Num_UEs\",\"Test_Description\",\"Cmd_Protocol\",\"Cmd_Direction\",\"Cmd_Rate_Target_Mbps\",\"Cmd_Duration_s\",\"Status\",\"Avg_Mbps\",\"Total_MB_Transferred\",\"UDP_Lost_Packets\",\"UDP_Lost_Percent\",\"UDP_Jitter_ms\",\"TCP_Retransmits\",\"Consumed_Energy_uJ\",\"Efficiency_bits_per_uJ\"" > "$SUMMARY_CSV_FILE"; echo "\"Timestamp\",\"Event_Type\",\"Details\"" > "$TIMELINE_LOG_FILE"
-energy_test_val=$(cat "$ENERGY_UJ_FILE" 2>/dev/null); if [[ -n "$energy_test_val" && "$energy_test_val" =~ ^[0-9]+$ ]]; then ENERGY_MONITORING_ENABLED=1; main_log "Energy monitoring ENABLED."; else ENERGY_MONITORING_ENABLED=0; main_log "WARN: Energy monitoring DISABLED."; fi
+energy_test_val=$(get_energy_uj); if [[ -n "$energy_test_val" && "$energy_test_val" =~ ^[0-9]+$ ]]; then ENERGY_MONITORING_ENABLED=1; main_log "Energy monitoring ENABLED."; else ENERGY_MONITORING_ENABLED=0; main_log "WARN: Energy monitoring DISABLED."; fi
 if [ -r /proc/stat ] && [ -r /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]; then CPU_MONITORING_ENABLED=1; main_log "CPU monitoring ENABLED."; else CPU_MONITORING_ENABLED=0; main_log "WARN: CPU monitoring DISABLED (/proc/stat or cpufreq files not readable)."; fi
 IFS=',' read -ra SERVERS_ARRAY_CONFIG <<< "$SERVERS_CSV"; declare -a UE_KEYS 
 for server_entry in "${SERVERS_ARRAY_CONFIG[@]}"; do server_ip=${server_entry%%:*}; server_port=${server_entry##*:}; if [[ "$server_port" == "$server_ip" ]]; then server_port=$DEFAULT_IPERF_PORT; fi; ue_key="${server_ip}:${server_port}"; UE_KEYS+=("$ue_key"); UE_SERVER_IPS["$ue_key"]="$server_ip"; UE_SERVER_PORTS["$ue_key"]="$server_port"; ue_id_for_log=$(echo "$server_ip" | tr '.' '_')_"$server_port"; UE_LOGFILES["$ue_key"]="${LOG_DIR}/iperf3_traffic_UE_${ue_id_for_log}_${MAIN_TIMESTAMP}.log"; main_log "UE $ue_key will log to: ${UE_LOGFILES["$ue_key"]}"; echo "===== iPerf3 Test Log for UE $ue_key (Run Timestamp: $MAIN_TIMESTAMP) =====" > "${UE_LOGFILES["$ue_key"]}"; done
