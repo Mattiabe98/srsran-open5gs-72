@@ -85,7 +85,7 @@ ru_ofh:
   warn_unreceived_ru_frames: never
   enable_ul_static_compr_hdr: true     # Configures if the compression header is present for uplink User-Plane messages (false) or not present (true).
   enable_dl_static_compr_hdr: true     # Configures if the compression header is present for downlink User-Plane messages (false) or not present (true).
-  iq_scaling: 9.0                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
+  iq_scaling: 8.5                  # IQ samples scaling factor applied before compression, should be a positive value smaller than 10. (5!)
   cells:
     - network_interface: 0000:51:11.0     # Ethernet interface name used to communicate with the RU.
       ru_mac_addr: 1c:a0:ef:87:68:b6   # RU MAC address.
