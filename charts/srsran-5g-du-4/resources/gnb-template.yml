@@ -37,10 +37,10 @@ cell_cfg:
   pusch:
     dmrs_additional_position: 2
     msg3_delta_preamble: 2
-    p0_nominal_with_grant: -100
+    # p0_nominal_with_grant: -100
     mcs_table: qam256
-  pucch:
-    p0_nominal: -96
+  # pucch:
+  #   p0_nominal: -96
   pdcch:
     common:
       coreset0_index: 11                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
