@@ -119,16 +119,16 @@ spec:
               taskset -pc 22 $!
 
               stdbuf -o0 iperf3 -s -p 5202 &
-              taskset -pc 23 $!
+
 
               stdbuf -o0 iperf3 -s -p 5203 &
-              taskset -pc 24 $!
+
 
               stdbuf -o0 iperf3 -s -p 5204 &
-              taskset -pc 25 $!
+
 
               stdbuf -o0 iperf3 -s -p 5205 &
-              taskset -pc 26 $!
+
 
               # Finally, run the main application in the foreground
               # This is what keeps the container running.
