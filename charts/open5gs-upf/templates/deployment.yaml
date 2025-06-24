@@ -80,6 +80,13 @@ spec:
             runAsNonRoot: false
             capabilities:
               add: ["NET_ADMIN"]
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 2
+            limits:
+              memory: 8Gi
+              cpu: 2
           volumeMounts:
             - name: entrypoint
               mountPath:  /k8s-entrypoint.sh
@@ -179,6 +186,13 @@ spec:
                 - NET_RAW
               drop:
                 - ALL
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 2
+            limits:
+              memory: 8Gi
+              cpu: 2
           {{- if .Values.start.iperf3 }}
           command:
             - /bin/sh
