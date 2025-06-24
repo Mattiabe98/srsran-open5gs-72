@@ -102,23 +102,37 @@ spec:
             - /bin/sh
             - -c
             - |
-              curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &&
-              curl -kL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -o /usr/bin/jq &&
-              chmod +x /usr/bin/jq &&
+              # Set -e to exit immediately if a command fails.
+              set -e
+
+              # First, download and prepare the tools
+              echo "Downloading iperf3 and jq..."
+              curl -f -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3
+              curl -f -kL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -o /usr/bin/jq
+              
+              echo "Setting permissions..."
+              chmod +x /usr/bin/iperf3 /usr/bin/jq
+
+              # Now, run the background services
+              echo "Starting iperf3 servers in the background..."
               stdbuf -o0 iperf3 -s &
-              taskset -pc 22 $!  # core 30
-          
+              taskset -pc 22 $!
+
               stdbuf -o0 iperf3 -s -p 5202 &
-              taskset -pc 23 $!  # core 31
-          
+              taskset -pc 23 $!
+
               stdbuf -o0 iperf3 -s -p 5203 &
-              taskset -pc 24 $!  # core 62
-          
+              taskset -pc 24 $!
+
               stdbuf -o0 iperf3 -s -p 5204 &
-              taskset -pc 25 $!  # core 63
-          
+              taskset -pc 25 $!
+
               stdbuf -o0 iperf3 -s -p 5205 &
-              taskset -pc 26 $!  # core 64
+              taskset -pc 26 $!
+
+              # Finally, run the main application in the foreground
+              # This is what keeps the container running.
+              echo "Starting Open5GS UPF..."
               open5gs-upfd
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
