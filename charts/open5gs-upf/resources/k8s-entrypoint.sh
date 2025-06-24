@@ -26,6 +26,8 @@ fi
 
 # Enable IP forwarding
 sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.ipv4.tcp_congestion_control=bbr
+tc qdisc replace dev ogstun root fq
 
 # Loop through subnets and configure IPs and NAT
 {{- range .Values.config.subnetList }}
