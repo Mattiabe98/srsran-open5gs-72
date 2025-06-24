@@ -118,21 +118,30 @@ metrics:
   periodicity:
     du_report_period: 5000
 
+# DU4 (srsran-5g-du-4-gnb)
 hal:
-   eal_args: "--lcores (0-1)@(18) -a 0000:51:09.2"
+   # DPDK gets its own dedicated physical core (21)
+   eal_args: "--lcores (0-1)@(21) -a 0000:51:09.2"
 
 expert_execution:
   affinities:
-    low_priority_cpus: 35     # On LC35 (PC3 SMT of OS core)
-    ru_timing_cpu: 17         # On LC17 (PC17 dedicated, LC49 unused)
+    low_priority_cpus: 35     # On SMT of OS core (3)
+    # Timing gets its own dedicated physical core (20). SMT sibling 52 is unused.
+    ru_timing_cpu: 20
     ofh:
-      - ru_txrx_cpus: 50      # SMT of DPDK
+      # OFH runs on the SMT sibling of the DPDK core (21)
+      - ru_txrx_cpus: 53
   cell_affinities:
     -
-       l1_dl_cpus: 19
-       l1_ul_cpus: 20
-       l2_cell_cpus: 51          # SMT of L1_DL
-       ru_cpus: 52             # SMT of L1_UL
+       l1_dl_cpus: 22          # Gets its own dedicated physical core (22)
+       l1_ul_cpus: 23          # Gets its own dedicated physical core (23)
+
+       # --- BOTTLENECK FIX ---
+       # L2 now gets its OWN DEDICATED physical core (24). SMT sibling 56 is unused.
+       l2_cell_cpus: 24
+       
+       # RU now runs on the SMT sibling of the L1 DL core (22)
+       ru_cpus: 54
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
