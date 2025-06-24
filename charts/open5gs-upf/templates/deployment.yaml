@@ -97,7 +97,6 @@ spec:
       containers:
         - name: {{ include "common.names.fullname" . }}
           image: {{ template "open5gs.upf.image" . }}
-
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.command }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" $) | nindent 12 }}
@@ -109,6 +108,20 @@ spec:
               curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 &&
               curl -kL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -o /usr/bin/jq &&
               chmod +x /usr/bin/jq &&
+              stdbuf -o0 iperf3 -s &
+              taskset -pc 22 $!  # core 30
+          
+              stdbuf -o0 iperf3 -s -p 5202 &
+              taskset -pc 23 $!  # core 31
+          
+              stdbuf -o0 iperf3 -s -p 5203 &
+              taskset -pc 24 $!  # core 62
+          
+              stdbuf -o0 iperf3 -s -p 5204 &
+              taskset -pc 25 $!  # core 63
+          
+              stdbuf -o0 iperf3 -s -p 5205 &
+              taskset -pc 26 $!  # core 64
               open5gs-upfd
           {{- end }}
           {{- if .Values.args }}
