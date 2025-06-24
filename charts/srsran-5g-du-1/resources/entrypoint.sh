@@ -33,8 +33,7 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
 
 # Disable polling for display driver
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-# sysctl -w net.ipv4.tcp_congestion_control=bbr
-# tc qdisc replace dev net1 root fq
+
 # DPDK device bind
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:11.4
 # Launch srsDU in the foreground

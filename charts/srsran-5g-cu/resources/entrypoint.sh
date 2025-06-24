@@ -32,9 +32,6 @@ sed -e "s/\${AMF_BIND_ADDR}/$AMF_BIND_ADDR/g" \
     < /gnb-template.yml > /gnb.yml
 
 echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
-# sysctl -w net.ipv4.tcp_congestion_control=bbr
-# tc qdisc replace dev net1 root fq
-# tc qdisc replace dev eth0 root fq
 # (
 #     echo "Starting turbostat monitoring..."
 #     mkdir -p /mnt/data

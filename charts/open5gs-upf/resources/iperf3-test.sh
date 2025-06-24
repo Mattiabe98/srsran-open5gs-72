@@ -5,7 +5,7 @@ set -m # IMPORTANT: Enable Job Control for process group management
 # --- Configuration ---
 SERVERS_CSV="$1"
 ROUNDS="$2"
-START_CORE=22 # <--- NEW: Define the starting core for affinity
+START_CORE=21 # <--- NEW: Define the starting core for affinity
 
 # --- Pre-flight Checks ---
 if ! command -v jq &> /dev/null; then
