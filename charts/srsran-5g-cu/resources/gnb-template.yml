@@ -79,7 +79,7 @@ metrics:
 
 expert_execution:
   affinities:
-    low_priority_cpus: 4,36
+    low_priority_cpus: 5,37
   #   low_priority_cpus:                    # Optional TEXT. Sets the CPU core(s) assigned to low priority tasks. Supported: [1, 2, 3 , ..., N].
   #   low_priority_pinning:                 # Optional TEXT. Sets the policy used for assigning CPU cores to low priority tasks.   
   threads:
