@@ -157,7 +157,8 @@ log:
   all_level: info                    # Optional TEXT (debug). Sets a common log level across PHY, MAC, RLC, PDCP, RRC, SDAP, NGAP and GTPU layers.
   ofh_level: warning
   gtpu_level: warning
-  phy_level: warning 
+  phy_level: warning
+  rlc_level: warning
 
 
 pcap:
