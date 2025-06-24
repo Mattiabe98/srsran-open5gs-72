@@ -144,9 +144,13 @@ spec:
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
           {{- end }}
-          {{- if .Values.resources }}
-          resources: {{- toYaml .Values.resources | nindent 12 }}
-          {{- end }}
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 2
+            limits:
+              memory: 8Gi
+              cpu: 2
           volumeMounts:
             - name: local-storage
               mountPath: /mnt/data
