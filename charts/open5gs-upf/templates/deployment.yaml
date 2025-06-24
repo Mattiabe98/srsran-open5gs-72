@@ -169,6 +169,7 @@ spec:
         {{- if .Values.sidecars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
+        {{- if .Values.start.iperf3 }}
         - name: iperf3
           image: "docker.io/networkstatic/iperf3:latest"
           imagePullPolicy: IfNotPresent
@@ -179,7 +180,6 @@ spec:
                 - NET_RAW
               drop:
                 - ALL
-          {{- if .Values.start.iperf3 }}
           command:
             - /bin/sh
             - -c
@@ -205,7 +205,7 @@ spec:
           command:
             - /bin/sleep
             - infinity
-          {{- end }}      
+        {{- end }}      
       runtimeClassName: performance-srsran-profile
       volumes:
         - name: local-storage
