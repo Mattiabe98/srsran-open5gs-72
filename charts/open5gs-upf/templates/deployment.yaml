@@ -120,7 +120,6 @@ spec:
               stdbuf -o0 iperf3 -s -p 5205 &
               taskset -pc 26 $!  # core 64
               open5gs-upfd
-          {{- end }}
           {{- if .Values.args }}
           args: {{- include "common.tplvalues.render" (dict "value" .Values.args "context" $) | nindent 12 }}
           {{- end }}
