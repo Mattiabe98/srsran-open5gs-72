@@ -77,14 +77,14 @@ metrics:
   port: 55555                     # Metrics-server Port  
 
 
-expert_execution:
-  affinities:
-    low_priority_cpus: 5,37
+# expert_execution:
+#   affinities:
+#     low_priority_cpus: 6,7,38,39
   #   low_priority_cpus:                    # Optional TEXT. Sets the CPU core(s) assigned to low priority tasks. Supported: [1, 2, 3 , ..., N].
   #   low_priority_pinning:                 # Optional TEXT. Sets the policy used for assigning CPU cores to low priority tasks.   
-  threads:
-    non_rt:
-      nof_non_rt_threads: 2                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
+  # threads:
+  #   non_rt:
+  #     nof_non_rt_threads: 2                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
   #     non_rt_task_queue_size: 2048            # Optional UINT (2048). Sets the non real time task worker queue size. 
 
 
