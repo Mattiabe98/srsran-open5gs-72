@@ -216,11 +216,6 @@ spec:
               taskset -pc 26 $!  # core 64
           
               wait
-
-          {{- else }}
-          command:
-            - /bin/sleep
-            - infinity
         {{- end }}      
       runtimeClassName: performance-srsran-profile
       volumes:
