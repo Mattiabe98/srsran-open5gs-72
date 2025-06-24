@@ -41,7 +41,7 @@ cell_cfg:
     mcs_table: qam256
   pucch:
     p0_nominal: -94
-    sr_period_ms: 1
+    sr_period_ms: 10
   pdcch:
     common:
       coreset0_index: 11                           # Optional INT. Sets the CORESET 0 index. Supported: [0 - 15].
