@@ -156,7 +156,7 @@ log:
   ofh_level: warning
   gtpu_level: warning
   phy_level: warning 
-
+  rlc_level: warning
 
 pcap:
   mac_enable: false                 # Set to true to enable MAC-layer PCAPs.
