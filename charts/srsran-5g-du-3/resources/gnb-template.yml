@@ -120,20 +120,20 @@ metrics:
     du_report_period: 5000
 
 hal:
-   eal_args: "--lcores (0-1)@(14) -a 0000:51:09.0"
+   eal_args: "--lcores (0-1)@(15) -a 0000:51:09.0" # Was CPU 14. Now shifted to CPU 15.
 
 expert_execution:
   affinities:
-    low_priority_cpus: 34     # On LC34 (PC2 SMT of OS core)
-    ru_timing_cpu: 13         # On LC13 (PC13 dedicated, LC45 unused)
+    low_priority_cpus: 34     # Unchanged. Still on SMT of OS core 2.
+    ru_timing_cpu: 14         # Was 13. This is the new dedicated core for timing. SMT sibling is 46.
     ofh:
-      - ru_txrx_cpus: 46      # SMT of DPDK
+      - ru_txrx_cpus: 47      # Was 46. Now on SMT of new DPDK core (15).
   cell_affinities:
     -
-       l1_dl_cpus: 15
-       l1_ul_cpus: 16
-       l2_cell_cpus: 47          # SMT of L1_DL
-       ru_cpus: 48             # SMT of L1_UL
+       l1_dl_cpus: 16          # Was 15. New dedicated core. SMT sibling is 48.
+       l1_ul_cpus: 17          # Was 16. New dedicated core. SMT sibling is 49.
+       l2_cell_cpus: 48          # Was 47. Now on SMT of new L1_DL core (16).
+       ru_cpus: 49             # Was 48. Now on SMT of new L1_UL core (17).
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
