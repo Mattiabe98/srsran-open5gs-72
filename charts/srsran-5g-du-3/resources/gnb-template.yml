@@ -118,22 +118,22 @@ metrics:
     enable_executor: false
   periodicity:
     du_report_period: 5000
-
+# DU3 (srsran-5g-du-3-gnb)
 hal:
-   eal_args: "--lcores (0-1)@(15) -a 0000:51:09.0" # Was CPU 14. Now shifted to CPU 15.
+   eal_args: "--lcores (0-1)@(19) -a 0000:51:09.0"
 
 expert_execution:
   affinities:
-    low_priority_cpus: 34     # Unchanged. Still on SMT of OS core 2.
-    ru_timing_cpu: 14         # Was 13. This is the new dedicated core for timing. SMT sibling is 46.
+    low_priority_cpus: 34
+    ru_timing_cpu: 18
     ofh:
-      - ru_txrx_cpus: 47      # Was 46. Now on SMT of new DPDK core (15).
+      - ru_txrx_cpus: 51
   cell_affinities:
     -
-       l1_dl_cpus: 16          # Was 15. New dedicated core. SMT sibling is 48.
-       l1_ul_cpus: 17          # Was 16. New dedicated core. SMT sibling is 49.
-       l2_cell_cpus: 48          # Was 47. Now on SMT of new L1_DL core (16).
-       ru_cpus: 49             # Was 48. Now on SMT of new L1_UL core (17).
+       l1_dl_cpus: 20
+       l1_ul_cpus: 21
+       l2_cell_cpus: 22
+       ru_cpus: 52
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
