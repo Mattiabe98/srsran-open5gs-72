@@ -178,19 +178,19 @@ spec:
             - -c
             - |
               stdbuf -o0 iperf3 -s &
-              taskset -pc 25 $!  # core 30
+              taskset -pc 21 $!  # core 30
           
               stdbuf -o0 iperf3 -s -p 5202 &
-              taskset -pc 26 $!  # core 31
+              taskset -pc 22 $!  # core 31
           
               stdbuf -o0 iperf3 -s -p 5203 &
-              taskset -pc 27 $!  # core 62
+              taskset -pc 23 $!  # core 62
           
               stdbuf -o0 iperf3 -s -p 5204 &
-              taskset -pc 28 $!  # core 63
+              taskset -pc 24 $!  # core 63
           
               stdbuf -o0 iperf3 -s -p 5205 &
-              taskset -pc 29 $!  # core 64
+              taskset -pc 25 $!  # core 64
           
               wait
 
