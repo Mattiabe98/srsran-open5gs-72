@@ -80,6 +80,13 @@ spec:
             runAsNonRoot: false
             capabilities:
               add: ["NET_ADMIN"]
+          resources:
+            requests:
+              memory: 16Gi
+              cpu: 2
+            limits:
+              memory: 16Gi
+              cpu: 2
           volumeMounts:
             - name: entrypoint
               mountPath:  /k8s-entrypoint.sh
@@ -146,10 +153,10 @@ spec:
           {{- end }}
           resources:
             requests:
-              memory: 8Gi
+              memory: 16Gi
               cpu: 2
             limits:
-              memory: 8Gi
+              memory: 16Gi
               cpu: 2
           volumeMounts:
             - name: local-storage
