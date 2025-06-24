@@ -116,19 +116,10 @@ spec:
               # Now, run the background services
               echo "Starting iperf3 servers in the background..."
               stdbuf -o0 iperf3 -s &
-              taskset -pc 22 $!
-
               stdbuf -o0 iperf3 -s -p 5202 &
-
-
               stdbuf -o0 iperf3 -s -p 5203 &
-
-
               stdbuf -o0 iperf3 -s -p 5204 &
-
-
               stdbuf -o0 iperf3 -s -p 5205 &
-
 
               # Finally, run the main application in the foreground
               # This is what keeps the container running.
