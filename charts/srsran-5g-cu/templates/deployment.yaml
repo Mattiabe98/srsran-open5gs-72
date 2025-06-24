@@ -122,11 +122,11 @@ spec:
             requests:
               memory: 16Gi
               intel.com/intel_sriov_netdevice_ens2f2: "1"
-              cpu: 2
+              cpu: 4
             limits:
               memory: 16Gi
               intel.com/intel_sriov_netdevice_ens2f2: "1"
-              cpu: 2
+              cpu: 4
           volumeMounts:
             - name: srsran-5g-cu-config
               mountPath: /gnb-template.yml
