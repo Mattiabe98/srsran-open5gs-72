@@ -154,6 +154,8 @@ log:
   filename: stdout                            # Optional TEXT (/tmp/gnb.log). File path for logs. Logs can be redirected to stdout by setting the filename to "stdout".
   all_level: info
   ofh_level: warning
+  gtpu_level: warning
+  phy_level: warning 
 
 
 pcap:
