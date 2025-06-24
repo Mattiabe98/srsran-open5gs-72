@@ -94,9 +94,10 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 
 # Launch srsDU in the background as well
 echo "Starting srsdu..."
-stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml &
-srsdu_pid=$!
-echo "srsdu started with PID: $srsdu_pid"
+stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
+# stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml &
+# srsdu_pid=$!
+# echo "srsdu started with PID: $srsdu_pid"
 
 
 # # Wait for EITHER process to exit. If one exits, we likely want to stop the other.
