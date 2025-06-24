@@ -154,7 +154,7 @@ log:
 # All gNB layers and components can be configured independently to output at various levels of detail. Logs can be configured to the following levels (from lowest to highest levels of detail):
 # none, error, debug, info, debug
   filename: stdout                            # Optional TEXT (/tmp/gnb.log). File path for logs. Logs can be redirected to stdout by setting the filename to "stdout".
-  all_level: info
+  all_level: warning
   ofh_level: warning
   gtpu_level: warning
   phy_level: warning 
