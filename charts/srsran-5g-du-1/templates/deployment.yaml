@@ -133,12 +133,12 @@ spec:
               hugepages-1Gi: "8Gi"
               intel.com/intel_sriov_netdevice_ens2f2: "1"
               memory: 16Gi
-              cpu: 9
+              cpu: 11
             limits:
               hugepages-1Gi: "8Gi"
               intel.com/intel_sriov_netdevice_ens2f2: "1"
               memory: 16Gi
-              cpu: 9
+              cpu: 11
           volumeMounts:
             - name: srsran-5g-du-config
               mountPath: /gnb-template.yml
