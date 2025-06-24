@@ -8,7 +8,7 @@
 ## @param global.storageClass Global StorageClass for Persistent Volume(s)
 ##
 start:
-  iperf3: true
+  iperf3: false
 global:
   imageRegistry: ""
   ## E.g.
