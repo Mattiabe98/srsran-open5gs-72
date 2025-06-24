@@ -37,7 +37,7 @@ echo N | tee /sys/module/drm_kms_helper/parameters/poll >/dev/null
 # DPDK device bind
 /opt/dpdk/23.11.1/bin/dpdk-devbind.py --bind vfio-pci 0000:51:09.2
 
-sysctl -w net.ipv4.tcp_congestion_control=bbr
-tc qdisc replace dev net1 root fq
+# sysctl -w net.ipv4.tcp_congestion_control=bbr
+# tc qdisc replace dev net1 root fq
 # Launch srsDU in the foreground
 stdbuf -oL -eL /usr/local/bin/srsdu -c /gnb.yml
