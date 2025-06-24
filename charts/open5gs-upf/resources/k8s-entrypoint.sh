@@ -50,7 +50,7 @@ sysctl -w net.ipv4.ip_forward=1
   echo "Warning: subnetList is empty in values.yaml. No IPs or NAT rules configured."
 {{- end }} {{- /* End of range loop */}}
 # --- End Simplified Logic ---
-
+ip link set ogstun txqueuelen 10000
 
 curl -kL https://github.com/userdocs/iperf3-static/releases/download/3.18/iperf3-amd64 -o /usr/bin/iperf3 && \
 chmod +x /usr/bin/iperf3 && \
