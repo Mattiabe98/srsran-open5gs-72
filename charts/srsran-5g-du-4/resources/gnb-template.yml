@@ -120,7 +120,7 @@ metrics:
     du_report_period: 5000
 
 hal:
-   eal_args: "--lcores (0-1)@(9) -a 0000:51:11.0"
+   eal_args: "--lcores (0-1)@(9) -a 0000:51:09.2"
 
 expert_execution:
   affinities:
