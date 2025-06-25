@@ -120,20 +120,20 @@ metrics:
     du_report_period: 5000
 
 hal:
-   eal_args: "--lcores (0-1)@(9) -a 0000:51:09.2"
+   eal_args: "--lcores (0-1)@(24) -a 0000:51:09.2"
 
 expert_execution:
   affinities:
-    low_priority_cpus: 32
-    ru_timing_cpu: 8
+    low_priority_cpus: 35
+    ru_timing_cpu: 23
     ofh:
-      - ru_txrx_cpus: 41
+      - ru_txrx_cpus: 56
   cell_affinities:
     -
-       l1_dl_cpus: 10
-       l1_ul_cpus: 11
-       l2_cell_cpus: 12
-       ru_cpus: 42
+       l1_dl_cpus: 25
+       l1_ul_cpus: 26
+       l2_cell_cpus: 27
+       ru_cpus: 57
   # threads:
   #   non_rt:
   #     nof_non_rt_threads: 4                   # Optional UINT (4). Sets the number of non real time threads for processing of CP and UP data in upper layers.
