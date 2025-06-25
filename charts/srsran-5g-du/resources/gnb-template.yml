@@ -121,7 +121,7 @@ metrics:
       
 # DU (srsran-5g-du-gnb)
 hal:
-   eal_args: "--lcores (0-1)@(24) -a 0000:51:09.2"
+   eal_args: "--lcores (0-1)@(24) -a 0000:51:11.0"
 
 expert_execution:
   affinities:
